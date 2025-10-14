@@ -1,0 +1,22 @@
+.tourist { padding-bottom: 14rem; }
+
+.common_title {
+  p { max-width: 60%; font-size: 1.25rem; line-height: 1.2; }
+}
+
+@media screen and (max-width: 1200px) {
+  .tourist { padding-bottom: 10rem; }
+}
+
+@media screen and (min-width: 575px) and (max-width: 992px) {
+ .common_title {
+    p { max-width: 80%; }
+  } 
+  
+}
+
+@media screen and (max-width: 575px)  {
+ .common_title {
+    p { max-width: 90%; }
+  } 
+}

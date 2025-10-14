@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-JKTourismApp<JKTourism>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "org.bisag.jktourism.JKTourismApp",
+            "projectName": "JKTourism",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

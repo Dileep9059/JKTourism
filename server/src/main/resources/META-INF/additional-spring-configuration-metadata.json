@@ -1,0 +1,37 @@
+{"properties": [
+  {
+    "name": "jkt.app.jwtCookieName",
+    "type": "java.lang.String",
+    "description": "A description for 'jkt.app.jwtCookieName'"
+  },
+  {
+    "name": "jkt.app.jwtSecret",
+    "type": "java.lang.String",
+    "description": "A description for 'jkt.app.jwtSecret'"
+  },
+  {
+    "name": "jkt.app.jwtExpirationMs",
+    "type": "java.lang.String",
+    "description": "A description for 'jkt.app.jwtExpirationMs'"
+  },
+  {
+    "name": "jkt.app.jwtExpirationMs",
+    "type": "java.lang.String",
+    "description": "A description for 'jkt.app.jwtExpirationMs'"
+  },
+  {
+    "name": "frontEndUrl",
+    "type": "java.lang.String",
+    "description": "A description for 'frontEndUrl'"
+  },
+  {
+    "name": "geoserverURL",
+    "type": "java.lang.String",
+    "description": "A description for 'geoserverURL'"
+  },
+  {
+    "name": "mediaPath",
+    "type": "java.lang.String",
+    "description": "A description for 'mediaPath'"
+  }
+]}
