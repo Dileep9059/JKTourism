@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 
 import scss from "./category.module.scss";
 import CommonSlider from "../slider/CommonSlider";
+import { Link } from "react-router-dom";
+import DocumentTitle from "../DocumentTitle";
 
 const DestinationCategories = () => {
 
@@ -56,6 +58,7 @@ const DestinationCategories = () => {
 
     return (
         <>
+        <DocumentTitle title="Most Visited Destinations"/>
             <CommonSlider sliderImages={sliderImages} />
 
             <div className={cn(scss.category_parent_div, "container pb-14")}>
@@ -65,7 +68,7 @@ const DestinationCategories = () => {
                 <div className={cn(scss.category_data, "mb-3 ")}>
                     {categories.map((category) => (
                         <div key={category.name} className={cn(scss.category_div, "")}>
-                            <a href={`/${baseUrl}/${category.url_value}`}>
+                            <Link to={`/${baseUrl}/${category.url_value}`}>
                                 <img
                                     src={`${import.meta.env.VITE_APP_API_BASE_URL}/files/load-file-by-path?path=${category?.cover_image}`}
                                     alt={category.cover_image || "Cover Image"}
@@ -73,8 +76,8 @@ const DestinationCategories = () => {
                                     width={500}
                                     height={250}
                                 />
-                            </a>
-                            <span className="italic">{category.name}</span>
+                                <span className="italic">{category.name}</span>
+                            </Link>
                         </div>
                     ))}
                 </div>

@@ -24,6 +24,7 @@ import ContactUs from "./components/contactus/ContactUs";
 import Categories from "./components/categories/Categories";
 import DestinationCategories from "./components/categories/DestinationCategories";
 import DestinationCategory from "./components/categories/DestinationCategory";
+import DestinationDetails from "./components/categories/DestinationDetails";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -102,8 +103,8 @@ function App() {
 
               <Route path="/categories" element={<Categories />} />
               <Route path="/most-visited-destinations" element={<DestinationCategories />} />
-              <Route path="/most-visited-destinations/:categoryName" element={<DestinationCategory />}
-              />
+              <Route path="/most-visited-destinations/:categoryName" element={<DestinationCategory />} />
+              <Route path="/most-visited-destinations/:categoryName/:placeName" element={<DestinationDetails />} />
             </Route>
 
             {/* Protected routes inside Sidebar */}

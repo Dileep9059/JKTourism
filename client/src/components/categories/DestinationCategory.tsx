@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { CircleAlert, Info } from 'lucide-react';
 import Categorydetail from './Categorydetail';
 import Missing from '../Missing';
+import DocumentTitle from '../DocumentTitle';
 
 const DestinationCategory = () => {
 
@@ -67,11 +68,12 @@ const DestinationCategory = () => {
     if (!categoryName) return <Missing />
     return (
         <>
+        <DocumentTitle title={categoryName}/>
             <Categorydetail
                 categoryName={categoryName}
                 destinations={destinations}
                 coverImage={coverImage}
-                baseUrl={`/category/${categoryName}`}
+                baseUrl={`/most-visited-destinations/${categoryName}`}
                 sliderImages={sliderImages}
             />
         </>

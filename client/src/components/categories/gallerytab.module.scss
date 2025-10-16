@@ -1,0 +1,44 @@
+.gallerymainContainer {
+  h2 {
+    font-size: 1.5rem !important;
+    color: #FF5033 !important;
+    font-weight: 600 !important;
+    padding-block: 1rem !important;
+  }
+
+  .gallerymain {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+
+    .galleryItem {
+      img {
+        border-radius: 10px;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+        aspect-ratio: 1/0.7;
+
+        &:hover {
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+          transform: translateY(-5px);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width:991px) {
+  .gallerymain {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+.gallery_img {
+  height: 100%;
+  display: block;
+
+  img {
+    height: 100%;
+    object-position: center;
+    object-fit: cover;
+  }
+}

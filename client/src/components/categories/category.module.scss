@@ -1,4 +1,7 @@
 .category_parent_div {
+  max-width: auto;
+  margin-inline: auto;
+
   .destination_title {
     position: relative;
 
@@ -19,8 +22,7 @@
     gap: 2rem;
     padding-inline: 1rem;
 
-    max-width: auto;
-    margin-inline: auto;
+
 
     .category_div {
       position: relative;
@@ -62,61 +64,49 @@
 
       &:first-child {
         a::after {
-          background: linear-gradient(
-            0deg,
-            #0c41ff 0%,
-            rgba(12, 72, 255, 0.3) 100%
-          );
+          background: linear-gradient(0deg,
+              #0c41ff 0%,
+              rgba(12, 72, 255, 0.3) 100%);
         }
       }
 
       &:nth-child(6n + 2) {
         a::after {
-          background: linear-gradient(
-            0deg,
-            #ff0c10 0%,
-            rgba(12, 72, 255, 0.3) 100%
-          );
+          background: linear-gradient(0deg,
+              #ff0c10 0%,
+              rgba(12, 72, 255, 0.3) 100%);
         }
       }
 
       &:nth-child(6n + 3) {
         ::after {
-          background: linear-gradient(
-            0deg,
-            #007432 0%,
-            rgba(0, 192, 83, 0.2) 100%
-          );
+          background: linear-gradient(0deg,
+              #007432 0%,
+              rgba(0, 192, 83, 0.2) 100%);
         }
       }
 
       &:nth-child(6n + 4) {
         ::after {
-          background: linear-gradient(
-            0deg,
-            #8f5100 0%,
-            rgba(143, 81, 0, 0.3) 100%
-          );
+          background: linear-gradient(0deg,
+              #8f5100 0%,
+              rgba(143, 81, 0, 0.3) 100%);
         }
       }
 
       &:nth-child(6n + 5) {
         ::after {
-          background: linear-gradient(
-            0deg,
-            #004864 0%,
-            rgba(0, 72, 100, 0.3) 100%
-          );
+          background: linear-gradient(0deg,
+              #004864 0%,
+              rgba(0, 72, 100, 0.3) 100%);
         }
       }
 
       &:nth-child(6n) {
         ::after {
-          background: linear-gradient(
-            0deg,
-            #7c1b33 0%,
-            rgba(124, 27, 51, 0.3) 100%
-          );
+          background: linear-gradient(0deg,
+              #7c1b33 0%,
+              rgba(124, 27, 51, 0.3) 100%);
         }
       }
 
