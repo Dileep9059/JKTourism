@@ -46,8 +46,8 @@ public class RegOTP {
 
     private Boolean expired;
 
-    @Min(1000)
-    @Max(9999)
+    @Min(100000)
+    @Max(999999)
     private Integer otp;
 
     private LocalDateTime otpGeneratedOn;

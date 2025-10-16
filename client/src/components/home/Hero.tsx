@@ -13,7 +13,7 @@ const Hero: React.FC = () => {
   const navItems = [
     { title: "What to Do", url: "/activities" },
     { title: "Plan Your Trip", url: "/plan-trip" },
-    { title: "Get Started", url: "/landing" },
+    { title: "Get Started", url: "/categories" },
     { title: "Medical Facilities", url: "/amenities" },
     { title: "Shopping", url: "/shopping" },
   ];

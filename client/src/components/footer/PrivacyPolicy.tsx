@@ -1,3 +1,4 @@
+import DocumentTitle from "../DocumentTitle";
 import scss from "./policy.module.scss";
 import clsx from "clsx";
 
@@ -5,6 +6,7 @@ import clsx from "clsx";
 const PrivacyPolicy = () => {
   return (
     <>
+    <DocumentTitle title="Privacy Policy"/>
       <div className={scss.policy_page}>
 
         <div className="banner">

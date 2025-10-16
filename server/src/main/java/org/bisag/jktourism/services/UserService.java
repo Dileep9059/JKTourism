@@ -1,8 +1,16 @@
 package org.bisag.jktourism.services;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 import org.bisag.jktourism.exceptions.BadRequestException;
 import org.bisag.jktourism.models.PasswordHistory;
@@ -12,7 +20,6 @@ import org.bisag.jktourism.payload.response.UserProfileResponse;
 import org.bisag.jktourism.repository.PasswordHistoryRepository;
 import org.bisag.jktourism.repository.RegOtpRepository;
 import org.bisag.jktourism.repository.UserRepository;
-import org.bisag.jktourism.utils.OtpUtil;
 import org.bisag.jktourism.utils.SendMail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,9 +33,6 @@ import jakarta.mail.internet.InternetAddress;
 
 @Service
 public class UserService {
-
-    @Autowired
-    private OtpUtil otpUtil;
 
     @Autowired
     RegOtpRepository regOtpRepository;
@@ -156,17 +160,8 @@ public class UserService {
 
     }
 
-    public void sendOtp(JsonNode json) throws Exception {
-        String username = json.get("username").asText();
-
-        // User user = userRepository.findByUsername(username).orElse(null);
-
-        // if (user == null) {
-        // throw new Exception("User not found");
-        // }
-
-        // generate otp
-        Integer otp = otpUtil.generateOTP();
+    public void sendOtp(String username, int otp) throws Exception {
+      
         String subject = "Your One-Time Password (OTP) for Verification";
 
         String messageContent = """
@@ -218,8 +213,8 @@ public class UserService {
                 </div>
                 """;
 
-        String finalMessage = MessageFormat.format(messageContent, otp);
-        
+        String finalMessage = MessageFormat.format(messageContent, String.valueOf(otp));
+
         // if user exists in regotp
         RegOTP regOtp = regOtpRepository.findByContact(username).orElse(null);
 
@@ -290,6 +285,59 @@ public class UserService {
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
 
+    private static final Random RANDOM = new Random();
+    private static int IMAGE_WIDTH = 0;
+    private static int IMAGE_HEIGHT = 0;
+    private static final Font FONT = new Font("JetBrains Mono", Font.BOLD | Font.ITALIC, 48);
+    public static final Color TEXT_COLOR_LIGHT = new Color(255, 255, 255);
+    public static final Color TEXT_COLOR_DARK = new Color(54, 64, 79);
+
+    static {
+        var image = new BufferedImage(400, 400, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+        graphics.setFont(FONT);
+        graphics.setColor(TEXT_COLOR_LIGHT);
+        FontMetrics metrics = graphics.getFontMetrics(FONT);
+        var width = metrics.stringWidth("WWWWWW");
+        IMAGE_WIDTH = (width) + ((int) Math.ceil(width / 3d));
+        IMAGE_HEIGHT = metrics.getHeight() + 12;
+        graphics.dispose();
+        image.flush();
+    }
+
+    public BufferedImage makeCaptchaImage(String captcha, Color textColor) {
+        var image = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setRenderingHint(
+                RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+        graphics.setComposite(AlphaComposite.Clear);
+        graphics.fillRect(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+        graphics.setComposite(AlphaComposite.Src);
+        graphics.setFont(FONT);
+        graphics.setColor(textColor);
+        FontMetrics metrics = graphics.getFontMetrics(FONT);
+        int totalTextWidth = 0;
+        for (int i = 0; i < captcha.length(); ++i) {
+            totalTextWidth += metrics.charWidth(captcha.charAt(i)) + 4;
+        }
+        int x = (IMAGE_WIDTH - totalTextWidth) / 2;
+        int y = (IMAGE_HEIGHT - 20) / 3 + metrics.getHeight() / 2;
+        for (int i = 0; i < captcha.length(); ++i) {
+            char c = captcha.charAt(i);
+            double theta = RANDOM.nextDouble() * 0.6 - 0.2;
+            graphics.rotate(theta, x + metrics.charWidth(c) / 2.0, y);
+            graphics.setColor(textColor);
+            graphics.drawString(String.valueOf(c), x, y);
+            x += metrics.charWidth(c) + 5;
+            graphics.rotate(-theta, x - metrics.charWidth(c) / 2.0, y);
+        }
+        graphics.dispose();
+        return image;
     }
 }

@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 public class OtpUtil {
 
 
-    public Integer generateOTP() {
-        // generate a 4 digit OTP
-        return new Random().nextInt(9000) + 1000;
+    public static Integer generateOTP() {
+        return new Random().nextInt(900000) + 100000;
     }
 }
