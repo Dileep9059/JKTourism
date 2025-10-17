@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  headers: { "Content-Type": "text/plain" },
+  headers: { "Content-Type": "text/plain", "X-Client-Type": "web" },
 });
 
 axiosInstance.interceptors.request.use(
@@ -33,7 +33,7 @@ export default axiosInstance;
 
 export const axiosPrivate = axios.create({
   baseURL: BASE_URL,
-  headers: { "Content-Type": "text/plain" },
+  headers: { "Content-Type": "text/plain", "X-Client-Type": "web" },
 });
 
 axiosPrivate.interceptors.request.use(

@@ -1,13 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "./ui/button";
-import useAuth from "@/hooks/useAuth";
-import type { AuthType } from "@/context/AuthProvider";
 
 const Missing = () => {
-  const navigate = useNavigate();
 
-  const { auth } = useAuth() as { auth: AuthType };
 
   // Optional: Change document title
   useEffect(() => {
@@ -27,13 +23,10 @@ const Missing = () => {
           <Button variant="outline" onClick={() => history.go(-1)}>
             Go Back
           </Button>
-          <Button
-            onClick={() =>
-              navigate(auth?.roles?.includes("ROLE_USER") ? "/user" : "/admin")
-            }
+          <Link to={"/"} className="bg-gray-900 text-white rounded-md py-1 px-3 hover:bg-black/80"
           >
             Back to Home
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

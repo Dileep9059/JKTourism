@@ -44,6 +44,7 @@ const DestinationDetails = () => {
         getdata();
     }, []);
     if (!placeName) return <Missing />
+    if (Object.keys(destinationdata).length === 0) return <Missing />
     return (
         <>
             <DocumentTitle title={`${placeName} | ${categoryName}`} />

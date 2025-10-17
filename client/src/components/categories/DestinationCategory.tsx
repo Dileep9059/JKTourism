@@ -66,6 +66,8 @@ const DestinationCategory = () => {
     }, []);
 
     if (!categoryName) return <Missing />
+    if (destinations.length === 0) return <Missing />
+    
     return (
         <>
         <DocumentTitle title={categoryName}/>

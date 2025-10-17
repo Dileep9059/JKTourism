@@ -25,6 +25,14 @@ import Categories from "./components/categories/Categories";
 import DestinationCategories from "./components/categories/DestinationCategories";
 import DestinationCategory from "./components/categories/DestinationCategory";
 import DestinationDetails from "./components/categories/DestinationDetails";
+import TravelAgent from "./components/travelagent/TravelAgent";
+import TourGuide from "./components/tourguide/TourGuide";
+import HomeStay from "./components/homestays/HomeStay";
+import HouseBoat from "./components/houseboats/HouseBoat";
+import Shopping from "./components/shopping/Shopping";
+import ShoppingLocation from "./components/shopping/ShoppingLocation";
+import Activities from "./components/activities/Activities";
+import ActivityName from "./components/activities/ActivityName";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -105,6 +113,17 @@ function App() {
               <Route path="/most-visited-destinations" element={<DestinationCategories />} />
               <Route path="/most-visited-destinations/:categoryName" element={<DestinationCategory />} />
               <Route path="/most-visited-destinations/:categoryName/:placeName" element={<DestinationDetails />} />
+
+              <Route path="/homestays" element={<HomeStay />} />
+              <Route path="/houseboats" element={<HouseBoat />} />
+              <Route path="/tour-guide" element={<TourGuide />} />
+              <Route path="/travel-agent" element={<TravelAgent />} />
+
+              <Route path="/shopping" element={<Shopping />} />
+              <Route path="/shopping/:shoppingLocation" element={<ShoppingLocation />} />
+              
+              <Route path="/activities" element={<Activities />} />
+              <Route path="/activities/:activityName" element={<ActivityName />} />
             </Route>
 
             {/* Protected routes inside Sidebar */}

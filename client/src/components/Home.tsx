@@ -1,3 +1,4 @@
+import DocumentTitle from "./DocumentTitle";
 import ExperienceCarousel from "./home/ExperienceCarousel";
 import ExploreDestination from "./home/ExploreDestination";
 import GallerySection from "./home/GallerySection";
@@ -12,6 +13,7 @@ const HeroCarousel = () => {
   return (
     <>
       <div className="flex flex-col min-h-screen">
+        <DocumentTitle title="Home" />
         <Hero />
         <ExploreDestination />
         <UpcomingEvents />
