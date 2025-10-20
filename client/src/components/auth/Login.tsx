@@ -28,7 +28,7 @@ import {
 const roleRedirectMap: Record<string, string> = {
   ROLE_MASTER_ADMIN: "/masterAdmin",
   ROLE_SUPER_ADMIN: "/superAdmin",
-  ROLE_DISTRICT_ADMIN: "/districtAdmin",
+  ROLE_ADMIN: "/dashboard",
   ROLE_TEHSILDAR: "/tehsildar",
   ROLE_NAIB_TEHSILDAR: "/naibTehsildar",
   ROLE_PATWARI: "/patwari",
@@ -43,8 +43,6 @@ const Login = () => {
   const { auth, setAuth } = useAuth() as { auth: AuthType; setAuth: React.Dispatch<React.SetStateAction<AuthType>> };
   const [step, setStep] = useState<"credentials" | "otp" | "captcha">("credentials");
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/user";
 
   const [user, resetUser, userAttributes] = useInput("user", "");
   const [password, setPassword] = useState("");
@@ -124,8 +122,6 @@ const Login = () => {
     }
   };
 
-
-
   const handleOtpSubmit = async (event: FormEvent) => {
     event.preventDefault();
     try {
@@ -153,6 +149,14 @@ const Login = () => {
     }
   };
 
+  useEffect(() => {
+    const roles: string[] = auth?.roles || [];
+    if (roles.length !== 0) {
+      const matchedRole = roles.find((r: string) => roleRedirectMap[r]);
+      const destination = matchedRole ? roleRedirectMap[matchedRole] : "/unauthorized";
+      navigate(destination, { replace: true });
+    }
+  }, [auth?.roles, navigate]);
 
   useEffect(() => {
     userRef?.current?.focus();

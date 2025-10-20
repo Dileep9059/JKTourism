@@ -33,14 +33,19 @@ import Shopping from "./components/shopping/Shopping";
 import ShoppingLocation from "./components/shopping/ShoppingLocation";
 import Activities from "./components/activities/Activities";
 import ActivityName from "./components/activities/ActivityName";
+import Experience from "./components/experience/Experience";
+import ExperienceName from "./components/experience/ExperienceName";
+import Gallery from "./components/gallery/Gallery";
+import Event from "./components/event/Event";
+import EventDetail from "./components/event/EventDetail";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import Feedbacks from "./components/admin/feedback/Feedbacks";
+import Category from "./components/admin/categories/Category";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
   SUPER_ADMIN: "ROLE_SUPER_ADMIN",
-  DISTRICT_ADMIN: "ROLE_DISTRICT_ADMIN",
-  TEHSILDAR: "ROLE_TEHSILDAR",
-  NAIB_TEHSILDAR: "ROLE_NAIB_TEHSILDAR",
-  PATWARI: "ROLE_PATWARI"
+  ADMIN: "ROLE_ADMIN"
 };
 
 const roleRoutes = [
@@ -65,32 +70,13 @@ const roleRoutes = [
     ],
   },
   {
-    role: ROLES.DISTRICT_ADMIN,
-    basePath: "districtAdmin",
+    role: ROLES.ADMIN,
     routes: [
-      { path: "", element: <Dashboard /> },
-      { path: "users", element: <UsersData /> },
+      { path: "category", element: <Category /> },
+      { path: "dashboard", element: <AdminDashboard /> },
+      { path: "feedback", element: <Feedbacks /> },
     ],
-  },
-  {
-    role: ROLES.TEHSILDAR,
-    basePath: "tehsildar",
-    routes: [{ path: "", element: <Dashboard /> }],
-
-  },
-  {
-    role: ROLES.NAIB_TEHSILDAR,
-    basePath: "naibTehsildar",
-    routes: [{ path: "", element: <Dashboard /> }],
-  },
-  {
-    role: ROLES.PATWARI,
-    basePath: "patwari",
-    routes: [
-      { path: "", element: <Dashboard /> },
-      { path: "mutation", element: <Mutation /> },
-    ],
-  },
+  }
 ];
 
 function App() {
@@ -121,15 +107,22 @@ function App() {
 
               <Route path="/shopping" element={<Shopping />} />
               <Route path="/shopping/:shoppingLocation" element={<ShoppingLocation />} />
-              
+
               <Route path="/activities" element={<Activities />} />
               <Route path="/activities/:activityName" element={<ActivityName />} />
+
+              <Route path="/experience" element={<Experience />} />
+              <Route path="/experience/:experienceName" element={<ExperienceName />} />
+
+              <Route path="/events" element={<Event />} />
+              <Route path="/events/:id" element={<EventDetail />} />
+
+              <Route path="/gallery" element={<Gallery />} />
             </Route>
 
-            {/* Protected routes inside Sidebar */}
             <Route element={<Sidebar />}>
               {/* Role-based routes */}
-              {roleRoutes.map(({ role, basePath, routes }) => (
+              {roleRoutes.map(({ role, routes }) => (
                 <Route
                   key={role}
                   element={<RequireAuth allowedRoles={[role]} />}
@@ -137,7 +130,7 @@ function App() {
                   {routes.map(({ path, element }) => (
                     <Route
                       key={path}
-                      path={`${basePath}/${path}`}
+                      path={path}
                       element={element}
                     />
                   ))}

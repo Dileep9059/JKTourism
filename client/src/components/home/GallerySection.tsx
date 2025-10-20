@@ -82,7 +82,7 @@ export default function GallerySection() {
               onMouseLeave={() => setIsHovered(false)}
             >
               <div className={scss.visualize_img_wrapper}>
-                <a href="/album" className={scss.hover_card}>
+                <a href="/gallery" className={scss.hover_card}>
                   <Camera />
                 </a>
                 <div className={scss.visualize_img_block}>
@@ -105,7 +105,7 @@ export default function GallerySection() {
                 <h3 className="text-2xl font-bold text-red-400 mb-3">
                   Photo Gallery
                 </h3>
-                <Link to="/album">Explore More</Link>
+                <Link to="/gallery">Explore More</Link>
               </div>
             </div>
           </SwiperSlide>
@@ -117,7 +117,7 @@ export default function GallerySection() {
               onMouseLeave={() => setIsHovered(false)}
             >
               <div className={scss.visualize_img_wrapper}>
-                <a href="/album" className={scss.hover_card}>
+                <a href="/gallery" className={scss.hover_card}>
                   <Video />
                 </a>
                 <div className={scss.visualize_img_block}>
@@ -143,7 +143,7 @@ export default function GallerySection() {
                 <h3 className="text-2xl font-bold text-red-400 mb-3">
                   Video Gallery
                 </h3>
-                <Link to="/album">Explore More</Link>
+                <Link to="/gallery">Explore More</Link>
               </div>
             </div>
           </SwiperSlide>
@@ -154,7 +154,7 @@ export default function GallerySection() {
               onMouseLeave={() => setIsHovered(false)}
             >
               <div className={scss.visualize_img_wrapper}>
-                <a href="/album" className={scss.hover_card}>
+                <a href="/gallery" className={scss.hover_card}>
                   <BookImage />
                 </a>
                 <div className={scss.visualize_img_block}>
@@ -168,7 +168,7 @@ export default function GallerySection() {
                 <h3 className="text-2xl font-bold text-red-400 mb-3">
                   E Brochures
                 </h3>
-                <Link to="/album">Explore More</Link>
+                <Link to="/gallery">Explore More</Link>
               </div>
             </div>
           </SwiperSlide>

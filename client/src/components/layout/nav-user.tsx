@@ -2,7 +2,6 @@ import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,15 +25,7 @@ import useAuth from "@/hooks/useAuth";
 import type { AuthType } from "@/context/AuthProvider";
 import useLogout from "@/hooks/useLogout";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+export function NavUser() {
   const { isMobile } = useSidebar();
 
   const { auth } = useAuth() as { auth: AuthType };
@@ -43,8 +34,6 @@ export function NavUser({
   const navigate = useNavigate();
 
   const signOut = async () => {
-    // if used in more components, this should be in context
-    // axios to /logout endpoint
     await logout();
     navigate("/");
   };
@@ -72,7 +61,7 @@ export function NavUser({
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{auth?.name}</span>
-                <span className="truncate text-xs">{auth?.maskedEmail}</span>
+                <span className="truncate text-xs">{auth?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -98,7 +87,7 @@ export function NavUser({
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{auth?.name}</span>
-                  <span className="truncate text-xs">{auth?.maskedEmail}</span>
+                  <span className="truncate text-xs">{auth?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

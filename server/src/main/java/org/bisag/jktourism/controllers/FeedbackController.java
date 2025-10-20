@@ -84,9 +84,9 @@ public class FeedbackController {
     }
 
     @PostMapping("/get-feedbacks")
-    public ResponseEntity<String> getFeedbacks(@RequestBody DataRequest req) throws Exception {
+    public ResponseEntity<String> getFeedbacks(@RequestBody String req) throws Exception {
         try {
-            JsonNode jsonNode = Json.deserialize(JsonNode.class, req.data());
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
             int page = jsonNode.get("page").asInt(0);
             int size = jsonNode.get("size").asInt(10);
 

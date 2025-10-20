@@ -1,0 +1,11 @@
+.download_group { display: flex; gap: 0.5rem; flex-wrap: wrap; width: 100%;
+    .download_block { flex: 1; 
+        h4 { font-size: 1.15rem; font-weight: 600; }
+    }
+}
+
+.chart_wrapper { display: flex; gap: 1rem; flex-wrap: wrap; padding-inline: 1.5rem;
+    .custom_card { padding: 1rem; width: calc(50% - 1rem); min-width: 300px; height: 100%; background: linear-gradient(360deg,rgb(216, 213, 213) 0%, rgba(255, 255, 255, 1) 100%); border-radius: 10px; border: 1px solid rgb(216, 213, 213); 
+        h3 { margin-bottom: 0.5rem; }
+    }
+}

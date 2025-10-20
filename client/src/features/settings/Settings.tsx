@@ -7,14 +7,10 @@ import { Separator } from '@/components/ui/separator'
 import { Main } from '@/components/layout/main'
 import SidebarNav from './components/sidebar-nav'
 import { Outlet } from 'react-router-dom'
-import { InnerHeader } from '@/components/layout/structure/InnerHeader'
 
 export default function Settings() {
   return (
     <>
-      {/* ===== Top Heading ===== */}
-      <InnerHeader/>
-
       <Main fixed>
         <div className='space-y-0.5'>
           <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>

@@ -1,17 +1,15 @@
 import {
   IconDatabasePlus,
-  IconEyePlus,
   IconLayoutDashboard,
   IconMessage,
   IconNotification,
-  IconPlus,
   IconSettings,
   IconSubtask,
   IconTool,
   IconUserCog,
   IconUsers,
 } from '@tabler/icons-react'
-import { Command } from 'lucide-react'
+import { CalendarSync, ChartBarStacked, Command, HandPlatter, ImagePlus, ImageUp, MapPinHouse, MountainSnow, Flower, Soup, TentTree, WandSparkles, WavesLadder, MessageSquareQuote, ShoppingBag, ShoppingBasket, TruckElectric } from 'lucide-react'
 import { type SidebarData } from '../types'
 import useAuth from '@/hooks/useAuth'
 import type { AuthType } from '@/context/AuthProvider'
@@ -19,19 +17,13 @@ import type { AuthType } from '@/context/AuthProvider'
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
   SUPER_ADMIN: "ROLE_SUPER_ADMIN",
-  DISTRICT_ADMIN: "ROLE_DISTRICT_ADMIN",
-  TEHSILDAR: "ROLE_TEHSILDAR",
-  NAIB_TEHSILDAR: "ROLE_NAIB_TEHSILDAR",
-  PATWARI: "ROLE_PATWARI"
+  ADMIN: "ROLE_ADMIN"
 }
 
 const roleDashboardMap: { [key: string]: string } = {
   [ROLES.MASTER_ADMIN]: '/masterAdmin',
   [ROLES.SUPER_ADMIN]: '/superAdmin',
-  [ROLES.DISTRICT_ADMIN]: '/districtAdmin',
-  [ROLES.TEHSILDAR]: '/tehsildar',
-  [ROLES.NAIB_TEHSILDAR]: '/naibTehsildar',
-  [ROLES.PATWARI]: '/patwari',
+  [ROLES.ADMIN]: '/dashboard'
 }
 
 
@@ -48,10 +40,7 @@ export function getSidebarData(): SidebarData {
 
   const isMasterAdmin = hasRole(ROLES.MASTER_ADMIN)
   const isSuperAdmin = hasRole(ROLES.SUPER_ADMIN)
-  const isDistrictAdmin = hasRole(ROLES.DISTRICT_ADMIN)
-  const isTehsildar = hasRole(ROLES.TEHSILDAR)
-  const isNaibTehsildar = hasRole(ROLES.NAIB_TEHSILDAR)
-  const isPatwari = hasRole(ROLES.PATWARI)
+  const isAdmin = hasRole(ROLES.ADMIN)
 
   const baseTeams = []
   if (isMasterAdmin) {
@@ -60,17 +49,8 @@ export function getSidebarData(): SidebarData {
   if (isSuperAdmin) {
     baseTeams.push({ name: 'Super Admin', logo: Command, plan: 'Revenue Dashboard' })
   }
-  if (isDistrictAdmin) {
-    baseTeams.push({ name: 'District Admin', logo: Command, plan: 'Revenue Dashboard' })
-  }
-  if (isTehsildar) {
-    baseTeams.push({ name: 'Tehsildar', logo: Command, plan: 'Revenue Dashboard' })
-  }
-  if (isNaibTehsildar) {
-    baseTeams.push({ name: 'Naib Tehsildar', logo: Command, plan: 'Revenue Dashboard' })
-  }
-  if (isPatwari) {
-    baseTeams.push({ name: 'Patwari', logo: Command, plan: 'Revenue Dashboard' })
+  if (isAdmin) {
+    baseTeams.push({ name: 'Admin', logo: Command, plan: 'Dashboard' })
   }
 
   // URLs based on roles
@@ -123,45 +103,70 @@ export function getSidebarData(): SidebarData {
       ]
       : []),
 
-    ...(isDistrictAdmin
+    ...(isAdmin
       ? [
         {
-          title: 'Create Users',
-          url: urls.users,
-          icon: IconUsers,
+          title: 'Activities',
+          icon: TentTree,
+          items: [
+            { title: 'Add Activity', url: '/activity/add', icon: ImagePlus },
+            { title: 'Published Activities ', url: '/activity', icon: WavesLadder },
+            { title: 'Upload Data', url: '/activity/upload', icon: ImageUp },
+          ],
         },
-      ]
-      : []),
-
-    ...(isTehsildar
-      ? [
-        // {
-        //   title: 'Mutation',
-        //   url: urls.mutation,
-        //   icon: IconDatabasePlus,
-        // },
-      ]
-      : []),
-
-    ...(isNaibTehsildar
-      ? [
-        // {
-        //   title: 'Mutation',
-        //   url: urls.mutation,
-        //   icon: IconDatabasePlus,
-        // },
-      ]
-      : []),
-
-    ...(isPatwari
-      ? [
         {
-          title: 'Mutation',
-          url: urls.mutation,
-          icon: IconDatabasePlus,
+          title: 'Categories',
+          icon: ChartBarStacked,
+          url: '/category'
+        },
+        {
+          title: 'Cuisines',
+          icon: HandPlatter,
+          items: [
+            { title: 'Add Cuisine', url: '/cuisine/add', icon: ImagePlus },
+            { title: 'Published Cuisines', url: '/cuisine', icon: Soup },
+          ],
+        },
+        {
+          title: 'Destinations',
+          icon: MapPinHouse,
+          items: [
+            { title: 'Add Destination', url: '/destination/add', icon: ImagePlus },
+            { title: 'Published Destinations ', url: '/destination', icon: MountainSnow },
+            { title: 'Upload Data', url: '/destination/upload', icon: ImageUp },
+          ],
+        },
+        {
+          title: 'Events',
+          icon: CalendarSync,
+          items: [
+            { title: 'Add Event', url: '/event/add', icon: ImagePlus },
+            { title: 'Published Events ', url: '/event', icon: CalendarSync },
+          ],
+        },
+        {
+          title: 'Experiences of J&K',
+          icon: WandSparkles,
+          items: [
+            { title: 'Add Experience', url: '/experiences/add', icon: ImagePlus },
+            { title: 'Published Experiences ', url: '/experiences', icon: Flower },
+          ],
+        },
+        {
+          title: 'Feedbacks',
+          icon: MessageSquareQuote,
+          url: '/feedback'
+        },
+        {
+          title: 'Shopping',
+          icon: ShoppingBag,
+          items: [
+            { title: 'Add Shopping Location', url: '/shopping/add', icon: ShoppingBasket },
+            { title: 'Published Shopping Locations ', url: '/shopping', icon: TruckElectric },
+          ],
         },
       ]
-      : []),
+      : [])
   ]
 
   return {

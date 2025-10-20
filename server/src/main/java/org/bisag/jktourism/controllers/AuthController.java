@@ -24,7 +24,6 @@ import org.bisag.jktourism.models.Role;
 import org.bisag.jktourism.models.User;
 import org.bisag.jktourism.models.Visitors;
 import org.bisag.jktourism.payload.request.LoginRequest;
-import org.bisag.jktourism.payload.request.ProfileUpdateRequest;
 import org.bisag.jktourism.payload.response.MessageResponse;
 import org.bisag.jktourism.payload.response.UserInfoResponse;
 import org.bisag.jktourism.repository.RegOtpRepository;
@@ -40,9 +39,7 @@ import org.bisag.jktourism.services.UserLoginService;
 import org.bisag.jktourism.services.UserService;
 import org.bisag.jktourism.utils.CaptchaUtil;
 import org.bisag.jktourism.utils.Json;
-import org.bisag.jktourism.utils.NullPropertyUtils;
 import org.bisag.jktourism.utils.OtpUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
@@ -290,7 +287,7 @@ public class AuthController {
 				.map(role -> (GrantedAuthority) () -> role.getName().name())
 				.collect(Collectors.toList());
 
-		String accessToken = jwtUtils.generateTokenFromUsername(user.getUuid(), authorities);
+		String accessToken = jwtUtils.generateTokenFromUsername(user.getUsername(), authorities);
 
 		String name = user.getName();
 		String firstName = user.getFirstname();

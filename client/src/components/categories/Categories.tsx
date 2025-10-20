@@ -159,7 +159,7 @@ function Categories() {
                                 data-aos-duration="2000"
                             >
                                 <div className={clsx(scss.category_div, "rounded-3xl")}>
-                                    <Link to="/album">
+                                    <Link to="/gallery">
                                         <img
                                             src="/assets/images/banner-05.png"
                                             alt="Banner"

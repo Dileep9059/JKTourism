@@ -20,7 +20,7 @@ export const InnerHeader = ({
   children,
   ...props
 }: HeaderProps) => {
-  const [offset, setOffset] = React.useState(0);
+  const [offset, setOffset] = React.useState(20);
 
   React.useEffect(() => {
     const onScroll = () => {
@@ -47,9 +47,7 @@ export const InnerHeader = ({
   return (
     <header
       className={cn(
-        "bg-background flex h-16 items-center gap-3 p-4 sm:gap-4",
-        fixed && "header-fixed peer/header fixed z-50 w-[inherit] rounded-md",
-        offset > 10 && fixed ? "shadow-sm" : "shadow-none",
+        "bg-background sticky top-0 flex h-16 items-center gap-3 p-4 sm:gap-4",
         className
       )}
       {...props}
@@ -60,7 +58,7 @@ export const InnerHeader = ({
 
       <div className="ml-auto flex items-center space-x-4">
         <Search />
-        <NotificationDropdown />
+        {/* <NotificationDropdown /> */}
         <ThemeSwitch />
         <ProfileDropdown />
       </div>

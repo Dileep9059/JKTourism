@@ -17,6 +17,7 @@ import Slider from "../slider/Slider";
 import { toast } from "sonner";
 import Gallerytab from "../categories/Gallerytab";
 import { useParams } from "react-router-dom";
+import DocumentTitle from "../DocumentTitle";
 
 type Activity = {
     title: string;
@@ -85,6 +86,7 @@ const ActivityName = () => {
 
     return (
         <>
+        <DocumentTitle title={activityName ?? ""}/>
             {activityData?.images && <Slider sliderImages={activityData.images} />}
             <div className={clsx(scss.detailtabmain, "container mx-auto mt-5 p-3")}>
                 <div className="mx-5 mb-2">
@@ -99,7 +101,6 @@ const ActivityName = () => {
                     {...thumbsSwiperOptions}
                     className={clsx(scss.mobiletab, "mob_tab")}
                 >
-                    {/* <div className="grid grid-cols-12"></div> */}
                     <SwiperSlide>
                         <div className={clsx(scss.slide_btn_tab, "slide_btn_tab")}>
                             <InfoIcon />
@@ -168,7 +169,7 @@ const ActivityName = () => {
                                             {activityData?.brochures.map((brochure, index) => (
                                                 <a
                                                     key={index}
-                                                    href={`${process.env.NEXT_PUBLIC_API_URL}/files/load-file-by-path?path=${brochure.file}`}
+                                                    href={`${import.meta.env.VITE_APP_API_BASE_URL}/files/load-file-by-path?path=${brochure.file}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="group flex flex-col items-center p-5 rounded-lg border border-gray-100 bg-gray-50 text-center 

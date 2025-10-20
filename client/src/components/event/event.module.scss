@@ -1,0 +1,280 @@
+.searchInput {
+  min-width: 320px;
+  position: relative;
+
+  .inputIcon {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: auto;
+    transform: translate(-20px, -50%);
+
+    svg {
+      font-size: 20px;
+      color: #000000;
+    }
+  }
+
+  .date_label {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(20px, -50%);
+    font-size: 14px;
+    color: rgba(79, 79, 79, 1);
+    font-style: italic;
+  }
+
+  .formInput {
+    height: 54px;
+    width: 100%;
+    padding: 8px 16px 8px 16px;
+    border-radius: 30px;
+    background-color: #ffffff;
+    border: 1px solid rgba(200, 200, 200, 1);
+    font-size: 16px;
+    line-height: 1.48;
+    font-weight: 500;
+    color: #4f4f4f;
+    font-style: italic;
+    // background-image: url(../../../../public/assets/images/calendar.svg);
+    // background-size: 32px;
+    // background-repeat: no-repeat;
+    appearance: none;
+    background-position: right 12px center;
+    position: relative;
+
+    &::placeholder {
+      color: #919191;
+      font-style: normal;
+    }
+
+    &::-webkit-calendar-picker-indicator {
+      // opacity: 0;
+      // width: 100%;
+    }
+  }
+}
+
+.event_data {
+  h2 {
+    color: #000;
+    font-size: 1.5rem;
+
+    text-align: center;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 0.1rem;
+  }
+
+  .eventgrid {
+    padding: 10px;
+    border: 0.5px solid rgba(210, 210, 210, 1);
+    border-radius: 9px;
+    // margin-bottom: 10px;
+    transition: transform 0.6s ease, box-shadow 0.6s ease,
+      background-color 0.6s ease, height 0.6s ease;
+    // width: 24%;
+    height: 420px;
+
+    &:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+      background-color: rgba(255, 248, 230, 1);
+
+      a {
+        display: block;
+      }
+    }
+
+    h2 {
+      color: rgba(0, 0, 0, 1);
+      font-size: 1rem;
+      font-weight: 600;
+      font-style: italic;
+      padding-top: 0.5rem;
+      transition: color 0.6s ease;
+    }
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: rgba(139, 139, 139, 1);
+      font-size: 1rem;
+      font-weight: 600;
+      font-style: italic;
+      transition: color 0.6s ease;
+    }
+
+    a {
+      background: linear-gradient(90deg, #ffcc00 0%, #ff8b01 100%);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 1rem;
+      width: 100% !important;
+      margin-top: 1rem;
+      text-align: center;
+      line-height: 40px;
+      text-decoration: none;
+      transition: transform 0.3s ease, opacity 0.3s ease, background 0.4s ease,
+        box-shadow 0.4s ease;
+      transform: scale(1.0);
+      background: linear-gradient(90deg, #ff8b01 0%, #ffcc00 100%);
+      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.5);
+    }
+  }
+}
+
+.kite {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: url("/assets/images/kite.png") no-repeat center center;
+  background-size: contain;
+  animation: flyKite 10s linear infinite;
+  z-index: -1;
+}
+
+@keyframes flyKite {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(50px, -30px) rotate(10deg);
+  }
+
+  50% {
+    transform: translate(100px, 0) rotate(-10deg);
+  }
+
+  75% {
+    transform: translate(50px, 30px) rotate(5deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@media (max-width: 767px) {
+  .event_data {
+    flex-direction: row;
+    // margin-left: -4px;
+  }
+
+  .eventgrid {
+    // width: 48% !important;
+    height: 100% !important;
+
+    h2 {
+      font-size: 0.8rem !important;
+    }
+
+    span {
+      font-size: 0.8rem !important;
+
+      img {
+        width: 25px;
+      }
+    }
+
+    a {
+      display: block !important;
+      opacity: 1 !important;
+      height: 30px !important;
+      font-size: 0.8rem !important;
+      line-height: 30px !important;
+    }
+  }
+
+  .formInput {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .event_main {
+    .event_data_top {
+      flex-wrap: nowrap;
+      gap: 0 !important;
+      padding-inline: 5px;
+
+      .colgrid {
+        flex-shrink: 1;
+        padding-inline: 2px;
+
+        .searchInput {
+          min-width: 100% !important;
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .eventcontainer {
+    padding-inline: 1rem !important;
+  }
+
+  .event_main {
+    .event_data_top {
+      flex-wrap: nowrap;
+    }
+  }
+
+  .event_data {
+    flex-wrap: wrap;
+    gap: 1.8rem !important;
+  }
+
+  .eventgrid {
+    // width: 48% !important;
+    height: 100% !important;
+
+    a {
+      display: block !important;
+      opacity: 1 !important;
+    }
+  }
+
+  .formInput {
+    font-size: 15px;
+    padding: 8px 14px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1140px) {
+  .event_data {
+    flex-wrap: wrap;
+    gap: 1.5rem !important;
+    margin-left: 0;
+  }
+
+  .eventgrid {
+    // width: 31% !important;
+    height: 100% !important;
+
+    a {
+      display: block !important;
+      opacity: 1 !important;
+    }
+  }
+
+  .formInput {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+}
+
+@media (min-width: 1140px) {
+  .eventgrid {
+    // width: 31% !important;
+    height: 100% !important;
+
+    a {
+      display: block !important;
+      opacity: 1 !important;
+    }
+  }
+}

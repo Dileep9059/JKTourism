@@ -3,7 +3,8 @@ import { AppSidebar } from '@/components/layout/app-sidebar'
 import { Outlet } from 'react-router-dom'
 import { GenericDialogProvider } from '@/features/users/components/server-side/GenericDialogProvider'
 import { SearchProvider } from '@/context/search-context'
-import { SidebarProvider } from './ui/sidebar'
+import { SidebarInset, SidebarProvider } from './ui/sidebar'
+import { InnerHeader } from './layout/structure/InnerHeader'
 
 interface Props {
   children?: React.ReactNode
@@ -17,20 +18,13 @@ const Sidebar = ({ children }: Props) => {
         <GenericDialogProvider<unknown>>
           <SidebarProvider defaultOpen={true}>
             <AppSidebar />
-            <div
-              id="content"
-              className={cn(
-                "ml-auto w-full max-w-full",
-                "peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]",
-                "peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
-                "sm:transition-[width] sm:duration-200 sm:ease-linear",
-                "flex h-svh flex-col",
-                "group-data-[scroll-locked=1]/body:h-full",
-                "has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh"
-              )}
-            >
-              {children ? children : <Outlet />}
-            </div>
+
+            <SidebarInset>
+              <InnerHeader />
+              <div className="flex flex-1 flex-col gap-4">
+                {children ? children : <Outlet />}
+              </div>
+            </SidebarInset>
           </SidebarProvider>
         </GenericDialogProvider>
       </SearchProvider>
