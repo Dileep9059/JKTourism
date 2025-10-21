@@ -41,6 +41,16 @@ import EventDetail from "./components/event/EventDetail";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import Feedbacks from "./components/admin/feedback/Feedbacks";
 import Category from "./components/admin/categories/Category";
+import AddActivity from "./components/admin/activity/AddActivity";
+import ShowActivities from "./components/admin/activity/ShowActivities";
+import UploadActivityData from "./components/admin/activity/UploadActivityData";
+import AddCuisines from "./components/admin/cuisine/AddCusisine";
+import CusineData from "./components/admin/cuisine/CuisineData";
+import AddDestination from "./components/admin/destination/AddDestination";
+import DestinationData from "./components/admin/destination/DestinaionData";
+import UploadDestinationData from "./components/admin/destination/UploadDestinationData";
+import EventData from "./components/admin/event/EventData";
+import AddEvent from "./components/admin/event/AddEvent";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -72,8 +82,18 @@ const roleRoutes = [
   {
     role: ROLES.ADMIN,
     routes: [
+      { path: "activity", element: <ShowActivities /> },
+      { path: "activity/add", element: <AddActivity /> },
+      { path: "activity/upload", element: <UploadActivityData /> },
+      { path: "cuisine", element: <CusineData /> },
+      { path: "cuisine/add", element: <AddCuisines /> },
       { path: "category", element: <Category /> },
       { path: "dashboard", element: <AdminDashboard /> },
+      { path: "destination", element: <DestinationData /> },
+      { path: "destination/add", element: <AddDestination /> },
+      { path: "destination/upload", element: <UploadDestinationData /> },
+      { path: "event", element: <EventData /> },
+      { path: "event/add", element: <AddEvent /> },
       { path: "feedback", element: <Feedbacks /> },
     ],
   }

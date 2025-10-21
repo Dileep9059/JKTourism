@@ -161,9 +161,9 @@ public class AdminController {
     }
 
     @PostMapping("/get-destinations")
-    public ResponseEntity<String> getdestinations(@RequestBody EncryptedRequest req) throws Exception {
+    public ResponseEntity<String> getdestinations(@RequestBody String req) throws Exception {
         try {
-            JsonNode jsonNode = Json.deserialize(JsonNode.class, req.data());
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
             int page = jsonNode.get("page").asInt(0);
             int size = jsonNode.get("size").asInt(10);
 
@@ -198,9 +198,9 @@ public class AdminController {
     }
 
     @PostMapping("/get-events")
-    public ResponseEntity<String> getEvents(@RequestBody EncryptedRequest req) throws Exception {
+    public ResponseEntity<String> getEvents(@RequestBody String req) throws Exception {
         try {
-            JsonNode jsonNode = Json.deserialize(JsonNode.class, req.data());
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
             int page = jsonNode.get("page").asInt(0);
             int size = jsonNode.get("size").asInt(10);
 
@@ -247,9 +247,9 @@ public class AdminController {
     }
 
     @PostMapping("/get-activities")
-    public ResponseEntity<String> getActivities(@RequestBody EncryptedRequest req) throws Exception {
+    public ResponseEntity<String> getActivities(@RequestBody String req) throws Exception {
         try {
-            JsonNode jsonNode = Json.deserialize(JsonNode.class, req.data());
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
             int page = jsonNode.get("page").asInt(0);
             int size = jsonNode.get("size").asInt(10);
 
@@ -421,9 +421,9 @@ public class AdminController {
     }
 
     @PostMapping("/get-cuisines")
-    public ResponseEntity<String> getCuisines(@RequestBody EncryptedRequest req) throws Exception {
+    public ResponseEntity<String> getCuisines(@RequestBody String req) throws Exception {
         try {
-            JsonNode jsonNode = Json.deserialize(JsonNode.class, req.data());
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
             int page = jsonNode.get("page").asInt(0);
             int size = jsonNode.get("size").asInt(10);
 
