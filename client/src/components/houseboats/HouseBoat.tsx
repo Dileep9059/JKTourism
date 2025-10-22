@@ -164,7 +164,7 @@ const HouseBoat = () => {
       <div className={clsx(scss.travelag_div)}>
         <div className={scss.banner}>
           <img
-            src="/assets/images/houseboat.jpg"
+            src={`${import.meta.env.VITE_BASE}assets/images/houseboat.jpg`}
             alt="Banner"
             className={clsx(
               scss.banner_image,

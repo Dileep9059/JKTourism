@@ -83,7 +83,7 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
           >
             <div className="absolute inset-0 w-full h-screen z-[-1]">
               <img
-                src="/images/JKTMobileAppBg.jpg"
+                src={`${import.meta.env.VITE_BASE}images/JKTMobileAppBg.jpg`}
                 alt="JK Tourism Background"
 
                 className="object-cover object-center opacity-90 inset-0 w-full h-full"

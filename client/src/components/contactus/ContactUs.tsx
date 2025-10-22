@@ -172,7 +172,7 @@ const ContactUs = () => {
       <div className={clsx(scss.category_div)}>
         <div className="banner">
           <img
-            src="/assets/images/slider1.jpeg"
+            src={`${import.meta.env.VITE_BASE}assets/images/slider1.jpeg`}
             alt="Banner"
             className={clsx(
               scss.banner_image,
@@ -316,13 +316,13 @@ const ContactUs = () => {
             >
               <a href="https://x.com/jandktourism" target="_blank">
                 <img
-                  src="/assets/images/twitterbg_.png"
+                  src={`${import.meta.env.VITE_BASE}assets/images/twitterbg_.png`}
                   alt="Banner"
                   className={clsx(scss.category_image, "w-full object-cover")}
                 />
                 <div>
                   <img
-                    src="/assets/images/twitter.png"
+                    src={`${import.meta.env.VITE_BASE}assets/images/twitter.png`}
                     alt="Banner"
                     className={clsx(scss.category_image, "w-full object-cover")}
                   />
@@ -338,13 +338,13 @@ const ContactUs = () => {
             >
               <a href="https://www.instagram.com/jktourismofficial" target="_blank">
                 <img
-                  src="/assets/images/instagrambg_.png"
+                  src={`${import.meta.env.VITE_BASE}assets/images/instagrambg_.png`}
                   alt="Banner"
                   className={clsx(scss.category_image, "w-full object-cover")}
                 />
                 <div>
                   <img
-                    src="/assets/images/instagram_.png"
+                    src={`${import.meta.env.VITE_BASE}assets/images/instagram_.png`}
                     alt="Banner"
                     className={clsx(scss.category_image, "w-full object-cover")}
                   />
@@ -360,13 +360,13 @@ const ContactUs = () => {
             >
               <a href="https://www.facebook.com/JKTourismOfficial/" target="_blank">
                 <img
-                  src="/assets/images/facebookbg_.png"
+                  src={`${import.meta.env.VITE_BASE}assets/images/facebookbg_.png`}
                   alt="Banner"
                   className={clsx(scss.category_image, "w-full object-cover")}
                 />
                 <div>
                   <img
-                    src="/assets/images/facebook.png"
+                    src={`${import.meta.env.VITE_BASE}assets/images/facebook.png`}
                     alt="Banner"
                     className={clsx(scss.category_image, "w-full object-cover")}
                   />
@@ -382,7 +382,7 @@ const ContactUs = () => {
             >
               <section>
                 <img
-                  src="/assets/images/trc.png"
+                  src={`${import.meta.env.VITE_BASE}assets/images/trc.png`}
                   alt="Banner"
                   className={clsx(scss.category_image, "w-full object-cover")}
                 />
@@ -403,7 +403,7 @@ const ContactUs = () => {
                       Visit TRC Kashmir
                     </a>
                     <img
-                      src="/assets/images/map.png"
+                      src={`${import.meta.env.VITE_BASE}assets/images/map.png`}
                       alt="Banner"
                       className={clsx(
                         scss.category_image,
@@ -421,7 +421,7 @@ const ContactUs = () => {
                       Visit TRC Jammu
                     </a>
                     <img
-                      src="/assets/images/map.png"
+                      src={`${import.meta.env.VITE_BASE}assets/images/map.png`}
                       alt="Banner"
                       className={clsx(
                         scss.category_image,

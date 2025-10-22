@@ -44,7 +44,7 @@ export default function ExperienceCarousel() {
         <div className="relative w-full h-20">
           {" "}
           <img
-            src="/images/Vector_.png"
+            src={`${import.meta.env.VITE_BASE}images/Vector_.png`}
             alt="Wave Pattern"
             width={500}
             height={500}
@@ -55,7 +55,7 @@ export default function ExperienceCarousel() {
         </div>
         <div className={clsx(scss.experiences, "py-10 pt-4 bg-white")}>
           <img
-            src="/images/experience_bg.png"
+            src={`${import.meta.env.VITE_BASE}images/experience_bg.png`}
             alt="background image"
             className={scss.exp_bg}
           />
@@ -69,7 +69,7 @@ export default function ExperienceCarousel() {
               </h2>
               <div className="flex justify-center pt-2">
                 <img
-                  src="/images/dark_btm_line.svg"
+                  src={`${import.meta.env.VITE_BASE}images/dark_btm_line.svg`}
                   alt="Decorative Divider"
                   width={500}
                   height={30}
@@ -132,7 +132,7 @@ export default function ExperienceCarousel() {
           )}
         >
           <img
-            src="/images/boat.png"
+            src={`${import.meta.env.VITE_BASE}images/boat.png`}
             alt="Bottom Right"
             width={650}
             height={285}

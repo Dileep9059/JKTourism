@@ -109,7 +109,7 @@ function Gallery() {
       <div className={scss.common_page}>
         <div className="banner">
           <img
-            src="/assets/images/gallery.png"
+            src={`${import.meta.env.VITE_BASE}assets/images/gallery.png`}
             alt="Banner"
             className={clsx(
               scss.banner_image,
@@ -129,7 +129,7 @@ function Gallery() {
                 <div className={scss.album_block}>
                   <div className={scss.album_icon}>
                     <img
-                      src="/assets/images/icons/photo-icon.svg"
+                      src={`${import.meta.env.VITE_BASE}assets/images/icons/photo-icon.svg`}
                       alt="video icon"
                     />
                   </div>
@@ -140,7 +140,7 @@ function Gallery() {
                 <div className={scss.album_block}>
                   <div className={scss.album_icon}>
                     <img
-                      src="/assets/images/icons/video-icon.svg"
+                      src={`${import.meta.env.VITE_BASE}assets/images/icons/video-icon.svg`}
                       alt="video icon"
                     />
                   </div>
@@ -151,7 +151,7 @@ function Gallery() {
                 <div className={scss.album_block}>
                   <div className={scss.album_icon}>
                     <img
-                      src="/assets/images/icons/brochures-icon.svg"
+                      src={`${import.meta.env.VITE_BASE}assets/images/icons/brochures-icon.svg`}
                       alt="video icon"
                     />
                   </div>

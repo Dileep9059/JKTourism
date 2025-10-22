@@ -83,7 +83,7 @@ export default function UpcomingEvents() {
                         ))}
                     </Swiper>
                 </div>
-                <img src="/images/flower_img.png"
+                <img src={`${import.meta.env.VITE_BASE}images/flower_img.png`}
                     alt="flower-image"
                     className={scss.flower_img}
                 />
@@ -97,31 +97,31 @@ const experiences = [
     {
         title: "House Boat Festival",
         date: "March 15th to April 20th, 2025",
-        image: "/images/JKTimg12.jpg",
+        image: `${import.meta.env.VITE_BASE}images/JKTimg12.jpg`,
     },
     {
         title: "Baisakhi Festival",
         date: "July 8th to July 9th, 2025",
-        image: "/images/JKTimg11.jpg",
+        image: `${import.meta.env.VITE_BASE}images/JKTimg11.jpg`,
     },
     {
         title: "Holi",
         date: "Yet to announced",
-        image: "/images/JKTimg10.png",
+        image: `${import.meta.env.VITE_BASE}images/JKTimg10.png`,
     },
     {
         title: "House Boat Festival",
         date: "March 15th to April 20th, 2025",
-        image: "/images/JKTimg12.jpg",
+        image: `${import.meta.env.VITE_BASE}images/JKTimg12.jpg`,
     },
     {
         title: "Baisakhi Festival",
         date: "July 8th to July 9th, 2025",
-        image: "/images/JKTimg11.jpg",
+        image: `${import.meta.env.VITE_BASE}images/JKTimg11.jpg`,
     },
     {
         title: "Holi",
         date: "Yet to announced",
-        image: "/images/JKTimg10.png",
+        image: `${import.meta.env.VITE_BASE}images/JKTimg10.png`,
     },
 ];

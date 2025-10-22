@@ -21,12 +21,12 @@ export default function GallerySection() {
       )}
     >
       <div className={scss.dark_wave}>
-        <img src="/images/dark_wave.svg" alt="dark wave" />
+        <img src={`${import.meta.env.VITE_BASE}images/dark_wave.svg`} alt="dark wave" />
       </div>
       {/* Background Video */}
       <video
         className="absolute top-0 left-0 w-full h-full object-cover z-0"
-        src="/videos/GallaryBg.mp4"
+        src={`${import.meta.env.VITE_BASE}videos/GallaryBg.mp4`}
         autoPlay
         loop
         muted
@@ -46,7 +46,7 @@ export default function GallerySection() {
           </h2>
           <div className="flex justify-center my-6">
             <img
-              src="/images/dark_btm_line.svg"
+              src={`${import.meta.env.VITE_BASE}images/dark_btm_line.svg`}
               alt="Decorative Divider"
               width={500}
               height={30}
@@ -87,16 +87,16 @@ export default function GallerySection() {
                 </a>
                 <div className={scss.visualize_img_block}>
                   <div className={scss.visualize_img}>
-                    <img src="/images/visualize-1.1.png" />
+                    <img src={`${import.meta.env.VITE_BASE}images/visualize-1.1.png`} />
                   </div>
                   <div className={scss.visualize_img}>
-                    <img src="/images/visualize-1.2.png" />
+                    <img src={`${import.meta.env.VITE_BASE}images/visualize-1.2.png`} />
                   </div>
                 </div>
 
                 <div className={scss.visualize_img_block}>
                   <div className={scss.visualize_img}>
-                    <img src="/images/visualize-1.3.png" />
+                    <img src={`${import.meta.env.VITE_BASE}images/visualize-1.3.png`} />
                   </div>
                 </div>
               </div>
@@ -122,19 +122,19 @@ export default function GallerySection() {
                 </a>
                 <div className={scss.visualize_img_block}>
                   <div className={scss.visualize_img}>
-                    <img src="/images/video-1.jpeg" />
+                    <img src={`${import.meta.env.VITE_BASE}images/video-1.jpeg`} />
                   </div>
                   <div className={scss.visualize_img}>
-                    <img src="/images/video-2.jpeg" />
+                    <img src={`${import.meta.env.VITE_BASE}images/video-2.jpeg`} />
                   </div>
                 </div>
 
                 <div className={scss.visualize_img_block}>
                   <div className={scss.visualize_img}>
-                    <img src="/images/video-3.jpeg" />
+                    <img src={`${import.meta.env.VITE_BASE}images/video-3.jpeg`} />
                   </div>
                   <div className={scss.visualize_img}>
-                    <img src="/images/video-4.jpeg" />
+                    <img src={`${import.meta.env.VITE_BASE}images/video-4.jpeg`} />
                   </div>
                 </div>
               </div>
@@ -159,7 +159,7 @@ export default function GallerySection() {
                 </a>
                 <div className={scss.visualize_img_block}>
                   <div className={scss.visualize_img}>
-                    <img src="/images/guide-1.jpeg" />
+                    <img src={`${import.meta.env.VITE_BASE}images/guide-1.jpeg`} />
                   </div>
                 </div>
               </div>

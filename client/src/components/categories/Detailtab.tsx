@@ -3,8 +3,7 @@ import { useState } from "react";
 import scss from "./detailtab.module.scss";
 import { Swiper, SwiperSlide } from "swiper/react";
 import clsx from "clsx";
-import { InfoIcon, MapPin, StarIcon, ViewIcon } from "lucide-react";
-import { IoMdStar } from "react-icons/io";
+import { InfoIcon, StarIcon, ViewIcon } from "lucide-react";
 import "swiper/swiper-bundle.css";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
@@ -23,9 +22,7 @@ function Detailtab({
 }) {
     const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-    const handleTabClick = (index: number) => {
-        setActiveTabIndex(index);
-    };
+
     const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
     const thumbsSwiperOptions = {
         onSwiper: (swiper: SwiperType) => setThumbsSwiper(swiper),

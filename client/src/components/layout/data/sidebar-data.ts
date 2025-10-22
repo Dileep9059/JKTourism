@@ -161,8 +161,8 @@ export function getSidebarData(): SidebarData {
           title: 'Shopping',
           icon: ShoppingBag,
           items: [
-            { title: 'Add Shopping Location', url: '/shopping/add', icon: ShoppingBasket },
-            { title: 'Published Shopping Locations ', url: '/shopping', icon: TruckElectric },
+            { title: 'Add Shopping Location', url: '/shopping-location/add', icon: ShoppingBasket },
+            { title: 'Published Shopping Locations ', url: '/shopping-location', icon: TruckElectric },
           ],
         },
       ]

@@ -296,9 +296,9 @@ public class AdminController {
     }
 
     @PostMapping("/get-experiences")
-    public ResponseEntity<String> getExperiences(@RequestBody EncryptedRequest req) throws Exception {
+    public ResponseEntity<String> getExperiences(@RequestBody String req) throws Exception {
         try {
-            JsonNode jsonNode = Json.deserialize(JsonNode.class, req.data());
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
             int page = jsonNode.get("page").asInt(0);
             int size = jsonNode.get("size").asInt(10);
 
@@ -345,9 +345,9 @@ public class AdminController {
     }
 
     @PostMapping("/get-all-shopping")
-    public ResponseEntity<String> getAllShopping(@RequestBody EncryptedRequest req) throws Exception {
+    public ResponseEntity<String> getAllShopping(@RequestBody String req) throws Exception {
         try {
-            JsonNode jsonNode = Json.deserialize(JsonNode.class, req.data());
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
             int page = jsonNode.get("page").asInt(0);
             int size = jsonNode.get("size").asInt(10);
 

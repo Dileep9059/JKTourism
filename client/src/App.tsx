@@ -51,6 +51,10 @@ import DestinationData from "./components/admin/destination/DestinaionData";
 import UploadDestinationData from "./components/admin/destination/UploadDestinationData";
 import EventData from "./components/admin/event/EventData";
 import AddEvent from "./components/admin/event/AddEvent";
+import ExperienceData from "./components/admin/experiences/ExperienceData";
+import AddExperience from "./components/admin/experiences/AddExperience";
+import AddShopping from "./components/admin/shopping/AddShopping";
+import ShoppingData from "./components/admin/shopping/ShoppingData";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -94,6 +98,10 @@ const roleRoutes = [
       { path: "destination/upload", element: <UploadDestinationData /> },
       { path: "event", element: <EventData /> },
       { path: "event/add", element: <AddEvent /> },
+      { path: "experiences", element: <ExperienceData /> },
+      { path: "experiences/add", element: <AddExperience /> },
+      { path: "shopping-location", element: <ShoppingData /> },
+      { path: "shopping-location/add", element: <AddShopping /> },
       { path: "feedback", element: <Feedbacks /> },
     ],
   }

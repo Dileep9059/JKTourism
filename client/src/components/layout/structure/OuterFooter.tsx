@@ -358,14 +358,14 @@ const OuterFooter: React.FC = () => {
 
       {/* chatbot design  */}
 
-      {/* 
+
       <button
         onClick={toggleChat}
         className={clsx("group space-x-2 p-2", scss.chatToggleBtn)}
       >
         <div className={clsx(scss.chatButton)}>
           <div className={clsx(scss.askImg)}>
-            <img src="/images/customer-icon.png" className="w-6 h-6" />
+            <img src={`${import.meta.env.VITE_BASE}images/customer-icon.png`} className="w-6 h-6" />
           </div>
           <div
             className={clsx("transition-opacity duration-300", scss.askJannat)}
@@ -374,7 +374,7 @@ const OuterFooter: React.FC = () => {
           </div>
         </div>
       </button>
-      */}
+
 
       {isOpen && (
         <div className={scss.chatWidget}>
@@ -386,26 +386,26 @@ const OuterFooter: React.FC = () => {
                 </button>
               )}
               <div className={scss.chat_profile}>
-                <img src="/images/customer-icon.png" />
+                <img src={`${import.meta.env.VITE_BASE}images/customer-icon.png`} />
                 <h1>Ask Jannat</h1>
               </div>
             </div>
             <img
-              src="https://ms6.pmgatishakti.gov.in/images/jk-tourism-logo.png"
+              src={`${import.meta.env.VITE_BASE}images/jk-tourism-logo.png`}
               alt="Logo"
             />
           </header>
           <div className={scss.chatbox}>
             <div className={scss.carousel}>
               <div className={scss.carouselImages}>
-                <img src="/images/JKTimg25.jpg" alt="Slide 1" />
-                <img src="/images/expBg.jpg" alt="Slide 2" />
-                <img src="/images/jk-img-01.jpg" alt="Slide 3" />
-                <img src="/images/jk-img-02.jpg" alt="Slide 4" />
-                <img src="/images/JKTimg25.jpg" alt="Slide 1" />
-                <img src="/images/expBg.jpg" alt="Slide 2" />
-                <img src="/images/jk-img-01.jpg" alt="Slide 3" />
-                <img src="/images/jk-img-02.jpg" alt="Slide 4" />
+                <img src={`${import.meta.env.VITE_BASE}images/JKTimg25.jpg`} alt="Slide 1" />
+                <img src={`${import.meta.env.VITE_BASE}images/expBg.jpg`} alt="Slide 2" />
+                <img src={`${import.meta.env.VITE_BASE}images/jk-img-01.jpg`} alt="Slide 3" />
+                <img src={`${import.meta.env.VITE_BASE}images/jk-img-02.jpg`} alt="Slide 4" />
+                <img src={`${import.meta.env.VITE_BASE}images/JKTimg25.jpg`} alt="Slide 1" />
+                <img src={`${import.meta.env.VITE_BASE}images/expBg.jpg`} alt="Slide 2" />
+                <img src={`${import.meta.env.VITE_BASE}images/jk-img-01.jpg`} alt="Slide 3" />
+                <img src={`${import.meta.env.VITE_BASE}images/jk-img-02.jpg`} alt="Slide 4" />
               </div>
             </div>
             <div className={scss.chatbox_wrapper}>
@@ -438,9 +438,8 @@ const OuterFooter: React.FC = () => {
                 {chatHistory.map((msg, index) => (
                   <div
                     key={index}
-                    className={`${
-                      msg.isUser ? scss.userMessage : scss.botMessage
-                    } ${scss.chatMessage}`}
+                    className={`${msg.isUser ? scss.userMessage : scss.botMessage
+                      } ${scss.chatMessage}`}
                   >
                     {msg.text}
                   </div>

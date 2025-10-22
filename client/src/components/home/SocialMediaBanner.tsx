@@ -42,13 +42,13 @@ const SocialMediaBanner = () => {
 
       <div className="relative pb-6">
         <img
-          src="/images/media_bg.png"
+          src={`${import.meta.env.VITE_BASE}images/media_bg.png`}
           alt="media background image"
           className={scss.media_bg}
         />
         <div className="relative w-full h-12 md:h-20">
           <img
-            src="/images/Vector2.png"
+            src={`${import.meta.env.VITE_BASE}images/Vector2.png`}
             alt="Wave Pattern"
             width={500}
             height={500}
@@ -67,7 +67,7 @@ const SocialMediaBanner = () => {
           {/* Divider - Responsive sizing */}
           <div className={clsx("position-relative flex justify-center mt-6")}>
             <img
-              src="/images/Layer_1.png"
+              src={`${import.meta.env.VITE_BASE}images/Layer_1.png`}
               alt="Decorative Divider"
               width={600}
               height={30}
@@ -90,10 +90,10 @@ const SocialMediaBanner = () => {
                 className={`position-relative rounded-full p-3 sm:p-4 md:p-5 xxl:p-7 ${item.color} text-white shadow-lg hover:scale-105 sm:hover:scale-110 transition-transform duration-300 relative border-2 sm:border-3 md:border-4 border-white`}
               >
                 <div className={scss.star_wrapper}>
-                  <img src="/images/star-icon.png" alt="star icon" />
-                  <img src="/images/star-icon.png" alt="star icon" />
-                  <img src="/images/star-icon.png" alt="star icon" />
-                  <img src="/images/star-icon.png" alt="star icon" />
+                  <img src={`${import.meta.env.VITE_BASE}images/star-icon.png`} alt="star icon" />
+                  <img src={`${import.meta.env.VITE_BASE}images/star-icon.png`} alt="star icon" />
+                  <img src={`${import.meta.env.VITE_BASE}images/star-icon.png`} alt="star icon" />
+                  <img src={`${import.meta.env.VITE_BASE}images/star-icon.png`} alt="star icon" />
                 </div>
                 {item.icon}
                 <span className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 bg-yellow-300 rounded-full animate-ping opacity-75"></span>

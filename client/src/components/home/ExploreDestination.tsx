@@ -56,7 +56,7 @@ const ExploreDestination = () => {
               Explore Destinations
               <div className="absolute left-1/2 top-full -translate-x-1/2 mt-1 md:mt-2 w-40 sm:w-60 md:w-80 h-8 sm:h-16 md:h-10">
                 <img
-                  src="/images/dark_btm_line.svg"
+                  src={`${import.meta.env.VITE_BASE}images/dark_btm_line.svg`}
                   alt="Temple Decoration"
                   className="object-contain"
                   loading="lazy"
@@ -107,7 +107,7 @@ const ExploreDestination = () => {
 
                       <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center hover:rounded-lg">
                         <Link
-                          to={`/category/${category.url_value}`}
+                          to={`/most-visited-destinations/${category.url_value}`}
                           className="bg-white text-black px-6 py-2 rounded-full shadow-md hover:bg-yellow-200 transition-all cursor-pointer"
                           aria-label={`View ${category.name}`}
                         >
@@ -140,9 +140,9 @@ const ExploreDestination = () => {
       {/* Decorative Bottom Elements */}
       <div className="w-full">
         {/* Left Temple */}
-        <div className="absolute !bottom-4 sm:!bottom-8 md:bottom-11 left-0 w-20 sm:w-32 md:w-40 h-26 sm:h-24 md:h-32 z-20">
+        <div className="absolute bottom-0 sm:!bottom-8 md:!bottom-7 left-0 w-20 sm:w-32 md:w-40 h-26 sm:h-24 md:h-32 z-20">
           <img
-            src="/images/Isolation_Mode-1.png"
+            src={`${import.meta.env.VITE_BASE}images/Isolation_Mode-1.png`}
             alt="Left Temple"
             loading="lazy"
             className={clsx(
@@ -153,10 +153,10 @@ const ExploreDestination = () => {
         </div>
 
         {/* Wave Pattern */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 sm:h-16 md:h-20 z-10">
+        <div className="absolute bottom-0 xs:!-bottom-50 left-0 right-0 h-12 sm:h-16 md:h-20 z-10">
           <div className="relative w-full h-full">
             <img
-              src="/images/Vector.png"
+              src={`${import.meta.env.VITE_BASE}images/Vector.png`}
               alt="Wave Pattern"
               className="object-cover object-top w-full"
               sizes="100vw"
@@ -166,9 +166,9 @@ const ExploreDestination = () => {
         </div>
 
         {/* Right Temple */}
-        <div className="absolute bottom-4 sm:bottom-8 md:bottom-11 right-0 w-20 sm:w-32 md:w-40 h-16 sm:h-24 md:h-32 z-20">
+        <div className="absolute bottom-8 sm:bottom-8 md:bottom-11 right-0 w-20 sm:w-32 md:w-40 h-16 sm:h-24 md:h-32 z-20">
           <img
-            src="/images/Isolation_Mode-1.png"
+            src={`${import.meta.env.VITE_BASE}images/Isolation_Mode-1.png`}
             alt="Right Temple"
             className={clsx(
               scss.temple_img,

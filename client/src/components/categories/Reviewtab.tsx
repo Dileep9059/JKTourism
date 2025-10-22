@@ -19,7 +19,7 @@ function Reviewtab({ reviews }: { reviews: Review[] }) {
               <div className={scss.clientinfo}>
                 <div className={scss.rtcinfo}>
                   <div className={scss.clientimg}>
-                    <img src="/assets/images/slider1.jpeg" alt="" title="" />
+                    <img src={`${import.meta.env.VITE_BASE}assets/images/slider1.jpeg`} alt="" title="" />
                   </div>
                   <div
                     className={clsx(

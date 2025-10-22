@@ -4,6 +4,9 @@ import { defineConfig, type PluginOption, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+import archiver from "archiver";
+import fs from "fs";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,12 +20,9 @@ export default defineConfig(({ mode, command }) => {
   const plugins: PluginOption[] = [
     react(),
     tailwindcss(),
-  ];
-
-  // Add source map stripper plugin only in dev
-  if (command === 'serve') {
-    plugins.push({
+    {
       name: 'strip-inline-sourcemaps',
+      apply: 'serve',
       enforce: 'post',
       transform(code, id) {
         if (id.endsWith('.js') || id.endsWith('.ts') || id.endsWith('.tsx')) {
@@ -32,8 +32,9 @@ export default defineConfig(({ mode, command }) => {
           };
         }
       },
-    });
-  }
+    },
+    zipAfterBuild(outDir)
+  ];
 
   return {
     base,
@@ -55,3 +56,29 @@ export default defineConfig(({ mode, command }) => {
     },
   };
 });
+
+function zipAfterBuild(outDir: string) {
+  return {
+    name: "zip-after-build",
+    closeBundle() {
+      const zipName = `${outDir}.zip`;
+      const output = fs.createWriteStream(zipName);
+      const archive = archiver("zip", { zlib: { level: 9 } });
+
+      output.on("close", () => {
+        console.log(`✅ ${zipName} created (${archive.pointer()} bytes)`);
+      });
+
+      archive.on("error", (err: any) => {
+        throw err;
+      });
+
+      archive.pipe(output);
+
+      // keep the folder name inside zip
+      archive.directory(outDir, path.basename(outDir));
+
+      archive.finalize();
+    },
+  };
+}

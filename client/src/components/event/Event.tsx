@@ -72,7 +72,7 @@ const Event = () => {
                                         className={clsx(scss.event_image)}
                                     />
                                     <h2>{event.title}</h2>
-                                    <span><img src="/assets/images/calendar.svg" />{format(new Date(event?.startDate), "MMM dd, yyyy")}</span>
+                                    <span><img src={`${import.meta.env.VITE_BASE}assets/images/calendar.svg`} />{format(new Date(event?.startDate), "MMM dd, yyyy")}</span>
                                     <Link to={`/events/${encodeURIComponent(event?.id)}`}>View</Link>
                                 </div>
                             ))}

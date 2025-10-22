@@ -155,7 +155,7 @@ function TravelAgent() {
             <div className={clsx(scss.travelag_div)}>
                 <div className={scss.banner}>
                     <img
-                        src="/assets/images/travel-agent.jpg"
+                        src={`${import.meta.env.VITE_BASE}assets/images/travel-agent.jpg`}
                         alt="Banner"
                         className={clsx(
                             scss.banner_image,

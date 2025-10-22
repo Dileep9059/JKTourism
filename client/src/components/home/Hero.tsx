@@ -1,8 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
-import { Menu, User } from "lucide-react";
-import MenuModal from "@/components/Hamburger/MenuModal";
+import React from "react";
 
 
 import clsx from "clsx";
@@ -19,15 +15,6 @@ const Hero: React.FC = () => {
   ];
 
 
-  // For Hamburgur Menu
-  const [hamburgerModal, setHamburgerModal] = useState<{
-    open: boolean;
-  }>({
-    open: false,
-  });
-
-  const openHamburgerModal = () => setHamburgerModal({ open: true });
-  const closeHamburgerModal = () => setHamburgerModal({ open: false });
 
   return (
     <>
@@ -40,61 +27,13 @@ const Hero: React.FC = () => {
           playsInline
           className="absolute inset-0 w-full h-full object-cover z-0"
         >
-          <source src="videos/vd1.mp4" type="video/mp4" />
+          <source src={`${import.meta.env.VITE_BASE}videos/vd1.mp4`} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-500/50 to-transparent z-10" />
 
-        <header className="w-full top-0 left-0 z-50">
-          <div className="container-fluid mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-4 relative">
-            {/* Menu Button - Left (Mobile) */}
-            <div className="block md:hidden absolute left-4 z-30">
-              <button
-                className="bg-white/80 hover:bg-white rounded-2xl p-3 shadow-lg transition cursor-pointer"
-                aria-label="User Login"
-                onClick={() => openHamburgerModal()}
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Logo - Center on mobile, Left on desktop */}
-            <div className="flex-1 flex justify-center md:justify-start z-20">
-              <img
-                src="/images/jk-tourism-logo.png"
-                alt="J&K Tourism Logo"
-                width={120}
-                height={60}
-                className="h-12 w-auto sm:h-14 md:h-16"
-                loading="lazy"
-              />
-            </div>
-
-            {/* Login Avatar Button - Right (Mobile Only) */}
-            <div className="block md:hidden absolute right-4 z-30">
-              <button
-                className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
-                aria-label="User Login"
-
-              >
-                <User className="w-6 h-6 text-black-600" />
-              </button>
-            </div>
-
-            {/* Right side for desktop - MenuModal */}
-            <div className="hidden md:block z-30">
-              <button
-                className="bg-white/80 hover:bg-white rounded-2xl p-3 shadow-lg transition cursor-pointer"
-                aria-label="User Login"
-                onClick={() => openHamburgerModal()}
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-        </header>
 
         {/* Center Title & Subtitle */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-20 text-white px-4">
@@ -132,7 +71,6 @@ const Hero: React.FC = () => {
         </nav>
       </section>
       {/* Hamburger Modal */}
-      <MenuModal open={hamburgerModal.open} onClose={closeHamburgerModal} />
     </>
   );
 };

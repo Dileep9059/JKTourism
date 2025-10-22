@@ -79,7 +79,7 @@ export default function ReviewSlider() {
         style={{ left: "0", top: "0", width: "100%", height: "100%" }}
       >
         <img
-          src="/images/tourist_bg.png"
+          src={`${import.meta.env.VITE_BASE}images/tourist_bg.png`}
           alt="JK Tourism Background"
           className="object-cover z-0 inset-0 w-full h-full"
           loading="lazy"
@@ -93,7 +93,7 @@ export default function ReviewSlider() {
             </h2>
             <div className="flex justify-center my-6">
               <img
-                src="/images/dark_btm_line.svg"
+                src={`${import.meta.env.VITE_BASE}images/dark_btm_line.svg`}
                 alt="Decorative Divider"
                 width={500}
                 height={30}

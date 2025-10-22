@@ -38,7 +38,7 @@ const Plantrip = () => {
             <div className={scss.common_page}>
                 <div className="banner">
                     <img
-                        src="/assets/images/slider1.jpeg"
+                        src={`${import.meta.env.VITE_BASE}assets/images/slider1.jpeg`}
                         alt="Banner"
                         className={clsx(
                             scss.banner_image,
@@ -60,7 +60,7 @@ const Plantrip = () => {
                                     <div className={scss.flip_card_front}>
                                         <div className={scss.connection_icon}>
                                             <img
-                                                src="/assets/images/icons/air-icon.png"
+                                                src={`${import.meta.env.VITE_BASE}assets/images/icons/air-icon.png`}
                                                 alt="air icon"
                                             />
                                         </div>
@@ -81,7 +81,7 @@ const Plantrip = () => {
                                     <div className={scss.flip_card_front}>
                                         <div className={scss.connection_icon}>
                                             <img
-                                                src="/assets/images/icons/train-icon.png"
+                                                src={`${import.meta.env.VITE_BASE}assets/images/icons/train-icon.png`}
                                                 alt="road icon"
                                             />
                                         </div>
@@ -101,7 +101,7 @@ const Plantrip = () => {
                                     <div className={scss.flip_card_front}>
                                         <div className={scss.connection_icon}>
                                             <img
-                                                src="/assets/images/icons/road-icon.jpg"
+                                                src={`${import.meta.env.VITE_BASE}assets/images/icons/road-icon.jpg`}
                                                 alt="train icon"
                                             />
                                         </div>

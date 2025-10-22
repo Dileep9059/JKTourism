@@ -101,7 +101,7 @@ function Categories() {
                                 <div className={clsx(scss.category_div, "rounded-3xl")}>
                                     <Link to={"/most-visited-destinations"}>
                                         <img
-                                            src="/assets/images/banner-02.jpg"
+                                            src={`${import.meta.env.VITE_BASE}assets/images/banner-02.jpg`}
                                             alt="Banner"
                                             className={clsx(
                                                 scss.category_image,
@@ -121,7 +121,7 @@ function Categories() {
                                 <div className={clsx(scss.category_div, "rounded-3xl")}>
                                     <Link to={"/events"}>
                                         <img
-                                            src="/assets/images/banner-03.png"
+                                            src={`${import.meta.env.VITE_BASE}assets/images/banner-03.png`}
                                             alt="Banner"
                                             className={clsx(
                                                 scss.category_image,
@@ -141,7 +141,7 @@ function Categories() {
                                 <div className={clsx(scss.category_div, "rounded-3xl")}>
                                     <Link to={"/experience"}>
                                         <img
-                                            src="/assets/images/banner-04.jpg"
+                                            src={`${import.meta.env.VITE_BASE}assets/images/banner-04.jpg`}
                                             alt="Banner"
                                             className={clsx(
                                                 scss.category_image,
@@ -161,7 +161,7 @@ function Categories() {
                                 <div className={clsx(scss.category_div, "rounded-3xl")}>
                                     <Link to="/gallery">
                                         <img
-                                            src="/assets/images/banner-05.png"
+                                            src={`${import.meta.env.VITE_BASE}assets/images/banner-05.png`}
                                             alt="Banner"
                                             className={clsx(
                                                 scss.category_image,
@@ -192,7 +192,7 @@ function Categories() {
                             >
                                 <div className={scss.group_img}>
                                     <img
-                                        src="/assets/images/contactld.png"
+                                        src={`${import.meta.env.VITE_BASE}assets/images/contactld.png`}
                                         alt="Banner"
                                         className={clsx(
                                             scss.category_image,
@@ -201,7 +201,7 @@ function Categories() {
                                         )}
                                     />
                                     <img
-                                        src="/images/contact_desktop_bg.jpg"
+                                        src={`${import.meta.env.VITE_BASE}images/contact_desktop_bg.jpg`}
                                         alt="Banner"
                                         className={clsx(
                                             scss.category_image,
@@ -220,7 +220,7 @@ function Categories() {
                                     >
                                         <a href="https://x.com/jandktourism" target="_blank">
                                             <img
-                                                src="/assets/images/twitter.png"
+                                                src={`${import.meta.env.VITE_BASE}assets/images/twitter.png`}
                                                 alt="Banner"
                                                 className={clsx(
                                                     scss.category_image,
@@ -233,7 +233,7 @@ function Categories() {
                                             target="_blank"
                                         >
                                             <img
-                                                src="/assets/images/instagram_.png"
+                                                src={`${import.meta.env.VITE_BASE}assets/images/instagram_.png`}
                                                 alt="Banner"
                                                 className={clsx(
                                                     scss.category_image,
@@ -246,7 +246,7 @@ function Categories() {
                                             target="_blank"
                                         >
                                             <img
-                                                src="/assets/images/facebook.png"
+                                                src={`${import.meta.env.VITE_BASE}assets/images/facebook.png`}
                                                 alt="Banner"
                                                 className={clsx(
                                                     scss.category_image,
@@ -256,7 +256,7 @@ function Categories() {
                                         </a>
                                         <Link to="/contact-us">
                                             <img
-                                                src="/assets/images/contact_us.png"
+                                                src={`${import.meta.env.VITE_BASE}assets/images/contact_us.png`}
                                                 alt="Banner"
                                                 className={clsx(
                                                     scss.category_image,

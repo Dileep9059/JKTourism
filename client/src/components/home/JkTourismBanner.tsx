@@ -7,13 +7,13 @@ const JkTourismBanner = () => {
   return (
     <section className={clsx(scss.mob_app, "relative overflow-hidden px-4 ")}>
       <div className={scss.dark_wave}>
-        <img src="/images/Vector.png" alt="dark wave image" />
+        <img src={`${import.meta.env.VITE_BASE}images/Vector.png`} alt="dark wave image" />
       </div>
       <div className="container  relative rounded-2xl sm:rounded-3xl overflow-hidden mx-auto">
         {/* Background Image + Overlay */}
         <div className="absolute inset-0 w-full h-full">
           <img
-            src="/images/JKTMobileAppBg.jpg"
+            src={`${import.meta.env.VITE_BASE}images/JKTMobileAppBg.jpg`}
             alt="JK Tourism Background"
             className="object-cover object-center absolute inset-0 w-full h-full"
           // priority
@@ -39,7 +39,7 @@ const JkTourismBanner = () => {
 
               <div className="flex sm:justify-center lg:justify-start my-6">
                 <img
-                  src="/images/dark_btm_line.svg"
+                  src={`${import.meta.env.VITE_BASE}images/dark_btm_line.svg`}
                   alt="Decorative Divider"
                   width={350}
                   height={30}
@@ -57,10 +57,10 @@ const JkTourismBanner = () => {
 
             <div className={scss.app_download}>
               <a href="">
-                <img src="/images/playstore-img.png" alt="playstore icon" />
+                <img src={`${import.meta.env.VITE_BASE}images/playstore-img.png`} alt="playstore icon" />
               </a>
               <a href="">
-                <img src="/images/appstore-img.png" alt="appstore icon" />
+                <img src={`${import.meta.env.VITE_BASE}images/appstore-img.png`} alt="appstore icon" />
               </a>
             </div>
           </div>
@@ -69,7 +69,7 @@ const JkTourismBanner = () => {
           <div className="flex gap-3 sm:gap-6 justify-center items-center lg:justify-end flex-wrap sm:flex-nowrap mt-4 sm:mt-0 lg:h-[52vh]">
             <div className="relative w-48 sm:w-54 xs:w-60 md:w-64 lg:w-full ">
               <img
-                src="/images/Layer_1 (1).png"
+                src={`${import.meta.env.VITE_BASE}images/Layer_1 (1).png`}
                 alt="Mobile App Login"
                 width={550}
                 height={1400}

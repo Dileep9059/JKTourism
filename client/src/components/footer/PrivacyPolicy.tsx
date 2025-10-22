@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
 
         <div className="banner">
           <img
-            src="/assets/images/slider1.jpeg"
+            src={`${import.meta.env.VITE_BASE}assets/images/slider1.jpeg`}
             alt="Banner"
             className={clsx(
               scss.banner_image,

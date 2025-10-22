@@ -150,7 +150,7 @@ function TourGuide() {
       <div className={clsx(scss.travelag_div)}>
         <div className={scss.banner}>
           <img
-            src="/assets/images/tour-guide_1.jpg"
+            src={`${import.meta.env.VITE_BASE}assets/images/tour-guide_1.jpg`}
             alt="Banner"
             className={clsx(
               scss.banner_image,

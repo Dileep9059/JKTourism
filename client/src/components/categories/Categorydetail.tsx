@@ -3,6 +3,7 @@ import clsx from "clsx";
 import scss from "./categorydetail.module.scss";
 import type { DestinationData, SliderImagedData } from "../utils/types";
 import CommonSlider from "../slider/CommonSlider";
+import { Link } from "react-router-dom";
 
 
 
@@ -39,7 +40,7 @@ function Categorydetail({
                 <div className={clsx(scss.category_data, "mb-5")}>
                     {destinations.map((item, idx) => (
                         <div key={idx} className={scss.category_div}>
-                            <a href={`${baseUrl}/${item.destination_url}`}>
+                            <Link to={`${baseUrl}/${item.destination_url}`}>
                                 <img
                                     src={`${import.meta.env.VITE_APP_API_BASE_URL}/files/load-file-by-path?path=${item.gallery_image}`}
                                     width={900}
@@ -56,7 +57,7 @@ function Categorydetail({
                                         {item.destination_description}
                                     </p>
                                 </div>
-                            </a>
+                            </Link>
                         </div>
                     ))}
                 </div>

@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build  && tsx zip.ts",
-    "build:staging": "vite build --mode staging && tsx zip.ts staging"
+    "build": "vite build",
+    "build:staging": "vite build --mode staging"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.0.0",
@@ -82,6 +82,7 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/aos": "^3.0.7",
+    "@types/archiver": "^6.0.3",
     "@types/node": "^24.0.10",
     "@types/nprogress": "^0.2.3",
     "@types/react": "^19.1.2",

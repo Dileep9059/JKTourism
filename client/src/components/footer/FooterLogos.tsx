@@ -2,11 +2,11 @@ import clsx from "clsx";
 import scss from "./footerlogos.module.scss";
 
 const footerLogos = [
-    { src: "/images/sm1.png", alt: "india.gov.in" },
-    { src: "/images/sm2.png", alt: "myGov" },
-    { src: "/images/sm3.png", alt: "data.gov.in" },
-    { src: "/images/sm4.png", alt: "Jammu & Kashmir" },
-    { src: "/images/sm5.png", alt: "Digital India" },
+    { src: `${import.meta.env.VITE_BASE}images/sm1.png`, alt: "india.gov.in" },
+    { src: `${import.meta.env.VITE_BASE}images/sm2.png`, alt: "myGov" },
+    { src: `${import.meta.env.VITE_BASE}images/sm3.png`, alt: "data.gov.in" },
+    { src: `${import.meta.env.VITE_BASE}images/sm4.png`, alt: "Jammu & Kashmir" },
+    { src: `${import.meta.env.VITE_BASE}images/sm5.png`, alt: "Digital India" },
 ];
 
 const FooterLogos = () => {
