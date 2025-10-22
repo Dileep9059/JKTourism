@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import scss from "./detailtab.module.scss";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -20,8 +20,6 @@ function Detailtab({
     placeName: string;
     destinationdata: DestinationInfo;
 }) {
-    const [activeTabIndex, setActiveTabIndex] = useState(0);
-
 
     const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
     const thumbsSwiperOptions = {
@@ -37,11 +35,21 @@ function Detailtab({
     const mainSwiperOptions = {
         spaceBetween: 10,
         navigation: false,
-        thumbs: { swiper: thumbsSwiper },
+        thumbs: thumbsSwiper && !thumbsSwiper.destroyed
+            ? { swiper: thumbsSwiper }
+            : undefined,
         modules: [FreeMode, Navigation, Thumbs],
         className: "mySwiper2",
         autoHeight: true,
     };
+
+    useEffect(() => {
+        return () => {
+            if (thumbsSwiper && !thumbsSwiper.destroyed) {
+                thumbsSwiper.destroy();
+            }
+        };
+    }, [thumbsSwiper]);
     return (
         <div className={clsx(scss.detailtabmain, "container mx-auto mt-5 p-3")}>
             <div className="mx-5 mb-2">

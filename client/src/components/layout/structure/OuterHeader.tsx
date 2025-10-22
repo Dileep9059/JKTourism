@@ -1,21 +1,10 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import {
-  ChevronDown,
-  Users,
-  CreditCard,
   Menu,
   User,
 } from "lucide-react";
 
-import { FaNetworkWired } from "react-icons/fa";
-import { IoIosMan } from "react-icons/io";
-import { Button } from "@/components/ui/button";
-import { ThemeSwitch } from "../../theme-switch";
-import useAuth from "@/hooks/useAuth";
-import type { AuthType } from "@/context/AuthProvider";
-import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import MenuModal from "@/components/Hamburger/MenuModal";
 
 export default function OuterHeader() {

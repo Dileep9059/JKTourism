@@ -38,29 +38,6 @@ const ShoppingLocation = () => {
     const [shoppingLocations, setShoppingLocations] =
         useState<ShoppingLocationData>();
 
-    async function getchActivityData() {
-        try {
-            const b = {
-                name: shoppingLocation
-            }
-            const encParams = await e(JSON.stringify(b));
-            const resp = await axiosInstance.post(
-                "/api/shopping/v2/get-shopping-location-by-name",
-                encParams
-            );
-            if (resp?.status === 200) {
-                const data = JSON.parse(await d(resp.data));
-                setShoppingLocations(data);
-            }
-        } catch (error) {
-            setNotFoundFlag(true);
-        }
-    }
-
-    useEffect(() => {
-        getchActivityData();
-    }, []);
-
     const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 
     const thumbsSwiperOptions = {
@@ -76,11 +53,48 @@ const ShoppingLocation = () => {
     const mainSwiperOptions = {
         spaceBetween: 10,
         navigation: false,
-        thumbs: { swiper: thumbsSwiper },
+        thumbs: thumbsSwiper && !thumbsSwiper.destroyed
+            ? { swiper: thumbsSwiper }
+            : undefined,
         modules: [FreeMode, Navigation, Thumbs],
         className: "mySwiper2",
         autoHeight: true,
     };
+
+    async function getchActivityData() {
+        try {
+            const b = {
+                name: shoppingLocation
+            }
+            const encParams = await e(JSON.stringify(b));
+            const resp = await axiosInstance.post(
+                "/api/shopping/v2/get-shopping-location-by-name",
+                encParams
+            );
+            if (resp?.status === 200) {
+                const data = JSON.parse(await d(resp.data));
+                setShoppingLocations(data);
+                setNotFoundFlag(false);
+            }
+        } catch (error) {
+            setShoppingLocations({} as ShoppingLocationData);
+            setNotFoundFlag(true);
+        }
+    }
+
+    useEffect(() => {
+        getchActivityData();
+    }, [shoppingLocation]);
+
+
+
+    useEffect(() => {
+        return () => {
+            if (thumbsSwiper && !thumbsSwiper.destroyed) {
+                thumbsSwiper.destroy();
+            }
+        };
+    }, [thumbsSwiper]);
 
     if (notFoundFlag) return <Missing />
 

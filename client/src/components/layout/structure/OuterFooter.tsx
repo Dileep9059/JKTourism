@@ -359,7 +359,7 @@ const OuterFooter: React.FC = () => {
       {/* chatbot design  */}
 
 
-      <button
+      {/* <button
         onClick={toggleChat}
         className={clsx("group space-x-2 p-2", scss.chatToggleBtn)}
       >
@@ -373,7 +373,7 @@ const OuterFooter: React.FC = () => {
             Ask <span>Jannat</span>
           </div>
         </div>
-      </button>
+      </button> */}
 
 
       {isOpen && (

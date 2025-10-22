@@ -49,7 +49,9 @@ const ExperienceName = () => {
   const mainSwiperOptions = {
     spaceBetween: 10,
     navigation: false,
-    thumbs: { swiper: thumbsSwiper },
+    thumbs: thumbsSwiper && !thumbsSwiper.destroyed
+      ? { swiper: thumbsSwiper }
+      : undefined,
     modules: [FreeMode, Navigation, Thumbs],
     className: "mySwiper2",
     autoHeight: true,
@@ -68,13 +70,22 @@ const ExperienceName = () => {
         setLoading(false);
       }
     } catch (error) {
+      setExperienceData({} as ExperienceData);
       setNotFound(true);
     }
   }
 
   useEffect(() => {
     getchActivityData();
-  }, []);
+  }, [experienceName]);
+
+  useEffect(() => {
+    return () => {
+      if (thumbsSwiper && !thumbsSwiper.destroyed) {
+        thumbsSwiper.destroy();
+      }
+    };
+  }, [thumbsSwiper]);
 
   if (notFound) return <Missing />;
   if (loading) return <FullScreenLoader />

@@ -33,7 +33,7 @@ export default defineConfig(({ mode, command }) => {
         }
       },
     },
-    zipAfterBuild(outDir)
+    // zipAfterBuild(outDir)
   ];
 
   return {

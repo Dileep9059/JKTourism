@@ -121,9 +121,10 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                             key={j}
                             className="text-white hover:text-white italic"
                           >
-                            <a
-                              href={item.url}
+                            <Link
+                              to={item.url}
                               className="items-center flex gap-2"
+                              onClick={onClose}
                             >
                               <span className="text-orange-400 mr-2 group-hover:mr-3 transition-all">
                                 <Triangle
@@ -132,7 +133,7 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                                 />
                               </span>
                               {item.title}
-                            </a>
+                            </Link>
                           </li>
                         ))}
                       </ul>
@@ -142,8 +143,9 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
 
                 {quickLinks.map((link, k) => (
                   <div key={k} className="border-b border-white/20 py-2">
-                    <a
-                      href={link.url}
+                    <Link
+                      to={link.url}
+                      onClick={onClose}
                       className="flex itemsMesmerizing-center text-white hover:text-orange-300 italic font-semibold "
                     >
                       <span className="text-orange-400 mr-2 group-hover:mr-3 transition-all">
@@ -153,7 +155,7 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                         />
                       </span>
                       {link.title}
-                    </a>
+                    </Link>
                   </div>
                 ))}
               </div>
@@ -186,12 +188,13 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                           key={j}
                           className="italic text-gray-300 hover:text-white transition"
                         >
-                          <a
-                            href={item.url}
+                          <Link
+                            to={item.url}
+                            onClick={onClose}
                             className="text-base sm:text-lg md:text-xl"
                           >
                             {item.title}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -215,15 +218,16 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                   >
                     {quickLinks.map((link, k) => (
                       <li key={k}>
-                        <a
-                          href={link.url}
+                        <Link
+                          to={link.url}
+                          onClick={onClose}
                           className="flex items-center hover:text-orange-400 transition group italic text-base"
                         >
                           <span className="text-orange-400 mr-2 group-hover:mr-3 transition-all">
                             <Triangle className="rotate-90" />
                           </span>
                           {link.title}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                     <li>
@@ -243,6 +247,7 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                         role="button"
                         className="flex items-center hover:text-orange-400 transition group italic text-base cursor-pointer"
                         to={"/login"}
+                        onClick={onClose}
                       >
                         <span className="text-orange-400 mr-2 group-hover:mr-3 transition-all text-xl">
                           <Triangle className="rotate-90" />
@@ -337,7 +342,6 @@ const menuColumns: MenuItem[] = [
 ];
 
 const quickLinks: SimpleItem[] = [
-  { title: "Rate Cards", url: "#" },
   { title: "Travel Facilities", url: "/amenities" },
   { title: "Medical Facilities", url: "/amenities" },
   { title: "Wayside Amenities", url: "/amenities" },

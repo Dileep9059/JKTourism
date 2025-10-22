@@ -7,7 +7,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "org.bisag.jktourism.JKTourismApp",
             "projectName": "JKTourism",
-            "args": "",
+            "args": "--spring.profiles.active=dev",
             "envFile": "${workspaceFolder}/.env"
         }
     ]

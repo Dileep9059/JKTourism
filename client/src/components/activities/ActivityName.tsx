@@ -40,28 +40,6 @@ const ActivityName = () => {
     const { activityName } = useParams();
     const [activityData, setActivityData] = useState<ActivityData>({} as ActivityData);
 
-    useEffect(() => {
-        async function getchActivityData() {
-            const params = {
-                activityName: activityName
-            }
-            try {
-                const encParams = await e(JSON.stringify(params));
-                const resp = await axiosInstance.post(
-                    "/api/activities/get-activity-by-name",
-                    encParams
-                );
-                if (resp?.status === 200) {
-                    const data = JSON.parse(await d(resp.data));
-                    setActivityData(data);
-                }
-            } catch (error: any) {
-                toast.error("Activity not found.")
-            }
-        }
-        getchActivityData();
-    }, []);
-
     const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
     const thumbsSwiperOptions = {
         onSwiper: (swiper: SwiperType) => setThumbsSwiper(swiper),
@@ -76,17 +54,52 @@ const ActivityName = () => {
     const mainSwiperOptions = {
         spaceBetween: 10,
         navigation: false,
-        thumbs: { swiper: thumbsSwiper },
+        thumbs: thumbsSwiper && !thumbsSwiper.destroyed
+            ? { swiper: thumbsSwiper }
+            : undefined,
         modules: [FreeMode, Navigation, Thumbs],
         className: "mySwiper2",
         autoHeight: true,
     };
 
+    async function getchActivityData() {
+        const params = {
+            activityName: activityName
+        }
+        try {
+            const encParams = await e(JSON.stringify(params));
+            const resp = await axiosInstance.post(
+                "/api/activities/get-activity-by-name",
+                encParams
+            );
+            if (resp?.status === 200) {
+                const data = JSON.parse(await d(resp.data));
+                setActivityData(data);
+            }
+        } catch (error: any) {
+            setActivityData({} as ActivityData);
+            toast.error("Activity not found.")
+        }
+    }
+    useEffect(() => {
+        getchActivityData();
+    }, [activityName]);
+
+
+    useEffect(() => {
+        return () => {
+            if (thumbsSwiper && !thumbsSwiper.destroyed) {
+                thumbsSwiper.destroy();
+            }
+        };
+    }, [thumbsSwiper]);
+
+
     if (Object.keys(activityData).length === 0) return <Missing />
 
     return (
         <>
-        <DocumentTitle title={activityName ?? ""}/>
+            <DocumentTitle title={activityName ?? ""} />
             {activityData?.images && <Slider sliderImages={activityData.images} />}
             <div className={clsx(scss.detailtabmain, "container mx-auto mt-5 p-3")}>
                 <div className="mx-5 mb-2">

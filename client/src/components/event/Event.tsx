@@ -1,4 +1,3 @@
-"use client"
 import { useEffect, useState } from "react";
 import clsx from 'clsx'
 import scss from './event.module.scss'

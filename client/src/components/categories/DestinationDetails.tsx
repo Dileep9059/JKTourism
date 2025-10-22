@@ -1,9 +1,8 @@
 import axiosInstance from '@/axios/axios';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import type { DestinationInfo } from '../utils/types';
 import { toast } from 'sonner';
-import { Info } from 'lucide-react';
 import { d, e } from '../utils/crypto';
 import Slider from '../slider/Slider';
 import DocumentTitle from '../DocumentTitle';
@@ -17,34 +16,33 @@ const DestinationDetails = () => {
     );
     const [images, setImages] = useState<string[]>([]);
 
-    useEffect(() => {
-        async function getdata() {
-            const params = {
-                placeName: placeName,
-            };
-            try {
-                const response = await axiosInstance.post(
-                    `/api/destination/getDetailsByDestination`,
-                    await e(JSON.stringify(params))
-                );
+    async function getdata() {
+        const params = {
+            placeName: placeName,
+        };
+        try {
+            const response = await axiosInstance.post(
+                `/api/destination/getDetailsByDestination`,
+                await e(JSON.stringify(params))
+            );
 
-                if (response?.status === 200) {
-                    const res = JSON.parse(await d(response?.data));
-                    // console.log(res)
-                    setdestinationdata(res);
-                    setImages(res?.images);
-                }
-            } catch {
-                toast("Error", {
-                    description: "Unable to fetch categories.",
-                    icon: <Info className="text-red-600 w-4 h-4" />,
-                });
+            if (response?.status === 200) {
+                const res = JSON.parse(await d(response?.data));
+                setdestinationdata(res);
+                setImages(res?.images);
             }
+        } catch {
+            setdestinationdata({} as DestinationInfo);
+            toast.error("Unable to fetch categories.");
         }
+    }
+    useEffect(() => {
         getdata();
-    }, []);
+    }, [placeName]);
+
     if (!placeName) return <Missing />
     if (Object.keys(destinationdata).length === 0) return <Missing />
+
     return (
         <>
             <DocumentTitle title={`${placeName} | ${categoryName}`} />
