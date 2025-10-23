@@ -1,18 +1,18 @@
 package org.bisag.jktourism.controllers;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.bisag.jktourism.models.RegOTP;
 import org.bisag.jktourism.payload.request.DataRequest;
 import org.bisag.jktourism.repository.RegOtpRepository;
 import org.bisag.jktourism.services.FeedbackService;
+import org.bisag.jktourism.services.RedisService;
 import org.bisag.jktourism.utils.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +34,9 @@ public class FeedbackController {
     @Autowired
     RegOtpRepository regOtpRepository;
 
+    @Autowired
+    RedisService redisService;
+
     @PostMapping("/submit-feedback")
     public ResponseEntity<String> submitFeedback(@RequestParam String data, @RequestParam MultipartFile file)
             throws Exception {
@@ -46,33 +49,28 @@ public class FeedbackController {
                 return ResponseEntity.ok().body(Json.serialize("Please provide email."));
             }
 
-            RegOTP regOtp = regOtpRepository.findByContact(email).orElse(null);
-
-            if (regOtp == null) {
-                return ResponseEntity.ok()
-                        .body(Json.serialize("Please request for otp before submitting the request."));
-            }
-
             if (otp.isEmpty()) {
                 return ResponseEntity.badRequest().body(Json.serialize(
                         "Please enter the otp."));
             }
 
-            int enteredOtp;
-            try {
-                enteredOtp = Integer.parseInt(otp);
-            } catch (NumberFormatException e) {
-                return ResponseEntity.badRequest().body(Json.serialize("Invalid OTP format."));
+            String storedOtp = redisService.getValue("otp:" + email);
+
+            if (storedOtp == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OTP expired or not found.");
             }
 
-            if (regOtp.getOtpGeneratedOn() != null &&
-                    regOtp.getOtpGeneratedOn().isBefore(LocalDateTime.now().minusMinutes(10))) {
-                return ResponseEntity.badRequest().body(Json.serialize("OTP has expired. Please request a new one."));
+            if (!storedOtp.equals(otp)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP");
             }
 
-            if (!Objects.equals(regOtp.getOtp(), enteredOtp)) {
-                return ResponseEntity.badRequest().body(Json.serialize(
-                        "OTP do not match."));
+            redisService.deleteKey("otp:" + email);
+
+            RegOTP regOtp = regOtpRepository.findByContact(email).orElse(null);
+
+            if (regOtp == null) {
+                return ResponseEntity.ok()
+                        .body(Json.serialize("Please request for otp before submitting the request."));
             }
 
             feedbackService.saveFeedback(data, file);

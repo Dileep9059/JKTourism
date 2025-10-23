@@ -1,5 +1,6 @@
 package org.bisag.jktourism;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -10,11 +11,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 @SpringBootApplication
 public class JKTourismApp extends SpringBootServletInitializer {
 
-	private final RedisConnectionFactory redisConnectionFactory;
+	@Autowired RedisConnectionFactory redisConnectionFactory;
 
-	JKTourismApp(RedisConnectionFactory redisConnectionFactory) {
-		this.redisConnectionFactory = redisConnectionFactory;
-	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(JKTourismApp.class, args);

@@ -35,9 +35,7 @@ function Detailtab({
     const mainSwiperOptions = {
         spaceBetween: 10,
         navigation: false,
-        thumbs: thumbsSwiper && !thumbsSwiper.destroyed
-            ? { swiper: thumbsSwiper }
-            : undefined,
+        thumbs: { swiper: thumbsSwiper },
         modules: [FreeMode, Navigation, Thumbs],
         className: "mySwiper2",
         autoHeight: true,

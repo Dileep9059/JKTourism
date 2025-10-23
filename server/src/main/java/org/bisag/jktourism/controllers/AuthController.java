@@ -123,6 +123,18 @@ public class AuthController {
 
 		JsonNode loginRequest = Json.deserialize(JsonNode.class, encryptedRequest);
 
+		String storedOtp = redisService.getValue("otp:" + loginRequest.get("username").asText());
+
+		if (storedOtp == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OTP expired or not found.");
+		}
+
+		if (!storedOtp.equals(loginRequest.get("otp").asText())) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP");
+		}
+
+		redisService.deleteKey("otp:" + loginRequest.get("username").asText());
+
 		Authentication authentication = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.get("username").asText(),
 						loginRequest.get("password").asText()));

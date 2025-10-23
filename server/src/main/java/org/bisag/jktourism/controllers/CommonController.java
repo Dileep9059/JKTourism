@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @RequestMapping("/api/common")
 public class CommonController {
 
-        String baseUrl = "https://ms6.pmgatishakti.gov.in";
+        String baseUrl = "https://staging2.pmgatishakti.gov.in";
 
         @Value("${backendPath}")
         String backendPath;

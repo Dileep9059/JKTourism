@@ -172,7 +172,7 @@ const ContactUs = () => {
       <div className={clsx(scss.category_div)}>
         <div className="banner">
           <img
-            src={`${import.meta.env.VITE_BASE}assets/images/slider1.jpeg`}
+            src={`${import.meta.env.VITE_BASE}images/contact-us.png`}
             alt="Banner"
             className={clsx(
               scss.banner_image,

@@ -161,7 +161,7 @@ public class UserService {
     }
 
     public void sendOtp(String username, int otp) throws Exception {
-      
+
         String subject = "Your One-Time Password (OTP) for Verification";
 
         String messageContent = """
@@ -215,56 +215,9 @@ public class UserService {
 
         String finalMessage = MessageFormat.format(messageContent, String.valueOf(otp));
 
-        // if user exists in regotp
-        RegOTP regOtp = regOtpRepository.findByContact(username).orElse(null);
+        sendMail.sendMail(subject, new InternetAddress[] { new InternetAddress(username) },
+                finalMessage, null);
 
-        if (regOtp == null) {
-            regOtp = new RegOTP();
-            regOtp.setContact(username);
-            regOtp.setOtp(otp);
-            regOtp.setMode("EMAIL");
-            regOtpRepository.save(regOtp);
-            System.out.println("[OTP] OTP :: " + otp);
-
-            sendMail.sendMail(subject, new InternetAddress[] { new InternetAddress(username) },
-                    finalMessage, null);
-        } else {
-            // check if it is blocked
-            if (regOtp.isCurrentlyBlocked()) {
-
-                // check if it is past blockeduntil
-                if (regOtp.getBlockedUntil().isBefore(LocalDateTime.now())) {
-                    // unblock he user and set the user otp
-                    regOtp.resetAttempts();
-
-                    // send the otp
-                    regOtp.setOtp(otp);
-                    regOtp.setOtpGeneratedOn(LocalDateTime.now());
-                    regOtpRepository.save(regOtp);
-                    System.out.println("[OTP] OTP :: " + otp);
-                    sendMail.sendMail(subject, new InternetAddress[] { new InternetAddress(username) },
-                            finalMessage, null);
-                } else {
-                    throw new Exception("Too many attempts. Try again after 15 minutes.");
-                }
-            } else if (regOtp.isMaxAttemptsReached()) {
-                // block the user
-                regOtp.setBlocked(true);
-                // add 15 minutes to LocalDate.now()
-                regOtp.setBlockedUntil(LocalDateTime.now().plusMinutes(15));
-                regOtpRepository.save(regOtp);
-                throw new Exception("Too many attempts. Try again after 15 minutes.");
-            } else {
-                // increase the attempts
-                regOtp.incrementAttempts();
-                // send the otp
-                regOtp.setOtp(otp);
-                regOtpRepository.save(regOtp);
-                System.out.println("[OTP] OTP :: " + otp);
-                sendMail.sendMail(subject, new InternetAddress[] { new InternetAddress(username) },
-                        finalMessage, null);
-            }
-        }
     }
 
     @Transactional

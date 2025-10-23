@@ -38,7 +38,7 @@ const Plantrip = () => {
             <div className={scss.common_page}>
                 <div className="banner">
                     <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/slider1.jpeg`}
+                        src={`${import.meta.env.VITE_BASE}assets/images/plan-your-trip.png`}
                         alt="Banner"
                         className={clsx(
                             scss.banner_image,

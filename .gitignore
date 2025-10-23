@@ -13,6 +13,8 @@ dist-ssr
 *.local
 JKTourism
 JKTourism.zip
+jktourism
+jktourism.zip
 
 # Editor directories and files
 !.vscode/*

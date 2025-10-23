@@ -34,6 +34,7 @@ export default axiosInstance;
 export const axiosPrivate = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "text/plain", "X-Client-Type": "web" },
+  withCredentials: true,
 });
 
 axiosPrivate.interceptors.request.use(
