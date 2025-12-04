@@ -48,10 +48,10 @@ export default function ShoppingChart() {
   useEffect(() => {
     setOptions({
       chart: { type: "column" },
-      title: { text: "Activities  Hits" },
+      title: { text: "Shopping  Hits" },
       xAxis: {
         categories: chartData?.map((d: ShoppingStat) => d.shopping),
-        title: { text: "Activities" },
+        title: { text: "Shopping Locations" },
       },
       legend: { enabled: false },
       plotOptions: {

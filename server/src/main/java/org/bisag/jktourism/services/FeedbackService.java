@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.coyote.BadRequestException;
 import org.bisag.jktourism.crypto.Crypto;
 import org.bisag.jktourism.models.Destinations;
 import org.bisag.jktourism.models.Feedback;
@@ -70,6 +71,10 @@ public class FeedbackService {
 
                 Destinations destination = destinationsRepository.findByUrlValue(json.get("location").asText());
 
+                if (destination == null){
+                    throw new BadRequestException("Location not found.");
+                }
+
                 feedback.setDestination(destination);
 
                 feedback.setImage(fileDir + File.separator + fileName);
@@ -79,7 +84,7 @@ public class FeedbackService {
                 throw new IllegalArgumentException("Error saving image");
             }
         } catch (Exception e) {
-            throw new Exception("Failed to save feedback");
+            throw new Exception("Invalid data.");
         }
     }
 

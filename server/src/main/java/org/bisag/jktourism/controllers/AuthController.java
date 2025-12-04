@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import org.bisag.jktourism.exceptions.BadRequestException;
 import org.bisag.jktourism.models.ERole;
 import org.bisag.jktourism.models.RefreshToken;
 import org.bisag.jktourism.models.RegOTP;
@@ -408,10 +409,14 @@ public class AuthController {
 	@PostMapping("/send-otp")
 	public ResponseEntity<String> sendOTP(@RequestBody String req) throws Exception {
 		try {
-			// Decrypt and deserialize the request
 			JsonNode json = Json.deserialize(JsonNode.class, req);
 			String username = json.has("username") ? json.get("username").asText()  : "";
+
+			if(username.isBlank()){
+				throw new BadRequestException("Username is empty.");
+			}
 			int otp = OtpUtil.generateOTP();
+			redisService.setValue("otp:" + username, String.valueOf(otp), 3, TimeUnit.MINUTES);
 			userService.sendOtp(username, otp);
 			return ResponseEntity.ok(Json.serialize("OTP sent successfully."));
 		} catch (Exception e) {
