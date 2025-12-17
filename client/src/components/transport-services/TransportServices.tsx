@@ -24,18 +24,31 @@ import FooterLogos from "@/components/footer/FooterLogos";
 import { d, e } from "../utils/crypto";
 import axiosInstance from "@/axios/axios";
 import DocumentTitle from "../DocumentTitle";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
-type destination = {
-    id: number;
+export interface TransportServiceRow {
+    uuid: string;
     name: string;
-    properitorName: string;
-    district: string;
     contact: string;
-};
+    email: string;
+    location: string;
+    district: string;
+    registrationDetail: string;
+}
+
+export interface Vehicle {
+    uuid: string;
+    vehicleNumber: string;
+    vehicleType: string;
+    capacity: number;
+    rate: string;
+}
+
 
 
 const TransportServices = () => {
-    const [data, setData] = useState<destination[]>([]);
+    const [data, setData] = useState<TransportServiceRow[]>([]);
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
@@ -48,6 +61,32 @@ const TransportServices = () => {
     const [sorting, setSorting] = useState<SortingState>([
         { id: "name", desc: false },
     ]);
+
+    const [open, setOpen] = useState(false);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [details, setDetails] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+
+
+    const openDetailsModal = async (row: TransportServiceRow) => {
+        setOpen(true);
+        setSelectedId(row.uuid);
+        setLoading(true);
+        setDetails(null);
+
+        try {
+            const res = await axiosInstance.get(`/api/transport-service/${row.uuid}`);
+            const data = JSON.parse(await d(res.data));
+            setDetails(data);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to load details");
+            setOpen(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const fetchTransportServices = async () => {
         const params = {
@@ -103,9 +142,8 @@ const TransportServices = () => {
         fetchTransportServices();
     }, [pageIndex, pageSize, sorting, search, state, district]);
 
-    const columns: ColumnDef<destination>[] = [
+    const columns: ColumnDef<TransportServiceRow>[] = [
         {
-            // accessorKey: "id",
             header: "S.No.",
             cell: ({ row }) => row.index + 1 + pageIndex * pageSize,
         },
@@ -145,17 +183,25 @@ const TransportServices = () => {
         {
             accessorKey: "email",
             header: "Email ID(s)",
+            cell: ({ row }) => (
+                <a
+                    href={`mailto:${row.original.email}`}
+                    className="text-blue-600 hover:underline"
+                >
+                    {row.original.email}
+                </a>
+            ),
             meta: {
                 className: "whitespace-normal break-words",
             },
         },
-        {
-            accessorKey: "registrationDetail",
-            header: "Registration Details",
-            meta: {
-                className: "whitespace-normal break-words",
-            },
-        },
+        // {
+        //     accessorKey: "registrationDetail",
+        //     header: "Registration Details",
+        //     meta: {
+        //         className: "whitespace-normal break-words",
+        //     },
+        // },
         {
             accessorKey: "location",
             header: "Location",
@@ -167,11 +213,24 @@ const TransportServices = () => {
             accessorKey: "district",
             header: "District",
         },
+        {
+            id: "actions",
+            header: "Details",
+            cell: ({ row }) => (
+                <Button
+                    onClick={() => openDetailsModal(row.original)}
+                    className="cursor-pointer bg-blue-600 hover:bg-blue-700"
+                >
+                    View
+                </Button>
+            ),
+        }
+
     ];
 
     return (
         <>
-            <DocumentTitle title="Travel Agent" />
+            <DocumentTitle title="Transport Services" />
             <div className={clsx(scss.travelag_div)}>
                 <div className={scss.banner}>
                     <img
@@ -182,7 +241,7 @@ const TransportServices = () => {
                             "w-full max-h-screen object-cover"
                         )}
                     />
-                    <h2 className="text-shadow-2xs">Explore Registered Travel agent</h2>
+                    <h2 className="text-shadow-2xs">Transport Services</h2>
                 </div>
                 <div className={clsx(scss.travel_dropdown, scss.travelcontainer, "container")}>
                     <Select
@@ -241,10 +300,81 @@ const TransportServices = () => {
                         setSorting={setSorting}
                     />
                 </div>
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogContent className=" !max-w-4xl max-h-[calc(100vh-10rem)] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Transport Service Details</DialogTitle>
+                        </DialogHeader>
+
+                        {loading && (
+                            <div className="py-6 text-center">Loading details...</div>
+                        )}
+
+                        {!loading && details && (
+                            <div className="space-y-6">
+
+                                {/* ================= Transport Service Info ================= */}
+                                <div className="rounded-lg border p-4">
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                        <Info label="Name" value={details.name} />
+                                        <Info label="Phone" value={details.contact} />
+                                        <Info label="Email" value={details.email} />
+                                        <Info label="District" value={details.district} />
+                                        <Info label="Location" value={details.location} />
+                                        <Info label="Registration" value={details.registrationDetail} />
+                                    </div>
+                                </div>
+
+                                {/* ================= Vehicles ================= */}
+                                <div className="rounded-lg border p-4">
+                                    <h3 className="text-base font-semibold mb-3">
+                                        Vehicles ({details.vehicles.length})
+                                    </h3>
+
+                                    {details.vehicles.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground">
+                                            No vehicles available
+                                        </p>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {details.vehicles.map((v: Vehicle) => (
+                                                <div
+                                                    key={v.uuid}
+                                                    className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-md border p-3 text-sm"
+                                                >
+                                                    <Info label="Vehicle No" value={v.vehicleNumber || "-"} />
+                                                    <Info label="Type" value={v.vehicleType} />
+                                                    <Info label="Capacity" value={v.capacity?.toString()} />
+                                                    <Info label="Rate" value={`₹ ${v.rate}`} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                    </DialogContent>
+                </Dialog>
+
+
                 <FooterLogos />
             </div>
         </>
     );
 }
+
+type InfoProps = {
+    label: string;
+    value?: string;
+};
+
+const Info: React.FC<InfoProps> = ({ label, value }) => (
+    <div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="font-medium">{value || "-"}</p>
+    </div>
+);
 
 export default TransportServices

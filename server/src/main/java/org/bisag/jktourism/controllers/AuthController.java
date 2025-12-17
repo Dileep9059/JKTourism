@@ -4,10 +4,11 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -23,6 +24,7 @@ import org.bisag.jktourism.models.RefreshToken;
 import org.bisag.jktourism.models.RegOTP;
 import org.bisag.jktourism.models.Role;
 import org.bisag.jktourism.models.TransportService;
+import org.bisag.jktourism.models.TransportServiceVehicle;
 import org.bisag.jktourism.models.User;
 import org.bisag.jktourism.models.Visitors;
 import org.bisag.jktourism.payload.request.LoginRequest;
@@ -31,6 +33,7 @@ import org.bisag.jktourism.payload.response.UserInfoResponse;
 import org.bisag.jktourism.repository.RegOtpRepository;
 import org.bisag.jktourism.repository.RoleRepository;
 import org.bisag.jktourism.repository.TransportServiceRepository;
+import org.bisag.jktourism.repository.TransportServiceVehicleRepository;
 import org.bisag.jktourism.repository.UserRepository;
 import org.bisag.jktourism.repository.VisitorRepository;
 import org.bisag.jktourism.security.OtpAuthenticationToken;
@@ -107,6 +110,7 @@ public class AuthController {
 
 	private final UserLoginService userLoginService;
 	private final TransportServiceRepository transportServiceRepository;
+	private final TransportServiceVehicleRepository transportServiceVehicleRepository;
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody String encryptedRequest) throws Exception {
@@ -528,30 +532,54 @@ public class AuthController {
 	@GetMapping("/add-transport-service")
 	public ResponseEntity<?> getMethodName() throws Exception {
 		try {
-			TransportService ts = new TransportService();
-			ts.setContact("7006419595, 7006600848");
-			ts.setEmail("feroz8019@gmail.com");
-			ts.setName("M/s Afson Travels");
-			ts.setDistrict("Srinagar");
-			ts.setState("Kashmir");
-			ts.setLocation("Sathu Bala Barbar Shah Srinagar Kashmir");
-			ts.setRegistrationDetail("""
-					JKEA00003319
-					(Issued by Department of Tourism Jammu
-					and Kashmir)
+			// TransportService ts = new TransportService();
+			// ts.setContact("7006419595, 7006600848");
+			// ts.setEmail("feroz8019@gmail.com");
+			// ts.setName("M/s Afson Travels");
+			// ts.setDistrict("Srinagar");
+			// ts.setState("Kashmir");
+			// ts.setLocation("Sathu Bala Barbar Shah Srinagar Kashmir");
+			// ts.setRegistrationDetail("""
+			// JKEA00003319
+			// (Issued by Department of Tourism Jammu
+			// and Kashmir)
 
-					Indian Association of Travel & Tourism
-					Experts (IATTE) membership IATTE/20
-					21/2617
-					(Validity till 31st December-2027)
-						""");
+			// Indian Association of Travel & Tourism
+			// Experts (IATTE) membership IATTE/20
+			// 21/2617
+			// (Validity till 31st December-2027)
+			// """);
 
-			transportServiceRepository.save(ts);
+			// transportServiceRepository.save(ts);
+			List<TransportServiceVehicle> tsList = new ArrayList<>();
 
-			return ResponseEntity.ok("");
+			TransportService ts = transportServiceRepository.findByUuid("1bafd29b-5786-4bb0-b43a-2fc7a2ac25b2").orElse(null);
+
+			tsList.add(createVehicle("Etios / Desire / Amaze", "2000.00", ts));
+			tsList.add(createVehicle("Tavera / Ertiga", "2300.00", ts));
+			tsList.add(createVehicle("Innova", "3000.00", ts));
+			tsList.add(createVehicle("Innova Crysta", "3500.00", ts));
+			tsList.add(createVehicle("Tempo Traveller 13 S", "4000.00", ts));
+			tsList.add(createVehicle("Tempo Traveller 17 S", "4500.00", ts));
+			tsList.add(createVehicle("Tempo Traveller 20 S", "5500.00", ts));
+			tsList.add(createVehicle("Urbaina", "6000.00", ts));
+			tsList.add(createVehicle("AC Couch 27 S", "7000.00", ts));
+			tsList.add(createVehicle("AC Couch 35 S", "9000.00", ts));
+
+			transportServiceVehicleRepository.saveAll(tsList);
+
+			return ResponseEntity.ok("okay");
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
+	}
+
+	private TransportServiceVehicle createVehicle(String type, String rate, TransportService ts) {
+		TransportServiceVehicle tsv = new TransportServiceVehicle();
+		tsv.setVehicleType(type);
+		tsv.setRate(rate);
+		tsv.setTransportService(ts);
+		return tsv;
 	}
 
 }

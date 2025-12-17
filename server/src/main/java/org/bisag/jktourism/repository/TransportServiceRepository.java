@@ -1,6 +1,7 @@
 package org.bisag.jktourism.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.bisag.jktourism.models.TransportService;
 import org.springframework.data.domain.Page;
@@ -30,4 +31,13 @@ public interface TransportServiceRepository extends JpaRepository<TransportServi
             @Param("state") String state,
             @Param("district") String district,
             Pageable pageable);
+
+    Optional<TransportService> findByUuid(String uuid);
+
+    @Query("""
+                SELECT ts FROM TransportService ts
+                LEFT JOIN FETCH ts.vehicles
+                WHERE ts.uuid = :uuid
+            """)
+    Optional<TransportService> findByUuidWithVehicles(@Param("uuid") String uuid);
 }

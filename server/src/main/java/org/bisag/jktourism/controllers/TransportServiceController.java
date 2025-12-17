@@ -8,6 +8,8 @@ import org.bisag.jktourism.utils.Json;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,9 +59,20 @@ public class TransportServiceController {
             Sort sort = orders.isEmpty() ? Sort.by("name").ascending() : Sort.by(orders);
 
             return ResponseEntity.ok()
-                    .body(Json.serialize(transportServicesService.getGuides(page, size, sort, search, state, district)));
+                    .body(Json
+                            .serialize(transportServicesService.getTransportServices(page, size, sort, search, state, district)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error getting tour guides: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<?> getTourGuide(@PathVariable String uuid) {
+        try {
+            return ResponseEntity.ok().body(Json
+                    .serialize(transportServicesService.getTransportServiceDetails(uuid)));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

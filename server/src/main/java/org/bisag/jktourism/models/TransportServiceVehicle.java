@@ -32,6 +32,7 @@ public class TransportServiceVehicle {
     private String vehicleNumber;
     private String vehicleType;
     private Integer capacity;
+    private String rate;
 
     @Column(nullable = false, unique = true, updatable = false)
     private String uuid;
