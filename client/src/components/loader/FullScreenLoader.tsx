@@ -7,7 +7,7 @@ const FullScreenLoader = () => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-white">
         <div className="relative flex h-28 w-28 items-center justify-center">
           <div className="absolute h-full w-full rounded-full border-4 border-sky-300 animate-ping"></div>
 

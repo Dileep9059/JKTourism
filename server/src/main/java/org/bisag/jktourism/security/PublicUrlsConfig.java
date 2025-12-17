@@ -28,6 +28,7 @@ public class PublicUrlsConfig {
                 "/api/feedback/get-public-feedbacks",
                 "/api/common/**",
                 "/api/houseboat/**",
-                "/api/chatbot/**");
+                "/api/chatbot/**",
+                "/api/transport-service/**");
     }
 }

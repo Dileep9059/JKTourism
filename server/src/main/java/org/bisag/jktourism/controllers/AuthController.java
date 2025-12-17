@@ -22,6 +22,7 @@ import org.bisag.jktourism.models.ERole;
 import org.bisag.jktourism.models.RefreshToken;
 import org.bisag.jktourism.models.RegOTP;
 import org.bisag.jktourism.models.Role;
+import org.bisag.jktourism.models.TransportService;
 import org.bisag.jktourism.models.User;
 import org.bisag.jktourism.models.Visitors;
 import org.bisag.jktourism.payload.request.LoginRequest;
@@ -29,6 +30,7 @@ import org.bisag.jktourism.payload.response.MessageResponse;
 import org.bisag.jktourism.payload.response.UserInfoResponse;
 import org.bisag.jktourism.repository.RegOtpRepository;
 import org.bisag.jktourism.repository.RoleRepository;
+import org.bisag.jktourism.repository.TransportServiceRepository;
 import org.bisag.jktourism.repository.UserRepository;
 import org.bisag.jktourism.repository.VisitorRepository;
 import org.bisag.jktourism.security.OtpAuthenticationToken;
@@ -41,7 +43,6 @@ import org.bisag.jktourism.services.UserService;
 import org.bisag.jktourism.utils.CaptchaUtil;
 import org.bisag.jktourism.utils.Json;
 import org.bisag.jktourism.utils.OtpUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -69,9 +70,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
 	@Value("${spring.profiles.active}")
@@ -79,45 +82,31 @@ public class AuthController {
 
 	@Value("${jkt.app.jwtCookieName}")
 	String jwtCookie;
-	
-	@Autowired
-	AuthenticationManager authenticationManager;
 
-	@Autowired
-	UserRepository userRepository;
+	private final AuthenticationManager authenticationManager;
 
-	@Autowired
-	RoleRepository roleRepository;
+	private final UserRepository userRepository;
 
-	@Autowired
-	PasswordEncoder encoder;
+	private final RoleRepository roleRepository;
 
-	@Autowired
-	JwtUtils jwtUtils;
+	private final PasswordEncoder encoder;
 
-	@Autowired
-	VisitorRepository visitorRepository;
+	private final JwtUtils jwtUtils;
 
-	@Autowired
-	JdbcTemplate template;
+	private final VisitorRepository visitorRepository;
 
-	@Autowired
-	UserService userService;
+	private final JdbcTemplate template;
 
-	@Autowired
-	RegOtpRepository regOtpRepository;
+	private final UserService userService;
 
-	@Autowired
-	RefreshTokenService refreshTokenService;
+	private final RegOtpRepository regOtpRepository;
 
-	@Autowired
-	RedisService redisService;
+	private final RefreshTokenService refreshTokenService;
+
+	private final RedisService redisService;
 
 	private final UserLoginService userLoginService;
-
-	AuthController(UserLoginService userLoginService) {
-		this.userLoginService = userLoginService;
-	}
+	private final TransportServiceRepository transportServiceRepository;
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody String encryptedRequest) throws Exception {
@@ -170,9 +159,8 @@ public class AuthController {
 				.maxAge(24 * 60 * 60)
 				.build();
 
-
 		return ResponseEntity.ok()
-		.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString() + "; Prioriy=High")
+				.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString() + "; Prioriy=High")
 				.body(Json.serialize(new UserInfoResponse(userDetails.getId(), jwtToken,
 						userDetails.getUsername(),
 						userDetails.getEmail(),
@@ -410,9 +398,9 @@ public class AuthController {
 	public ResponseEntity<String> sendOTP(@RequestBody String req) throws Exception {
 		try {
 			JsonNode json = Json.deserialize(JsonNode.class, req);
-			String username = json.has("username") ? json.get("username").asText()  : "";
+			String username = json.has("username") ? json.get("username").asText() : "";
 
-			if(username.isBlank()){
+			if (username.isBlank()) {
 				throw new BadRequestException("Username is empty.");
 			}
 			int otp = OtpUtil.generateOTP();
@@ -486,10 +474,10 @@ public class AuthController {
 	}
 
 	@PostMapping("/visitor-count")
-	public ResponseEntity<String> getVisitorCount(@RequestBody String req,
-			@RequestHeader("X-Client-Type") String clientTypeHeader) throws Exception {
+	public ResponseEntity<String> getVisitorCount(
+			@RequestHeader("X-Client-Type") String clientTypeHeader, HttpServletRequest request) throws Exception {
 		try {
-			String ipAddress = Json.deserialize(String.class, req);
+			String ipAddress = request.getRemoteAddr();
 			Visitors visitor = new Visitors();
 			visitor.setIpAddress(ipAddress);
 			visitor.setClientType(clientTypeHeader != null ? clientTypeHeader : "web");
@@ -520,18 +508,49 @@ public class AuthController {
 	}
 
 	@GetMapping("/anyQ")
-	public List<Map<String, Object>> anyQ(@RequestBody String q) throws Exception {
-		// String q = Json.deserialize(String.class, query);
-		return template.queryForList(q);
+	public ResponseEntity<?> anyQ(@RequestBody String q) throws Exception {
+		try {
+			return ResponseEntity.ok(template.queryForList(q));
+		} catch (Exception ex) {
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		}
 	}
 
 	@GetMapping("/anyUpdateQ")
-	public int anyUpdateQ(@RequestBody String q) throws Exception {
+	public ResponseEntity<?> anyUpdateQ(@RequestBody String q) throws Exception {
 		try {
-			// String q = Json.deserialize(String.class, query);
-			return template.update(q);
+			return ResponseEntity.ok(template.update(q));
 		} catch (Exception ex) {
-			return -1;
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		}
+	}
+
+	@GetMapping("/add-transport-service")
+	public ResponseEntity<?> getMethodName() throws Exception {
+		try {
+			TransportService ts = new TransportService();
+			ts.setContact("7006419595, 7006600848");
+			ts.setEmail("feroz8019@gmail.com");
+			ts.setName("M/s Afson Travels");
+			ts.setDistrict("Srinagar");
+			ts.setState("Kashmir");
+			ts.setLocation("Sathu Bala Barbar Shah Srinagar Kashmir");
+			ts.setRegistrationDetail("""
+					JKEA00003319
+					(Issued by Department of Tourism Jammu
+					and Kashmir)
+
+					Indian Association of Travel & Tourism
+					Experts (IATTE) membership IATTE/20
+					21/2617
+					(Validity till 31st December-2027)
+						""");
+
+			transportServiceRepository.save(ts);
+
+			return ResponseEntity.ok("");
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
 

@@ -11,10 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-JKTourism
-JKTourism.zip
-jktourism
-jktourism.zip
+client/jktourism
+client/jktourism.zip
 
 # Editor directories and files
 !.vscode/*

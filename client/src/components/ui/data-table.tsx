@@ -20,6 +20,7 @@ import React from "react";
 import { Input } from "./input";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableViewOptions } from "./data-table-view-columns";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -121,7 +122,10 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map(row => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className={cn(
+                      "align-top",
+                      cell.column.columnDef.meta?.className
+                    )}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

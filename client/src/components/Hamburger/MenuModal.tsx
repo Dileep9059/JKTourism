@@ -299,6 +299,7 @@ const menuColumns: MenuItem[] = [
       { title: "Registered Travel Guides", url: "/tour-guide" },
       { title: "Registered Home Stays", url: "/homestays" },
       { title: "Registered Houseboats", url: "/houseboats" },
+      { title: "Transport Services", url: "/transport-services" },
       {
         title: "How to Spend 3 days in J&K",
         url: "/plan-trip?days=3-days",

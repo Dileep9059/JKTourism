@@ -55,6 +55,7 @@ import ExperienceData from "./components/admin/experiences/ExperienceData";
 import AddExperience from "./components/admin/experiences/AddExperience";
 import AddShopping from "./components/admin/shopping/AddShopping";
 import ShoppingData from "./components/admin/shopping/ShoppingData";
+import TransportServices from "./components/transport-services/TransportServices";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -132,6 +133,7 @@ function App() {
               <Route path="/houseboats" element={<HouseBoat />} />
               <Route path="/tour-guide" element={<TourGuide />} />
               <Route path="/travel-agent" element={<TravelAgent />} />
+              <Route path="/transport-services" element={<TransportServices />} />
 
               <Route path="/shopping" element={<Shopping />} />
               <Route path="/shopping/:shoppingLocation" element={<ShoppingLocation />} />

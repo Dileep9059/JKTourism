@@ -56,11 +56,8 @@ const OuterFooter: React.FC = () => {
   useEffect(() => {
     async function getVisitorCount() {
       try {
-        const res = await fetch("/api/get-ip");
-        const { ip } = await res.json();
         const resp = await axiosInstance.post(
-          "/api/auth/visitor-count",
-          await e(JSON.stringify(ip))
+          "/api/auth/visitor-count"
         );
         if (resp?.status === 200) {
           const data = await d(resp?.data);
