@@ -4,6 +4,13 @@
   .banner {
     position: relative;
 
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
     h2 {
       position: absolute;
       top: 50%;
@@ -146,10 +153,12 @@
       width: 60px;
     }
   }
+
   .travelag_div {
     .traveltable {
       margin: 0rem auto;
     }
+
     .travel_dropdown {
       margin-top: 1rem !important;
 

@@ -44,6 +44,28 @@ if [[ $ARGS == *"client"* || $ARGS == *"both"* ]]; then
     npm run build
   fi
 
+  echo "📁 Checking for jktourism folder..."
+  BUILD_DIR="jktourism"   # your build output folder
+
+  if [[ -d "$BUILD_DIR" ]]; then
+    echo "📦 Creating zip: jktourism.zip"
+
+    # Remove old zip if exists
+    rm -f jktourism.zip
+
+    # Zip the whole build folder
+    # zip -r jktourism.zip "$BUILD_DIR"
+    powershell.exe -Command "Compress-Archive -Path '$BUILD_DIR' -DestinationPath 'jktourism.zip' -Force"
+
+    # Move zip to client root (optional)
+    # mv JammuMarathon.zip ../
+
+    echo "✅ Zip created at: client/jktourism.zip"
+  else
+    echo "❌ ERROR: jktourism folder not found after build!"
+    exit 1
+  fi
+
   cd ..
   echo "✅ Client build finished $([[ $ARGS == *"staging"* ]] && echo '(staging)' || echo '(prod)')"
 fi

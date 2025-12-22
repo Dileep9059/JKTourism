@@ -232,16 +232,16 @@ const TransportServices = () => {
         <>
             <DocumentTitle title="Transport Services" />
             <div className={clsx(scss.travelag_div)}>
-                <div className={scss.banner}>
+                <div className={clsx(scss.banner)}>
                     <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/travel-agent.jpg`}
+                        src={`${import.meta.env.VITE_BASE}assets/images/transport-services.jpg`}
                         alt="Banner"
                         className={clsx(
                             scss.banner_image,
-                            "w-full max-h-screen object-cover"
+                            "w-full max-h-screen object-cover "
                         )}
                     />
-                    <h2 className="text-shadow-2xs">Transport Services</h2>
+                    <h2 className="text-shadow-2xs z-2">Transport Services</h2>
                 </div>
                 <div className={clsx(scss.travel_dropdown, scss.travelcontainer, "container")}>
                     <Select
@@ -301,7 +301,7 @@ const TransportServices = () => {
                     />
                 </div>
                 <Dialog open={open} onOpenChange={setOpen}>
-                    <DialogContent className=" !max-w-4xl max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    <DialogContent className=" !max-w-4xl ">
                         <DialogHeader>
                             <DialogTitle>Transport Service Details</DialogTitle>
                         </DialogHeader>
@@ -311,7 +311,7 @@ const TransportServices = () => {
                         )}
 
                         {!loading && details && (
-                            <div className="space-y-6">
+                            <div className="space-y-6 max-h-[calc(100vh-10rem)] overflow-y-auto">
 
                                 {/* ================= Transport Service Info ================= */}
                                 <div className="rounded-lg border p-4">
