@@ -325,7 +325,9 @@ const menuColumns: MenuItem[] = [
   {
     title: "Where to Stay",
     icon: "/images/JKT15.gif",
-    items: [{ title: "JKTDC", url: "https://www.jktdc.co.in/" }],
+    items: [{ title: "JKTDC", url: "https://www.jktdc.co.in/" },
+      { title: "Book Hotel", url: "/hotel-search" }
+    ],
   },
   {
     title: "Shopping",

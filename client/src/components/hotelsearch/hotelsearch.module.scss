@@ -1,0 +1,82 @@
+.common_page {
+  .destination_title {
+    position: relative;
+
+    h2 {
+      font-size: 2rem;
+      text-align: center;
+      font-weight: 600;
+      color: #ff5033;
+      font-style: italic;
+      letter-spacing: 0.1rem;
+
+      @media (max-width: 768px) {
+        font-size: 1rem;
+      }
+
+      &:before {
+        width: 28px;
+        height: 5px;
+        display: block;
+        content: "";
+        position: absolute;
+        bottom: 16px;
+        left: 50%;
+        margin-left: -30px;
+        background-color: #ff5033;
+      }
+
+      &:after {
+        width: 100px;
+        height: 1px;
+        display: block;
+        content: "";
+        position: relative;
+        margin-top: 25px;
+        left: 50%;
+        margin-left: -67px;
+        background-color: #ff5033;
+        bottom: 18px;
+      }
+    }
+  }
+
+  .hotel_filter { min-height: 500px; position: relative;  
+    .filter_bg { position: absolute; left: 0; top: 0; height: 100%; width: 100%; 
+      img { height: 100%; width: 100%; object-fit: cover; }
+    }
+    .filter_wrapper {  padding: 3rem 1rem; transform: translateY(-50%); background: white; position: relative; z-index: 3; box-shadow: 0px 4px 10.8px 3px rgba(0, 0, 0, 0.25); border-radius: 6px; 
+      .custom_tab {
+        .tab_head { position: absolute; left: 50%; top: 0; transform: translate(-50%,-50%); 
+          button { font-size: 1rem; padding: 10px 16px; }
+          button[aria-selected='true'] { color: #ff5033; }
+        }
+      }
+
+      .custom_form { max-width: 80%; margin-inline: auto; display: flex; gap: 2rem; 
+        .form_block { flex-grow: 1; 
+          .input_block {
+           &>button { width: 100%; }
+            .age_body { background: white; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); }
+          }
+          .form_inner_block { position: relative;
+            &:not(:last-child) { margin-bottom: 2rem; 
+              &::after { position: absolute; content: ''; bottom: -1rem; left: 0; width: 100%; height: 1px; background: #676D9D; }
+            }
+          }
+        }
+      }
+
+      .search_btn { text-align: center; min-width: 150px; position: absolute; left: 50%; bottom: 0; transform: translate(-50%,50%); flex-shrink: 0; padding: 12px 20px; background: #26AE5D; color: white; font-size: 1rem; line-height: 1.2; display: flex; align-items: center; justify-content: space-between; gap: 6px; border-radius: 2rem; cursor: pointer;
+        span          { flex-grow: 1; text-align: center; font-weight: 600; }
+        .search_icon  { width: 24px; aspect-ratio: 1; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; 
+          svg { color: #26AE5D; max-width: 60%; }
+        }
+      }
+
+    }
+  }
+
+}
+
+

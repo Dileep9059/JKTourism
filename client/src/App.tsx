@@ -56,6 +56,8 @@ import AddExperience from "./components/admin/experiences/AddExperience";
 import AddShopping from "./components/admin/shopping/AddShopping";
 import ShoppingData from "./components/admin/shopping/ShoppingData";
 import TransportServices from "./components/transport-services/TransportServices";
+import Hotelsearch from "./components/hotelsearch/Hotelsearch";
+import Hotellist from "./components/hotellist/Hotellist";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -148,6 +150,8 @@ function App() {
               <Route path="/events/:id" element={<EventDetail />} />
 
               <Route path="/gallery" element={<Gallery />} />
+              <Route path="/hotel-search" element={<Hotelsearch />} />
+              <Route path="/hotel-list" element={<Hotellist />} />
             </Route>
 
             <Route element={<Sidebar />}>
