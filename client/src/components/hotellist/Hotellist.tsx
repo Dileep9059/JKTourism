@@ -1,18 +1,18 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState  } from 'react'
 import scss from './hotellist.module.scss';
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select" ;
 import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { format } from "date-fns";
-import { ArrowDown, Calendar as CalendarIcon, ChevronDown, ChevronUp, Minus, Plus, Search } from "lucide-react";
+import { ArrowDown, Calendar as CalendarIcon, ChevronDown, ChevronRight, ChevronUp, Clock, Coffee, Leaf, MapPin, Minus, Plus, Search, User } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -20,8 +20,19 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import clsx from 'clsx';
-import { FaMapMarkerAlt } from 'react-icons/fa';
-import { Input } from '../ui/input';
+import { FaChevronLeft, FaChevronRight, FaMapMarkerAlt } from 'react-icons/fa';
+import { Input } from '../ui/input'; 
+import { Swiper, SwiperSlide } from "swiper/react";
+import { FreeMode, Navigation } from "swiper/modules";
+
+  import { Splide, SplideSlide } from "@splidejs/react-splide";
+  import "@splidejs/react-splide/css";
+ 
+
+import "swiper/css";
+import "swiper/css/free-mode";
+import "swiper/css/navigation";
+// import required modules
 
 function Hotellist() {
    const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
@@ -53,7 +64,15 @@ function Hotellist() {
 
     // State for selected filters and expanded view
   const [selectedFilters, setSelectedFilters] = useState<number[]>([]);
-  const [showAll, setShowAll] = useState(false);
+  // State to track which list is expanded
+  const [expandedLists, setExpandedLists] = useState<Record<string, boolean>>({
+    suggested: false,
+    facility: false,
+    bedtype: false,
+    accomodation: false,
+    ratings: false,
+    // Add more lists as needed
+  });
 
   // Toggle filter selection
   const toggleFilter = (id: number) => {
@@ -63,9 +82,25 @@ function Hotellist() {
   };
 
   // Toggle show more/less
-  const toggleShowAll = () => {
-    setShowAll(!showAll);
-  };
+ // Toggle the expanded state for a specific list
+ const toggleList = (listName: string) => {
+  setExpandedLists((prev) => ({
+    ...prev,
+    [listName]: !prev[listName],
+  }));
+};
+ 
+const mainSliderRef = useRef<Splide>(null);
+const thumbSliderRef = useRef<Splide>(null);
+
+useEffect(() => {
+  if (mainSliderRef.current && thumbSliderRef.current) {
+    // Sync the sliders
+    mainSliderRef.current.sync(thumbSliderRef.current.splide);
+  }
+}, []);
+
+const swiperRef = useRef(null);
 
   return (
     <>
@@ -270,99 +305,607 @@ function Hotellist() {
                 </div>
             </div>
           </section>
-          <section className={scss.hotel_list}>
+          <section className={scss.hotel_list}> 
               <div className={scss.list_wrapper}>
-                <div className={scss.list_filter}>
-                    <div className={scss.map_preview}>
-                      <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/map-preview.svg`}
-                        alt="image" 
-                      />
-                      <Link role="button" className={scss.explore_btn} to={""}><span>EXPLORE ON MAP</span> <div className={scss.map_icon}><FaMapMarkerAlt /></div></Link>
-                    </div>
-                    <div className={scss.hotelname_block}>
-                        <label htmlFor="">Search by hotel name</label>
-                        <div className={scss.input_field}>
-                          <Search />
-                          <Input type="text" placeholder="eg. The Srinagar Hotel" />
-                        </div>
-                    </div>
-                    <div className={scss.facility_list}>
-                      <ul>
-                        <li> 
-                            <Checkbox
-                              id="filter-1"
-                              checked={selectedFilters.includes(1)}
-                              onCheckedChange={() => toggleFilter(1)}
-                            />
-                            <label
-                              htmlFor="filter-1"
-                              className=""
-                            >
-                              Breakfast included
-                            </label> 
-                        </li>
-                        <li> 
-                            <Checkbox
-                              id="filter-1"
-                              checked={selectedFilters.includes(2)}
-                              onCheckedChange={() => toggleFilter(2)}
-                            />
-                            <label
-                              htmlFor="filter-1"
-                              className=""
-                            >
-                              All-inclusive
-                            </label> 
-                        </li>
-                        <li> 
-                            <Checkbox
-                              id="filter-1"
-                              checked={selectedFilters.includes(3)}
-                              onCheckedChange={() => toggleFilter(3)}
-                            />
-                            <label
-                              htmlFor="filter-1"
-                              className=""
-                            >
-                              Free Cancellation
-                            </label> 
-                        </li>
-                        {showAll && (
-                        <>
+                <div style={{display: 'flex',width:'100%',gap: '1rem' }}>
+                  <div className={scss.list_filter}>
+                      <div className={scss.map_preview}>
+                        <img
+                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/map-preview.svg`}
+                          alt="image" 
+                        />
+                        <Link role="button" className={scss.explore_btn} to={""}><span>EXPLORE ON MAP</span> <div className={scss.map_icon}><FaMapMarkerAlt /></div></Link>
+                      </div>
+                      <div className={scss.hotelname_block}>
+                          <label htmlFor="">Search by hotel name</label>
+                          <div className={scss.input_field}>
+                            <Search />
+                            <Input type="text" placeholder="eg. The Srinagar Hotel" />
+                          </div>
+                      </div>
+                      <div className={scss.facility_list}>
+                        <h3 className={scss.list_title}>Suggested For You</h3>
+                        <ul>
                           <li> 
-                            <Checkbox
-                              id="filter-1"
-                              checked={selectedFilters.includes(4)}
-                              onCheckedChange={() => toggleFilter(4)}
-                            />
-                            <label
-                              htmlFor="filter-1"
-                              className=""
-                            >
-                              100% refund
-                            </label> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(1)}
+                                onCheckedChange={() => toggleFilter(1)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Breakfast included
+                              </label> 
                           </li>
-                        </>
-          )}
-                      </ul>
-                      <button
-        onClick={toggleShowAll}
-        className="flex items-center text-sm text-blue-600 hover:underline"
-      >
-        {showAll ? (
-          <>
-            <ChevronUp className="mr-1 h-3 w-3" /> Show less
-          </>
-        ) : (
-          <>
-            <ChevronDown className="mr-1 h-3 w-3" /> Show more
-          </>
-        )}
-      </button>
-                    </div>
+                          <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(2)}
+                                onCheckedChange={() => toggleFilter(2)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                All-inclusive
+                              </label> 
+                          </li>
+                          <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(3)}
+                                onCheckedChange={() => toggleFilter(3)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Free Cancellation
+                              </label> 
+                          </li>
+                          {expandedLists.suggested && (
+                          <>
+                            <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(4)}
+                                onCheckedChange={() => toggleFilter(4)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Extra 1
+                              </label> 
+                            </li>
+                            <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(5)}
+                                onCheckedChange={() => toggleFilter(5)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Extra 2
+                              </label> 
+                            </li>
+                            <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(6)}
+                                onCheckedChange={() => toggleFilter(6)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Extra 3
+                              </label> 
+                            </li>
+                          </>
+            )}
+                        </ul>
+                        <button onClick={() => toggleList("suggested")} className="flex items-center text-sm text-blue-600 hover:underline" >
+                          {expandedLists.suggested ? (
+                            <>
+                              <ChevronUp className="mr-1 h-3 w-3" /> Show less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="mr-1 h-3 w-3" /> Show more
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className={scss.facility_list}>
+                        <h3 className={scss.list_title}>Room Facilities</h3>
+                        <ul>
+                          <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(1)}
+                                onCheckedChange={() => toggleFilter(1)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Baby Bed
+                              </label> 
+                          </li>
+                          <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(2)}
+                                onCheckedChange={() => toggleFilter(2)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Bathtub
+                              </label> 
+                          </li> 
+                          {expandedLists.facility && (
+                          <>
+                            <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(4)}
+                                onCheckedChange={() => toggleFilter(4)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Swimming Pool
+                              </label> 
+                            </li>
+                            <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(5)}
+                                onCheckedChange={() => toggleFilter(5)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Internet access
+                              </label> 
+                            </li>
+                            <li> 
+                              <Checkbox
+                                id="filter-1"
+                                checked={selectedFilters.includes(6)}
+                                onCheckedChange={() => toggleFilter(6)}
+                              />
+                              <label
+                                htmlFor="filter-1"
+                                className=""
+                              >
+                                Heating
+                              </label> 
+                            </li>
+                          </>
+            )}
+                        </ul>
+                        <button onClick={() => toggleList("facility")} className="flex items-center text-sm text-blue-600 hover:underline" >
+                          {expandedLists.facility ? (
+                            <>
+                              <ChevronUp className="mr-1 h-3 w-3" /> Show less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="mr-1 h-3 w-3" /> Show more
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className={scss.facility_list}>
+                        <h3 className={scss.list_title}>Bed Type</h3>
+                        <RadioGroup >
+                        <ul>
+                          <li> 
+                              <RadioGroupItem value="two single" id="bed-two" />
+                              <label
+                                htmlFor="bed-two"
+                                className=""
+                              >
+                                Two Single Beds
+                              </label> 
+                          </li>
+                          <li> 
+                              <RadioGroupItem value="kind beds" id="bed-king" />
+                              <label
+                                htmlFor="bed-king"
+                                className=""
+                              >
+                                King Beds
+                              </label> 
+                          </li> 
+                          <li> 
+                          <RadioGroupItem value="baby cots" id="babay-cots" />
+                              <label
+                                htmlFor="baby-cots"
+                                className=""
+                              >
+                                Baby Cots
+                              </label> 
+                          </li> 
+                          <li> 
+                              <RadioGroupItem value="double bed" id="double-bed" />
+                              <label
+                                htmlFor="double-bed"
+                                className=""
+                              >
+                                Double Bed 
+                              </label> 
+                          </li> 
+                          <li> 
+                              <RadioGroupItem value="single bed" id="single-bed" />
+                              <label
+                                htmlFor="single-bed"
+                                className=""
+                              >
+                                Single Bed 
+                              </label> 
+                          </li> 
+                          {expandedLists.bedtype && (
+                          <>
+                            <li> 
+                              <RadioGroupItem value="queen" id="queen" />
+                              <label
+                                htmlFor="queen"
+                                className=""
+                              >
+                                Queen
+                              </label> 
+                            </li>
+                            <li> 
+                              <RadioGroupItem value="bannk bed" id="bunk-bed" />
+                              <label
+                                htmlFor="bunk-bed"
+                                className=""
+                              >
+                                Bunk bed
+                              </label> 
+                            </li> 
+                          </>
+            )}
+                        </ul>
+                        </RadioGroup>
+                        <button onClick={() => toggleList("bedtype")}  className="flex items-center text-sm text-blue-600 hover:underline" >
+                          {expandedLists.bedtype ? (
+                            <>
+                              <ChevronUp className="mr-1 h-3 w-3" /> Show less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="mr-1 h-3 w-3" /> Show more
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className={scss.facility_list}>
+                        <h3 className={scss.list_title}>Accommodation classification </h3>
+                        <RadioGroup >
+                        <ul>
+                          <li> 
+                              <RadioGroupItem value="five star" id="five-star" />
+                              <label
+                                htmlFor="five-star"
+                                className=""
+                              >
+                                5 Stars
+                              </label> 
+                          </li>
+                          <li> 
+                              <RadioGroupItem value="four star" id="four-star" />
+                              <label
+                                htmlFor="four-star"
+                                className=""
+                              >
+                                4 Stars
+                              </label> 
+                          </li> 
+                          <li> 
+                          <RadioGroupItem value="three star" id="three-star" />
+                              <label
+                                htmlFor="three-star"
+                                className=""
+                              >
+                                3 Stars
+                              </label> 
+                          </li>   
+                          {expandedLists.accomodation && (
+                          <>
+                            <li> 
+                              <RadioGroupItem value="two star" id="two-star" />
+                              <label
+                                htmlFor="two-star"
+                                className=""
+                              >
+                                2 Stars
+                              </label> 
+                            </li>
+                            <li> 
+                              <RadioGroupItem value="one star" id="one-star" />
+                              <label
+                                htmlFor="one-star"
+                                className=""
+                              >
+                                1 Star
+                              </label> 
+                            </li> 
+                          </>
+            )}
+                        </ul>
+                        </RadioGroup>
+                        <button onClick={() => toggleList("accomodation")} className="flex items-center text-sm text-blue-600 hover:underline" >
+                          {expandedLists.accomodation ? (
+                            <>
+                              <ChevronUp className="mr-1 h-3 w-3" /> Show less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="mr-1 h-3 w-3" /> Show more
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className={scss.facility_list}>
+                        <h3 className={scss.list_title}>Distance from the centre </h3>
+                        <RadioGroup >
+                        <ul>
+                          <li> 
+                              <RadioGroupItem value="one km" id="one-km" />
+                              <label
+                                htmlFor="one-km"
+                                className=""
+                              >
+                              Less Than 1 Km
+                              </label> 
+                          </li>
+                          <li> 
+                              <RadioGroupItem value="five-km" id="five-km" />
+                              <label
+                                htmlFor="five-km"
+                                className=""
+                              >
+                                Less Than 5 Km
+                              </label> 
+                          </li> 
+                          <li> 
+                          <RadioGroupItem value="fifiteen km" id="fifteen-km" />
+                              <label
+                                htmlFor="fifteen-km"
+                                className=""
+                              >
+                              Less Than 15 Km
+                              </label> 
+                          </li>   
+                          {expandedLists.ratings && (
+                          <>
+                            <li> 
+                              <RadioGroupItem value="twenty km" id="twenty-km" />
+                              <label
+                                htmlFor="twenty-km"
+                                className=""
+                              >
+                                Less Than 20 Km
+                              </label> 
+                            </li> 
+                          </>
+                          )}
+                        </ul>
+                        </RadioGroup>
+                        <button onClick={() => toggleList("ratings")} className="flex items-center text-sm text-blue-600 hover:underline" >
+                          {expandedLists.ratings ? (
+                            <>
+                              <ChevronUp className="mr-1 h-3 w-3" /> Show less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="mr-1 h-3 w-3" /> Show more
+                            </>
+                          )}
+                        </button>
+                      </div>
+                  </div>
+                  <div className={scss.result_block}>
+                      <div className={clsx(scss.filter_slider ,"relative")}>
+                        <button
+                          onClick={() => swiperRef.current?.swiper.slidePrev()}
+                          className={clsx( scss.prev_btn,"swiper-button-prev rounded-full bg-white p-2 shadow-md")}
+                        >
+                          <FaChevronLeft />
+                        </button>
+                        <div className={scss.filter_slider_wrapper}> 
+                          <Swiper
+                            slidesPerView={3}
+                            spaceBetween={20}
+                            slidesPerGroup={1} 
+                            freeMode={true}
+                            navigation={true}
+                            modules={[FreeMode, Navigation]}
+                            navigation={{
+                              nextEl: ".swiper-button-next",
+                              prevEl: ".swiper-button-prev",
+                            }}
+                            className="mySwiper"
+                          >
+                            <SwiperSlide>
+                              <div className={scss.filter_btn}> 
+                                <input type="radio" id='popularity' name='filter' />
+                                <label htmlFor="popularity">Popularity</label>
+                              </div>
+                            </SwiperSlide> 
+                            <SwiperSlide>
+                              <div className={scss.filter_btn}> 
+                                <input type="radio" id='pricelth' name='filter' />
+                                <label htmlFor="pricelth">Price (Low to High)</label>
+                              </div>
+                            </SwiperSlide>
+                            <SwiperSlide>
+                              <div className={scss.filter_btn}> 
+                              <input type="radio" id='rating' name='filter' />
+                                <label htmlFor="rating">User Rating (Highest)</label>
+                              </div>
+                            </SwiperSlide>
+                            <SwiperSlide>
+                              <div className={scss.filter_btn}> 
+                              <input type="radio" id='lp' name='filter' />
+                                <label htmlFor="lp">Lowest Price & Best Rated</label>
+                              </div>
+                            </SwiperSlide>
+                            <SwiperSlide>
+                              <div className={scss.filter_btn}> 
+                              <input type="radio" id='nearest' name='filter' />
+                                <label htmlFor="nearest">Nearest to -</label>
+                              </div>
+                            </SwiperSlide>
+                          </Swiper>
+                        </div>
+                        <button
+                          onClick={() => swiperRef.current?.swiper.slideNext()}
+                          className={clsx(scss.next_btn,"swiper-button-next rounded-full bg-white p-2 shadow-md")}
+                        >
+                          <FaChevronRight />
+                        </button>
+                      </div>
+                      <h4 className={scss.result_head}>Srinagar : 18 Results found lore</h4>
+                      <div className={scss.hotel_card_wrapper}>
+                        <div className={scss.hotel_card}>
+                          <div className={scss.gallery}>
+                            <div className={scss.main_slider}>
+                              <Splide
+                                ref={mainSliderRef}
+                                options={{
+                                  type: "loop",
+                                  perPage: 1,
+                                  arrows: false,
+                                  pagination: false, 
+                                }}
+                                aria-label="Main Slider"
+                              >
+                                {/* Main Slides */} 
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`}
+                                    alt="image" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide>
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.1.png`}
+                                    alt="image" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide>
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.2.png`}
+                                    alt="image" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide>
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.3.png`}
+                                    alt="image" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide> 
+                              </Splide>
+                            </div>
+                            {/* Thumbnail Slider */}
+                            <div className={scss.thumb_slider}>
+                              <Splide
+                                ref={thumbSliderRef}
+                                options={{
+                                  direction: "ttb",
+                                  height: "300px", 
+                                  rewind: true,
+                                  gap: "1rem",
+                                  pagination: false,
+                                  fixedWidth: 100,
+                                  fixedHeight: 70,
+                                  isNavigation: true,
+                                  updateOnMove: true,
+                                  cover: true,
+                                  focus: "center",
+                                  wheels: false,
+                                }}
+                                aria-label="Thumbnail Navigation"
+                              >
+                                {/* Thumbnail Slides */}  
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`}
+                                    alt="Thumbnail 2"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide>
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.1.png`}
+                                    alt="Thumbnail 2"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide>
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.2.png`}
+                                    alt="Thumbnail 3"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide>
+                                <SplideSlide>
+                                  <img
+                                    src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.3.png`}
+                                    alt="Thumbnail 4"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </SplideSlide> 
+                              </Splide>
+                            </div>
+                          </div>
+                          <div className={scss.card_content}>
+                            <div className={scss.card_head}>
+                              <h4 className={scss.hotel_name}>Hotel Name</h4>
+                              <ul className={scss.facility_list}>
+                                <li><MapPin /><span>Located In Srinagar, 500m Distance to pathan</span></li>
+                                <li><Coffee /> <span>Breakfast Included</span></li>
+                                <li><User /><span>1 Adult, 2 Children </span></li>
+                                <li><Clock /><span>4 Nights </span></li>
+                              </ul>
+                            </div>
+                            <div className={scss.card_footer}>
+                              <div className={scss.detail_block}>
+                                <p className='text-muted'>Experience Unique Opportunity </p>
+                                <p>Standard rooms </p>
+                                <div className={scss.review_detail}><h5>Very Good ,</h5><span>2.259 Reviews</span></div>
+                              </div>
+                              <div className={scss.price_block}>
+                                <h5>6800/-</h5>
+                                <p>Includes taxes and charges</p>
+                                <span className={scss.level_text}><Leaf /> trip Sustainable Level, 5</span>
+                                <Link role="button" className={scss.availability_link} to={"/hotel-detail"}><span>See Availability </span> <ChevronRight/></Link>
+                              </div>
+                            </div>
+                          </div>
+                        </div> 
+                        
+                      </div>
+                  </div>
                 </div>
-              </div>
+              </div> 
           </section>
       </div>
     </>
