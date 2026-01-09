@@ -149,8 +149,12 @@ function Hotelregister() {
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
                        <div className={scss.form_block}>
                           <div className={scss.input_block}>
-                              <label htmlFor="">Full Address</label>
-                              <Input type="text" placeholder="Enter Full Address" />
+                              <label htmlFor="address">Full Address</label> 
+                              <Textarea
+                                  placeholder="Enter Full Address"
+                                  id="address"  
+                                  className="min-h-[80px]"
+                                />
                           </div>
                           {/* error message place here  */}
                         </div> 
@@ -208,7 +212,7 @@ function Hotelregister() {
                           </div>
                           {/* error message place here  */}
                         </div> 
-                        <div className={scss.form_block}>
+                        <div className={clsx(scss.form_block,'col-span-2 sm:col-span-2 lg:col-span-2')}>
                           <div className={scss.inputblock_wrapper}> 
                             <div className={scss.input_block}>
                               <Checkbox id="owner" />
@@ -493,7 +497,7 @@ function Hotelregister() {
                 <TabsContent value="food" className={scss.custom_tabcontent}>
                 <div className={scss.form_details}>
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
-                        <div className={scss.form_block}>
+                        <div className={clsx(scss.form_block,'col-span-2 sm:col-span-2 lg:col-span-2')}>
                           <RadioGroup >
                           <label htmlFor="">In-house Restaurant Available?</label>
                           <div className={scss.inputblock_wrapper}>
@@ -509,7 +513,7 @@ function Hotelregister() {
                         </RadioGroup>
                           {/* error message place here  */}
                         </div>
-                        <div className={scss.form_block}>
+                        <div className={clsx(scss.form_block,'col-span-2 sm:col-span-2 lg:col-span-2')}>
                           <RadioGroup >
                           <label htmlFor="">Meal Plans Offered</label>
                           <div className={scss.inputblock_wrapper}>

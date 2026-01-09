@@ -60,11 +60,11 @@
       .tab_content_wrapper { background: white; border: 1px solid #C1C5E3; border-radius: 8px; padding: 1rem; flex-grow: 1; 
         .custom_tabcontent { display: flex; flex-direction: column; height: 100%;
           .form_details { flex-grow: 1; overflow: auto; 
-            .input_block {
-              .inputblock_wrapper { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; 
+           
+              .inputblock_wrapper { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; 
                 .input_block { display: flex; align-items: center; gap: 0.25rem; }
               }
-            }
+          
             
           }
           .btn_wrapper { background: white; display: flex; justify-content: end; }
