@@ -1,29 +1,23 @@
 import {
-  IconDatabasePlus,
   IconLayoutDashboard,
   IconMessage,
   IconNotification,
   IconSettings,
-  IconSubtask,
   IconTool,
   IconUserCog,
   IconUsers,
 } from '@tabler/icons-react'
-import { CalendarSync, ChartBarStacked, Command, HandPlatter, ImagePlus, ImageUp, MapPinHouse, MountainSnow, Flower, Soup, TentTree, WandSparkles, WavesLadder, MessageSquareQuote, ShoppingBag, ShoppingBasket, TruckElectric } from 'lucide-react'
+import { CalendarSync, ChartBarStacked, Command, HandPlatter, ImagePlus, ImageUp, MapPinHouse, MountainSnow, Flower, Soup, TentTree, WandSparkles, WavesLadder, MessageSquareQuote, ShoppingBag, ShoppingBasket, TruckElectric, Hotel } from 'lucide-react'
 import { type SidebarData } from '../types'
 import useAuth from '@/hooks/useAuth'
 import type { AuthType } from '@/context/AuthProvider'
-
-const ROLES = {
-  MASTER_ADMIN: "ROLE_MASTER_ADMIN",
-  SUPER_ADMIN: "ROLE_SUPER_ADMIN",
-  ADMIN: "ROLE_ADMIN"
-}
+import { ROLES } from '@/utils/constants'
 
 const roleDashboardMap: { [key: string]: string } = {
   [ROLES.MASTER_ADMIN]: '/masterAdmin',
   [ROLES.SUPER_ADMIN]: '/superAdmin',
-  [ROLES.ADMIN]: '/dashboard'
+  [ROLES.ADMIN]: '/dashboard',
+  [ROLES.HOTEL]: '/hotel/dashboard'
 }
 
 
@@ -41,6 +35,7 @@ export function getSidebarData(): SidebarData {
   const isMasterAdmin = hasRole(ROLES.MASTER_ADMIN)
   const isSuperAdmin = hasRole(ROLES.SUPER_ADMIN)
   const isAdmin = hasRole(ROLES.ADMIN)
+  const isHotel = hasRole(ROLES.HOTEL)
 
   const baseTeams = []
   if (isMasterAdmin) {
@@ -52,12 +47,14 @@ export function getSidebarData(): SidebarData {
   if (isAdmin) {
     baseTeams.push({ name: 'Admin', logo: Command, plan: 'Dashboard' })
   }
+  if (isHotel) {
+    baseTeams.push({ name: 'Hotel', logo: Hotel, plan: 'Dashboard' })
+  }
 
   // URLs based on roles
   const urls = {
     dashboard: dashboardUrl,
     users: `${dashboardUrl}/users`,
-    mutation: `${dashboardUrl}/mutation`,
     tasks: `${dashboardUrl}/tasks`,
     chats: `${dashboardUrl}/chats`,
   }
@@ -75,16 +72,6 @@ export function getSidebarData(): SidebarData {
         title: 'Create Users',
         url: urls.users,
         icon: IconUsers,
-      },
-      {
-        title: 'Mutation',
-        url: urls.mutation,
-        icon: IconDatabasePlus,
-      },
-      {
-        title: 'Tasks',
-        url: urls.tasks,
-        icon: IconSubtask,
       },
       {
         title: 'Chats',
@@ -166,7 +153,22 @@ export function getSidebarData(): SidebarData {
           ],
         },
       ]
+      : []),
+
+    ...(isHotel
+      ? [
+        {
+          title: 'Hotel',
+          icon: Hotel,
+          items: [
+            { title: 'Add Hotel', url: '/hotel/add', icon: ImagePlus },
+            { title: 'Published Hotels ', url: '/hotel', icon: Hotel },
+            { title: 'Upload Data', url: '/hotel/upload', icon: ImageUp },
+          ],
+        },
+      ]
       : [])
+
   ]
 
   return {

@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react'
 import type { To } from 'react-router-dom'
 
 interface User {
@@ -8,7 +9,7 @@ interface User {
 
 interface Team {
   name: string
-  logo: React.ElementType
+  logo: LucideIcon
   plan: string
 }
 

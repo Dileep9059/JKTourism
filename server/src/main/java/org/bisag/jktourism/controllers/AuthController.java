@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -23,8 +21,6 @@ import org.bisag.jktourism.models.ERole;
 import org.bisag.jktourism.models.RefreshToken;
 import org.bisag.jktourism.models.RegOTP;
 import org.bisag.jktourism.models.Role;
-import org.bisag.jktourism.models.TransportService;
-import org.bisag.jktourism.models.TransportServiceVehicle;
 import org.bisag.jktourism.models.User;
 import org.bisag.jktourism.models.Visitors;
 import org.bisag.jktourism.payload.request.LoginRequest;
@@ -32,8 +28,6 @@ import org.bisag.jktourism.payload.response.MessageResponse;
 import org.bisag.jktourism.payload.response.UserInfoResponse;
 import org.bisag.jktourism.repository.RegOtpRepository;
 import org.bisag.jktourism.repository.RoleRepository;
-import org.bisag.jktourism.repository.TransportServiceRepository;
-import org.bisag.jktourism.repository.TransportServiceVehicleRepository;
 import org.bisag.jktourism.repository.UserRepository;
 import org.bisag.jktourism.repository.VisitorRepository;
 import org.bisag.jktourism.security.OtpAuthenticationToken;
@@ -109,8 +103,6 @@ public class AuthController {
 	private final RedisService redisService;
 
 	private final UserLoginService userLoginService;
-	private final TransportServiceRepository transportServiceRepository;
-	private final TransportServiceVehicleRepository transportServiceVehicleRepository;
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody String encryptedRequest) throws Exception {
@@ -205,7 +197,7 @@ public class AuthController {
 
 		// Create new user's account
 		User user = new User();
-		user.setUsername(signUpRequest.get("username").asText());
+		user.setUsername(signUpRequest.get("email").asText());
 		user.setEmail(signUpRequest.get("email").asText());
 		user.setPassword(encoder.encode(signUpRequest.get("password").asText()));
 
@@ -216,7 +208,7 @@ public class AuthController {
 		user.setLastname(signUpRequest.get("lastname").asText());
 		user.setMobile(signUpRequest.get("mobile").asText());
 
-		Set<String> strRoles = null;
+		Set<String> strRoles = signUpRequest.has("role") ? Set.of(signUpRequest.get("role").asText()) : null;
 		Set<Role> roles = new HashSet<>();
 
 		if (strRoles == null) {
@@ -229,6 +221,41 @@ public class AuthController {
 				roleRepository.save(userRole);
 			}
 			roles.add(userRole);
+		} else {
+			strRoles.forEach(role -> {
+				switch (role) {
+					case "admin":
+						Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+							.orElse(null);
+						if (adminRole == null) {
+							adminRole = new Role();
+							adminRole.setName(ERole.ROLE_ADMIN);
+							roleRepository.save(adminRole);
+						}
+						roles.add(adminRole);
+						break;
+					case "hotel":
+						Role hotelRole = roleRepository.findByName(ERole.ROLE_HOTEL)
+							.orElse(null);
+						if (hotelRole == null) {
+							hotelRole = new Role();
+							hotelRole.setName(ERole.ROLE_HOTEL);
+							roleRepository.save(hotelRole);
+						}
+						roles.add(hotelRole);
+						break;
+					default:
+						Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+							.orElse(null);
+						if (userRole == null) {
+							userRole = new Role();
+							userRole.setName(ERole.ROLE_USER);
+							roleRepository.save(userRole);
+						}
+						roles.add(userRole);
+						break;
+					}
+				});
 		}
 
 		user.setRoles(roles);

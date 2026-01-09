@@ -1,7 +1,7 @@
 import useAuth from "../../hooks/useAuth";
 import useInput from "../../hooks/useInput";
 import useToggle from "../../hooks/useToggle";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect, type FormEvent } from "react";
 import axios, { setupAxiosPrivate } from "../../axios/axios";
 import { d, e } from "../utils/crypto";
@@ -29,9 +29,7 @@ const roleRedirectMap: Record<string, string> = {
   ROLE_MASTER_ADMIN: "/masterAdmin",
   ROLE_SUPER_ADMIN: "/superAdmin",
   ROLE_ADMIN: "/dashboard",
-  ROLE_TEHSILDAR: "/tehsildar",
-  ROLE_NAIB_TEHSILDAR: "/naibTehsildar",
-  ROLE_PATWARI: "/patwari",
+  ROLE_HOTEL: "/hotel/dashboard",
 };
 
 const LOGIN_URL = "/api/auth/signin";
@@ -270,27 +268,6 @@ const Login = () => {
                   </div>
                 </form>
               )}
-
-
-              <div className="inline-flex items-center mt-3">
-                <label className="relative flex cursor-pointer items-center" htmlFor="check-2">
-                  <input type="checkbox"
-                    onChange={toggleCheck}
-                    checked={check}
-                    className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-slate-300 shadow transition-all checked:border-green-600 checked:bg-green-600 hover:shadow-md" id="check-2" />
-                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" stroke="currentColor" strokeWidth="1">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
-                    </svg>
-                  </span>
-                </label>
-                <label className="ml-2 cursor-pointer text-sm text-slate-600" htmlFor="check-2"> Remember Me </label>
-              </div>
-
-              {/* <p className="mt-4 text-black flex justify-center dark:text-white text-sm">
-                Don&apos;t have an account?
-                <Link to="/register" className="text-blue-500 font-semibold hover:underline ml-1">Sign Up</Link>
-              </p> */}
 
             </CardContent>
             <CardFooter>

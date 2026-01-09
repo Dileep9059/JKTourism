@@ -10,7 +10,6 @@ import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -96,18 +95,18 @@ public class SendMail {
         }
     }
 
-    private String sendLocalMail(String subject, InternetAddress[] to, String msgcontent, List<File> files) {
+       private String sendLocalMail(String subject, InternetAddress[] to, String msgcontent, List<File> files) {
         try {
             // getting jwt token
             OkHttpClient client = new OkHttpClient();
 
             MediaType mediaType = MediaType.parse("application/json");
             RequestBody body = RequestBody.create(
-                    "{\n    \"username\": \"iakmalik\",\n    \"password\": \"Bisag@123\"\n}",
+                    "{\n    \"username\": \"ocbis\",\n    \"password\": \"ocbis\"\n}",
                     mediaType);
 
             Request request = new Request.Builder()
-                    .url("https://staging2.pmgatishakti.gov.in/email-service/api/auth/signin")
+                    .url("https://amritsarovar.gov.in/EmailSmsServer/authenticate")
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .build();
@@ -137,28 +136,27 @@ public class SendMail {
                             requestBodyString,
                             mediaTypeUsingToken);
                     Request requestUsingToken = new Request.Builder()
-                            .url("https://staging2.pmgatishakti.gov.in/email-service/api/admin/sendMail")
+                            .url("https://amritsarovar.gov.in/EmailSmsServer/api/sendemail")
                             .post(bodyUsingToken)
                             .addHeader("Authorization",
                                     "Bearer " + token)
                             .addHeader("Content-Type", "application/x-www-form-urlencoded")
                             .build();
 
-                    Response responseUsingToken = clientUsingToken.newCall(requestUsingToken).execute();
-                    if (responseUsingToken.isSuccessful() && responseUsingToken.body() != null) {
-                        System.out.println("[OTP] :: Otp sent.");
-                    } else {
-                        System.out.println("[OTP] :: Otp not sent.");
+                    try (Response responseUsingToken = clientUsingToken.newCall(requestUsingToken).execute()) {
+                        System.out.println(responseUsingToken);
+                        return "SUCCESS";
+                    } catch (IOException e) {
                         return "FAIL";
                     }
 
                 } else {
                     System.out.println("Request failed: " + response.code() + " - " + response.message());
+                    return "FAIL";
                 }
             } catch (IOException e) {
                 return "FAIL";
             }
-            return "SUCCESS";
         } catch (Exception e) {
             return "FAIL";
         }

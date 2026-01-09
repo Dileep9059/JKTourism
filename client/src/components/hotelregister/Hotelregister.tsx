@@ -1,20 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import scss from './hotelregister.module.scss';
 import clsx from 'clsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select" 
-import { format } from "date-fns";
-import { ArrowDown, Calendar as CalendarIcon, ChevronDown, Minus, Plus } from "lucide-react";
-import type { DateRange } from "react-day-picker";
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
@@ -76,17 +63,17 @@ function Hotelregister() {
             <div className={clsx(scss.tab_container ,"container mx-auto")}>
             <Tabs value={currentTab} onValueChange={setCurrentTab} className={scss.custom_tab}>
               <TabsList className={scss.custom_tablist}>
-                <TabsTrigger value="basic-information">Property Basic Information</TabsTrigger>
-                <TabsTrigger value="location-details">Location Details</TabsTrigger>
-                <TabsTrigger value="owner-details">Owner / Contact Details</TabsTrigger>
-                <TabsTrigger value="nodal-details">Nodal Contact Person Details</TabsTrigger>
-                <TabsTrigger value="property-details">Property Details</TabsTrigger>
-                <TabsTrigger value="amenity-details">Amenities & Facilities</TabsTrigger>
-                <TabsTrigger value="food">Food & Beverage</TabsTrigger>
-                <TabsTrigger value="registration-details">Registration Details with Directorate</TabsTrigger>
-                <TabsTrigger value="banking-details">Banking Details (for Payments)</TabsTrigger>
-                <TabsTrigger value="presnce">Online Presence</TabsTrigger>
-                <TabsTrigger value="declaration">Declaration</TabsTrigger>
+                <TabsTrigger value="basic-information" className='w-full'>Property Basic Information</TabsTrigger>
+                <TabsTrigger value="location-details" className='w-full'>Location Details</TabsTrigger>
+                <TabsTrigger value="owner-details" className='w-full'>Owner / Contact Details</TabsTrigger>
+                <TabsTrigger value="nodal-details" className='w-full'>Nodal Contact Person Details</TabsTrigger>
+                <TabsTrigger value="property-details" className='w-full'>Property Details</TabsTrigger>
+                <TabsTrigger value="amenity-details" className='w-full'>Amenities & Facilities</TabsTrigger>
+                <TabsTrigger value="food" className='w-full'>Food & Beverage</TabsTrigger>
+                <TabsTrigger value="registration-details" className='w-full'>Registration Details with Directorate</TabsTrigger>
+                <TabsTrigger value="banking-details" className='w-full'>Banking Details (for Payments)</TabsTrigger>
+                <TabsTrigger value="presnce" className='w-full'>Online Presence</TabsTrigger>
+                <TabsTrigger value="declaration" className='w-full'>Declaration</TabsTrigger>
               </TabsList>
 
               <div className={scss.tab_content_wrapper}>

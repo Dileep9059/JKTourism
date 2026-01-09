@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 
 import useRefreshToken from "../../hooks/useRefreshToken";
 import useAuth from "../../hooks/useAuth";
-import useLocalStorage from "../../hooks/useLocalStorage";
 import FullScreenLoader from "../loader/FullScreenLoader";
 import type { AuthType } from "../../context/AuthProvider";
 
@@ -11,7 +10,7 @@ const PersistLogin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const refresh = useRefreshToken();
   const { auth } = useAuth() as { auth: AuthType };
-  const [persist] = useLocalStorage("persist", false);
+  const persist = true;
 
   useEffect(() => {
     let isMounted = true;

@@ -60,11 +60,14 @@ import Hotelsearch from "./components/hotelsearch/Hotelsearch";
 import Hotellist from "./components/hotellist/Hotellist";
 import Hoteldetail from "./components/hoteldetail/Hoteldetail";
 import Hotelregister from "./components/hotelregister/Hotelregister";
+import HotelRegistration from "./components/hotel/HotelRegistration";
+import HotelDashboard from "./components/hotel/HotelDashboard";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
   SUPER_ADMIN: "ROLE_SUPER_ADMIN",
-  ADMIN: "ROLE_ADMIN"
+  ADMIN: "ROLE_ADMIN",
+  HOTEL: "ROLE_HOTEL"
 };
 
 const roleRoutes = [
@@ -109,7 +112,8 @@ const roleRoutes = [
       { path: "shopping-location/add", element: <AddShopping /> },
       { path: "feedback", element: <Feedbacks /> },
     ],
-  }
+  },
+  { role: ROLES.HOTEL, routes: [{ path: "hotel/dashboard", element: <HotelDashboard /> }, { path: "hotel/add", element: <Hotelregister /> }] }
 ];
 
 function App() {
@@ -155,7 +159,8 @@ function App() {
               <Route path="/hotel-search" element={<Hotelsearch />} />
               <Route path="/hotel-list" element={<Hotellist />} />
               <Route path="/hotel-detail" element={<Hoteldetail />} />
-              <Route path="/hotel-register" element={<Hotelregister />} />
+
+              <Route path="/hotel-registration" element={<HotelRegistration />} />
             </Route>
 
             <Route element={<Sidebar />}>

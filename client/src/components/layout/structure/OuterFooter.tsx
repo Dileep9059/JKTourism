@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 
 import axiosInstance from "@/axios/axios";
 import { d, e } from "@/components/utils/crypto";
+import { Link } from "react-router-dom";
 
 interface FooterLink {
   label: string;
@@ -205,12 +206,12 @@ const OuterFooter: React.FC = () => {
                     <ul className="space-y-2 sm:space-y-3 text-sm lg:text-2xl sm:text-base leading-relaxed m-3">
                       {section.links.map((link, idx) => (
                         <li key={idx}>
-                          <a
-                            href={link.href || "#"}
+                          <Link
+                            to={link.href || "#"}
                             className="hover:text-orange-400 transition-colors duration-150"
                           >
                             {link.label}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -779,6 +780,7 @@ const sections: FooterSection[] = [
       { label: "Registered Travel Operators", href: "/travel-agent" },
       { label: "Registered Travel Guides", href: "/tour-guide" },
       { label: "Contact us", href: "/contact-us" },
+      { label: "Hotel Registration", href: "/hotel-registration" },
     ],
   },
   {
