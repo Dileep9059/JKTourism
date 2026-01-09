@@ -42,8 +42,9 @@
   }
 
 
-  .banner { min-height: 900px; padding-top: 96px;
+  .banner { min-height: 900px; padding-block: 120px 20px;
     .filter_bg { display: flex; flex-direction: column; position: absolute; left: 0; top: 0;  width: 100%; height: 100%;
+      &::after { position: absolute; content: ''; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.308); backdrop-filter: blur(4px); }
       img { width: 100%; object-fit: cover;
         &:first-child { height: 40%; }
         &:last-child { flex-grow: 1; }
@@ -53,21 +54,43 @@
     .tab_wrapper { position: relative; z-index: 2; min-height: 600px; max-height: 600px; display: flex; flex-direction: column;
       .tab_container { flex-grow: 1; display: flex; flex-direction: column;
       .custom_tab[data-orientation="horizontal"] { display: flex; flex-direction: row; gap: 1rem; height: 100%; flex-grow: 1;
-        .custom_tablist { flex-direction: column; height: auto;
-          align-items: flex-start; }
-        }
-      }
-      .tab_content_wrapper { background: white; border: 1px solid #C1C5E3; border-radius: 8px; padding: 1rem; flex-grow: 1; 
-        .custom_tabcontent { display: flex; flex-direction: column; height: 100%;
-          .form_details { flex-grow: 1; overflow: auto; 
-           
-              .inputblock_wrapper { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; 
-                .input_block { display: flex; align-items: center; gap: 0.25rem; }
-              }
-          
-            
+          .custom_tablist { padding: 1rem 0.5rem; flex-direction: column; height: auto; gap: 0.5rem; background: rgb(255 255 255 / 17%); backdrop-filter: blur(4px); align-items: flex-start; position: relative; border-radius: 8px; overflow: auto;
+            &::after { position: absolute; content: ''; left: 0; top: 0; background: radial-gradient(rgba(153, 152, 152, 0.5), rgb(255 255 255 / 98%)); height: 100%; width: 100%; }
+            button { padding: 6px 12px; width: 100%; transition: all 0.6s; cursor: pointer; position: relative; z-index: 2;
+              &[aria-selected='true'],&:hover { background: #ffffff99; box-shadow: rgb(100 93 93 / 32%) 0px 2px 11px 0px; border: 1px solid #7d818140; }
+              &:hover { transform: translateY(-1px); }
+            }
           }
-          .btn_wrapper { background: white; display: flex; justify-content: end; }
+          .tab_content_wrapper { background: rgba(255, 254, 254, 0.712); backdrop-filter: blur(4px); isolation: isolate; border: 1px solid #C1C5E3; border-radius: 8px; padding: 0; flex-grow: 1; 
+            .custom_tabcontent { display: flex; flex-direction: column; height: 100%; 
+              .form_details { position: relative; z-index: 3; padding: 1rem; flex-grow: 1; overflow: auto; 
+                  .input_block { background: rgba(255, 255, 255, 0.363); background: transparent; padding: 6px 12px; border-radius: 6px;
+                    label { margin-bottom: 0.25rem; font-size: 15px; line-height: 23px; font-weight: 600; display: block; }
+                    input,textarea { border: 1px solid #80808063; background: rgba(255, 255, 255, 0.74); }
+                  }
+                  .inputblock_wrapper { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; 
+                    .input_block { display: flex; align-items: center; gap: 0.25rem; 
+                      button { border-color: #464646f1; flex-shrink: 0; }
+                      label { margin: 0; }
+                    }
+                  }
+                  .conset_details { margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: flex-start;
+                    label { margin: 0; font-size: 15px; line-height: 23px; font-weight: 600; display: block;  }
+                    button { border-color: #464646f1; flex-shrink: 0; margin-top: 3px; }
+                  }
+                
+              }
+              .btn_wrapper { display: flex; justify-content: end; gap: 1rem; position: relative; z-index: 3; padding: 2rem; 
+                .prev_btn,.next_btn,.submit_btn { padding: 10px 22px; cursor: pointer; font-size: 16px; line-height: 22px; font-weight: 600; border-radius: 8px; display: block; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
+                  inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5); position: relative; overflow: hidden; border: 1px solid rgba(128, 128, 128, 0.356);
+                  &::after { position: absolute; content: ''; background: linear-gradient(90deg, transparent, rgba(231, 205, 121, 0.219), transparent); left: 0; top: 0; width: 100%; height: 100%; transform: translateX(-100%);  transition: all 0.6s; 
+                  }
+                  &:hover::after { transform: translateX(100%); }
+                }
+                .submit_btn { background: #ffa500; color: white; }
+              }
+            }
+          }
         }
       }
     }
