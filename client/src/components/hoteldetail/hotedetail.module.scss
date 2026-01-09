@@ -72,14 +72,20 @@
   .hotel_photos { padding-block: 2rem;
     .photo_wrapper { display: flex; gap: 1rem; 
       .w_50 { width: calc(50% - 1rem); 
-        img { border-radius: 8px; }
+        .photo_block { overflow: hidden; border-radius: 8px;
+          img { transition: all 0.4s; 
+            &:hover { transform: scale(1.2); }
+          }
+        } 
         .photo_block_wrapper { display: flex; gap: 1rem; flex-wrap: wrap; height: 100%;
-          .photo_block { width: calc(50% - 1rem); }
+          .photo_block { width: calc(50% - 1rem);   
+          }
          }
       }
     }
   }
 
+  .hotel_details { border: 1px solid #C1C5E3; background: white; border-radius: 6px; }
   
 } 
 
@@ -107,3 +113,5 @@
 @media screen and (max-width: 575px) {
   .list_wrapper { max-width: 100%; }
 }
+
+ 

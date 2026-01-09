@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import scss from './hotedetail.module.scss';
 import {
   Select,
@@ -18,7 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import clsx from 'clsx'; 
-
+import { Fancybox } from "@fancyapps/ui";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
  
  
  
@@ -51,7 +52,18 @@ function Hoteldetail() {
       newAges[index] = value;
       setChildrenAges(newAges);
     };
- 
+    
+    useEffect(() => {
+      // Initialize Fancybox
+      Fancybox.bind("[data-fancybox='gallery']", {
+        // Your custom options
+      });
+  
+      // Cleanup on unmount
+      return () => {
+        Fancybox.unbind("[data-fancybox='gallery']");
+      };
+    }, []);
  
 
   return (
@@ -262,48 +274,97 @@ function Hoteldetail() {
             <div className='container mx-auto'>
               <div className={scss.photo_wrapper}>
                 <div className={scss.w_50}>
-                    <div className={scss.photo_block}>
+                  <div className={scss.photo_block}>
+                    <a
+                      data-fancybox="gallery" data-caption='OUTDOOR'
+                      href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-1.png`}
+                    >
                       <img
                         src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-1.png`}
                         alt="image"
                         className="w-full h-full object-cover"
                       />
-                    </div>
+                    </a>
+                  </div>
                 </div>
                 <div className={scss.w_50}>
-                  <div className={scss.photo_block_wrapper}> 
+                  <div className={scss.photo_block_wrapper}>
                     <div className={scss.photo_block}>
-                      <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-2.png`}
-                        alt="image"
-                        className="w-full h-full object-cover"
-                      />
+                      <a
+                        data-fancybox="gallery" data-caption='HALL'
+                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-2.png`}
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-2.png`}
+                          alt="image"
+                          className="w-full h-full object-cover"
+                        />
+                      </a>
                     </div>
                     <div className={scss.photo_block}>
-                      <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-3.png`}
-                        alt="image"
-                        className="w-full h-full object-cover"
-                      />
+                      <a
+                        data-fancybox="gallery" data-caption='BALCONY'
+                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-3.png`}
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-3.png`}
+                          alt="image"
+                          className="w-full h-full object-cover"
+                        />
+                      </a>
                     </div>
                     <div className={scss.photo_block}>
-                      <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-4.png`}
-                        alt="image"
-                        className="w-full h-full object-cover"
-                      />
+                      <a
+                        data-fancybox="gallery" data-caption='BALCONY VIEW'
+                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-4.png`}
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-4.png`}
+                          alt="image"
+                          className="w-full h-full object-cover"
+                        />
+                      </a>
                     </div>
                     <div className={scss.photo_block}>
-                      <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-5.png`}
-                        alt="image"
-                        className="w-full h-full object-cover"
-                      />
+                      <a
+                        data-fancybox="gallery" data-caption='DELUXE BADROOM'
+                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-5.png`}
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-5.png`}
+                          alt="image"
+                          className="w-full h-full object-cover"
+                        />
+                      </a>
                     </div>
                   </div>
-
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className={scss.hotel_details}>
+            <div className='container mx-auto'>
+              <ul className="list_head">
+                <li>
+                  <p>Overview</p>
+                </li>
+                <li>
+                  <p>Facilities</p>
+                </li>
+                <li>
+                  <p>Rooms</p>
+                </li>
+                <li>
+                  <p>Location</p>
+                </li>
+                <li>
+                  <p>Reviews</p>
+                </li>
+                <li>
+                  <p>Policies</p>
+                </li>
+              </ul>
             </div>
           </section>
          

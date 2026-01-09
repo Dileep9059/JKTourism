@@ -59,6 +59,7 @@ import TransportServices from "./components/transport-services/TransportServices
 import Hotelsearch from "./components/hotelsearch/Hotelsearch";
 import Hotellist from "./components/hotellist/Hotellist";
 import Hoteldetail from "./components/hoteldetail/Hoteldetail";
+import Hotelregister from "./components/hotelregister/Hotelregister";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -154,6 +155,7 @@ function App() {
               <Route path="/hotel-search" element={<Hotelsearch />} />
               <Route path="/hotel-list" element={<Hotellist />} />
               <Route path="/hotel-detail" element={<Hoteldetail />} />
+              <Route path="/hotel-register" element={<Hotelregister />} />
             </Route>
 
             <Route element={<Sidebar />}>
