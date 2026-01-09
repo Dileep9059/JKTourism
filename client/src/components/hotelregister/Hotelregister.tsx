@@ -19,7 +19,7 @@ import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
- 
+import { GiFamilyHouse } from "react-icons/gi";
 
 function Hotelregister() {
       const [currentTab, setCurrentTab] = useState("basic-information");
@@ -74,9 +74,12 @@ function Hotelregister() {
           </div> 
           <section className={scss.tab_wrapper}>
             <div className={clsx(scss.tab_container ,"container mx-auto")}>
+            <div className={scss.destination_title}>
+            <h2 className={clsx(scss.cattitle, "mt-5")}>List Your Hotel</h2>
+          </div>
             <Tabs value={currentTab} onValueChange={setCurrentTab} className={scss.custom_tab}>
               <TabsList className={scss.custom_tablist}>
-                <TabsTrigger value="basic-information">Property Basic Information</TabsTrigger>
+                <TabsTrigger value="basic-information"><GiFamilyHouse/> Property Basic Information</TabsTrigger>
                 <TabsTrigger value="location-details">Location Details</TabsTrigger>
                 <TabsTrigger value="owner-details">Owner / Contact Details</TabsTrigger>
                 <TabsTrigger value="nodal-details">Nodal Contact Person Details</TabsTrigger>
