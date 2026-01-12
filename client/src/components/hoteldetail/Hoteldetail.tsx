@@ -20,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover
 import clsx from 'clsx'; 
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
+import { FaStar } from 'react-icons/fa';
  
  
  
@@ -345,26 +346,58 @@ function Hoteldetail() {
 
           <section className={scss.hotel_details}>
             <div className='container mx-auto'>
-              <ul className="list_head">
-                <li>
-                  <p>Overview</p>
-                </li>
-                <li>
-                  <p>Facilities</p>
-                </li>
-                <li>
-                  <p>Rooms</p>
-                </li>
-                <li>
-                  <p>Location</p>
-                </li>
-                <li>
-                  <p>Reviews</p>
-                </li>
-                <li>
-                  <p>Policies</p>
-                </li>
-              </ul>
+              <div className={scss.hotel_container}>
+                <ul className={scss.list_head}>
+                  <li className={scss.active}>
+                    <p>Overview</p>
+                  </li>
+                  <li>
+                    <p>Facilities</p>
+                  </li>
+                  <li>
+                    <p>Rooms</p>
+                  </li>
+                  <li>
+                    <p>Location</p>
+                  </li>
+                  <li>
+                    <p>Reviews</p>
+                  </li>
+                  <li>
+                    <p>Policies</p>
+                  </li>
+                </ul>
+                <div className={scss.hotel_content}>
+                  <div className={scss.hotel_head_content}>
+                    <div className={scss.hotel_name}>
+                      <h3>Hotel Name</h3>
+                      <ul className={scss.hotel_ratings}>
+                        <li><FaStar /></li>
+                        <li><FaStar /></li>
+                        <li><FaStar /></li>
+                        <li><FaStar /></li>
+                        <li><FaStar /></li>
+                      </ul>
+                      <div className={scss.map_link}>
+                        <p>Located In Srinagar, 500m Distance to pathan - </p><Link to={''}>show map</Link>
+                      </div>
+                    </div>
+                    <button className={scss.book_btn}>Book Now</button>
+                  </div>
+                  <div className={scss.facilities}>
+                      <div className={scss.facility_block}>
+                          <h3>Overview</h3>
+                          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dignissim cras tincidunt lobortis feugiat vivamus at augue eget. Odio ut enim blandit volutpat. Ac ut consequat semper viverra nam libero. Fames ac turpis egestas integer eget aliquet nibh. Elementum pulvinar etiam non quam lacus. Risus pretium quam vulputate dignissim suspendisse in est.</p>
+                      </div>
+                      {/* <div className={scss.facility_block}>
+                          <h3>Amenities</h3> 
+                          <ul className='grid grid-cols-1 sm:grid-cols-4 gap-4'>
+                            <li><p>Air Conditioning</p></li>
+                          </ul>
+                      </div> */}
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
          

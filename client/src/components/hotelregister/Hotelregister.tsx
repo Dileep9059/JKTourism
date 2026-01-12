@@ -79,7 +79,7 @@ function Hotelregister() {
           </div>
             <Tabs value={currentTab} onValueChange={setCurrentTab} className={scss.custom_tab}>
               <TabsList className={scss.custom_tablist}>
-                <TabsTrigger value="basic-information"><GiFamilyHouse/> Property Basic Information</TabsTrigger>
+                <TabsTrigger value="basic-information">Property Basic Information</TabsTrigger>
                 <TabsTrigger value="location-details">Location Details</TabsTrigger>
                 <TabsTrigger value="owner-details">Owner / Contact Details</TabsTrigger>
                 <TabsTrigger value="nodal-details">Nodal Contact Person Details</TabsTrigger>
