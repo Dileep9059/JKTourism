@@ -162,7 +162,6 @@ export function getSidebarData(): SidebarData {
           icon: Hotel,
           items: [
             { title: 'Add Hotel', url: '/hotel/add', icon: ImagePlus },
-            { title: 'Published Hotels ', url: '/hotel', icon: Hotel },
             { title: 'Upload Data', url: '/hotel/upload', icon: ImageUp },
           ],
         },

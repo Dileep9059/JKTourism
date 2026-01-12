@@ -1,8 +1,14 @@
 import React from 'react'
+import DocumentTitle from '../DocumentTitle'
 
 const HotelDashboard = () => {
   return (
-    <div>HotelDashboard</div>
+    <>
+      <DocumentTitle title="Hotel Dashboard" />
+      <div className="">
+        Hotel Dashboard
+      </div>
+    </>
   )
 }
 
