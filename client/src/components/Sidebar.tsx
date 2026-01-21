@@ -21,7 +21,7 @@ const Sidebar = ({ children }: Props) => {
 
             <SidebarInset>
               <InnerHeader />
-              <div className="flex flex-1 flex-col gap-4">
+              <div className="flex flex-1 flex-col gap-4 relative">
                 {children ? children : <Outlet />}
               </div>
             </SidebarInset>
