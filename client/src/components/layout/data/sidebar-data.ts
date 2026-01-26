@@ -152,6 +152,11 @@ export function getSidebarData(): SidebarData {
             { title: 'Published Shopping Locations ', url: '/shopping-location', icon: TruckElectric },
           ],
         },
+        {
+          title: 'Applied Hotels',
+          icon: Hotel,
+          url: '/dashboard/applied-hotels'
+        }
       ]
       : []),
 

@@ -19,7 +19,7 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter basename={base}>
         <AuthProvider>
-          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          {/* <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme"> */}
             <LoadingProvider>
               <FullScreenLoader />
               <Routes>
@@ -27,7 +27,7 @@ createRoot(document.getElementById("root")!).render(
               </Routes>
               <Toaster richColors position="top-right" />
             </LoadingProvider>
-          </ThemeProvider>
+          {/* </ThemeProvider> */}
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

@@ -47,7 +47,7 @@ export const InnerHeader = ({
   return (
     <header
       className={cn(
-        "bg-background sticky top-0 flex h-16 items-center gap-3 p-4 sm:gap-4",
+        "bg-background sticky top-0 flex h-16 items-center gap-3 p-4 sm:gap-4 z-100",
         className
       )}
       {...props}
@@ -59,7 +59,7 @@ export const InnerHeader = ({
       <div className="ml-auto flex items-center space-x-4">
         <Search />
         {/* <NotificationDropdown /> */}
-        <ThemeSwitch />
+        {/* <ThemeSwitch /> */}
         <ProfileDropdown />
       </div>
     </header>

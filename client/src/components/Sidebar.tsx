@@ -1,4 +1,3 @@
-import { cn } from '@/lib/utils'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { Outlet } from 'react-router-dom'
 import { GenericDialogProvider } from '@/features/users/components/server-side/GenericDialogProvider'
