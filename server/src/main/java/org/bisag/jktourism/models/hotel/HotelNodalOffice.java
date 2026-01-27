@@ -30,9 +30,6 @@ public class HotelNodalOffice {
     private String fullName;
 
     @Column(nullable = false)
-    private String designation; // Manager / Nodal Officer / Supervisor
-
-    @Column(nullable = false)
     private String mobileNumber;
 
     @Column(nullable = false)
@@ -48,4 +45,11 @@ public class HotelNodalOffice {
     private Instant effectiveTo;
 
     private UUID updatedBy;
+
+    public HotelNodalOffice() {
+    }
+
+    public HotelNodalOffice(Hotel hotel) {
+        this.hotel = hotel;
+    }
 }

@@ -3,6 +3,7 @@ package org.bisag.jktourism.models.hotel;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bisag.jktourism.models.hotel.enums.HotelStatus;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,7 +15,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -30,8 +30,9 @@ import jakarta.persistence.CascadeType;
 public class Hotel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -46,6 +47,9 @@ public class Hotel {
 
     private Instant submittedAt;
     private Instant approvedAt;
+
+    @Column(name = "owner_user_id", nullable = false, updatable = false)
+    private UUID ownerUserId;
 
     @CreationTimestamp
     @Column(updatable = false)

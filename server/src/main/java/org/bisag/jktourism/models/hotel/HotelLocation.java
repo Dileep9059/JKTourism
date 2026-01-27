@@ -49,4 +49,12 @@ public class HotelLocation {
 
     @UpdateTimestamp
     private Instant updatedAt;
+
+    // ✅ REQUIRED by JPA
+    protected HotelLocation() {
+    }
+
+    public HotelLocation(Hotel hotel) {
+        this.hotel = hotel;
+    }
 }

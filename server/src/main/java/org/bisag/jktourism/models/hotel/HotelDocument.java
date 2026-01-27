@@ -30,12 +30,12 @@ public class HotelDocument {
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
-    private String documentType;
-    private String documentNumber;
+    // private String documentType;
+    private String registrationNumber;
     private String fileUrl;
 
-    private LocalDate validFrom;
-    private LocalDate validTo;
+    // private LocalDate validFrom;
+    // private LocalDate validTo;
 
     @CreationTimestamp
     @Column(updatable = false)

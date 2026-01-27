@@ -47,4 +47,10 @@ public class HotelBasicInfo {
 
     @UpdateTimestamp
     private Instant updatedAt;
+
+    protected HotelBasicInfo() {}
+
+    public HotelBasicInfo(Hotel hotel) {
+        this.hotel = hotel;
+    }
 }

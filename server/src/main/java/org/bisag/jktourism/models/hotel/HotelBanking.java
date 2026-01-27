@@ -2,6 +2,7 @@ package org.bisag.jktourism.models.hotel;
 
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -29,4 +30,7 @@ public class HotelBanking {
     private String bankName;
     private String accountNumber;
     private String ifscCode;
+
+    @Column(columnDefinition = "TEXT")
+    private String file;
 }

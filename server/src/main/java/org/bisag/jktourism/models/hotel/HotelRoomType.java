@@ -44,14 +44,8 @@ public class HotelRoomType {
     private String roomTypeName;
 
     private Integer roomCount;
-    private Integer maxOccupancy;
-    private Integer roomSizeSqft;
-    private String bedType;
 
-    private BigDecimal tariffMin;
-    private BigDecimal tariffMax;
-
-    private Boolean extraBedAllowed;
+    private BigDecimal tariff;
 
     @CreationTimestamp
     @Column(updatable = false)

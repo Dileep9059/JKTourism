@@ -26,9 +26,6 @@ public class HotelProperty {
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
-    private Integer floors;
-    private Integer totalRooms;
-
     private LocalTime checkInTime;
     private LocalTime checkOutTime;
 

@@ -10,7 +10,6 @@ import org.bisag.jktourism.models.Cuisine;
 import org.bisag.jktourism.models.Event;
 import org.bisag.jktourism.models.Experience;
 import org.bisag.jktourism.models.Shopping;
-import org.bisag.jktourism.payload.request.EncryptedRequest;
 import org.bisag.jktourism.payload.response.MessageResponse;
 import org.bisag.jktourism.services.ActivityService;
 import org.bisag.jktourism.services.CuisineService;

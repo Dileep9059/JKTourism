@@ -4,25 +4,19 @@ import clsx from 'clsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
-import { Textarea } from '../ui/textarea';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Calendar } from '../ui/calendar';
-import { Label } from '../ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+
 import { Button } from '../ui/button';
-import { ChevronDownIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field';
+import BasicInfo from './BasicInfo';
+import LocationDetails from './LocationDetails';
+import ManagerDetails from './ManagerDetails';
 
 function Hotelregister() {
   const [currentTab, setCurrentTab] = useState("basic-information");
+
+
 
   // Define the order of tabs
   const tabOrder = [
@@ -38,6 +32,36 @@ function Hotelregister() {
     "presnce",
     "declaration",
   ];
+
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([
+    { roomType: "", roomCount: 0, tariff: 0 },
+  ]);
+
+  const [hotelId, setHotelId] = useState<string>("8c608176-681e-45ae-99fd-b9068f5f0dfc");
+
+  const addRoomType = () => {
+    // max 5 types can be added if already selected then cannot add same type
+    if (roomTypes.length >= 5) {
+      toast.error("Maximum 5 room types can be added");
+      return;
+    }
+    setRoomTypes([...roomTypes, { roomType: "", roomCount: 0, tariff: 0 }]);
+  };
+
+  const removeRoomType = (index: number) => {
+    setRoomTypes(roomTypes.filter((_, i) => i !== index));
+  };
+
+  const updateRoomType = (index: number, field: string, value: string) => {
+    if (field === "roomType" && roomTypes.some((type) => type.roomType === value)) {
+      toast.error("Room type already exists");
+      return;
+    }
+    const updated = [...roomTypes];
+    updated[index][field] = field === "roomCount" || field === "tariff" ? Number(value) : value;
+    setRoomTypes(updated);
+  };
+
 
   // Function to handle "Next" button click
   const handleNext = () => {
@@ -55,7 +79,6 @@ function Hotelregister() {
     }
   };
 
-  const [open, setOpen] = useState(false)
   const [date, setDate] = useState<Date | undefined>(undefined)
   return (
     <>
@@ -84,206 +107,24 @@ function Hotelregister() {
                   <TabsTrigger value="basic-information" className='w-full'>Property Basic Information</TabsTrigger>
                   <TabsTrigger value="location-details" className='w-full'>Location Details</TabsTrigger>
                   <TabsTrigger value="owner-details" className='w-full'>Owner / Contact Details</TabsTrigger>
-                  <TabsTrigger value="nodal-details" className='w-full'>Nodal Contact Person Details</TabsTrigger>
+                  <TabsTrigger value="manager-details" className='w-full'>Manager Details</TabsTrigger>
                   <TabsTrigger value="property-details" className='w-full'>Property Details</TabsTrigger>
-                  <TabsTrigger value="amenity-details" className='w-full'>Amenities & Facilities</TabsTrigger>
+                  <TabsTrigger value="amenity-details" className='w-full'>Hotel Amenities</TabsTrigger>
                   <TabsTrigger value="food" className='w-full'>Food & Beverage</TabsTrigger>
                   <TabsTrigger value="registration-details" className='w-full'>Registration Details with Directorate</TabsTrigger>
                   <TabsTrigger value="banking-details" className='w-full'>Banking Details (for Payments)</TabsTrigger>
-                  <TabsTrigger value="presnce" className='w-full'>Online Presence</TabsTrigger>
                   <TabsTrigger value="declaration" className='w-full'>Declaration</TabsTrigger>
                 </TabsList>
 
                 <div className={scss.tab_content_wrapper}>
                   {/* Basic Information Tab */}
                   <TabsContent value="basic-information" className={scss.custom_tabcontent}>
-                    <div className={scss.form_details}>
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Hotel / Property Name</label>
-                            <Input type="text" placeholder="Enter Hotel / Property Name" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Brand Name (if any)</label>
-                            <Input type="text" placeholder="Enter Brand Name (if any)" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Property Type</label>
-                            <Select>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Property Type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectItem value="hotel">Hotel</SelectItem>
-                                  <SelectItem value="resort">Resort</SelectItem>
-                                  <SelectItem value="guest-house">Guest House</SelectItem>
-                                  <SelectItem value="home-stay">Home Stay</SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Star Rating (if applicable)</label>
-                            <Select>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Star Rating" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectItem value="1">1</SelectItem>
-                                  <SelectItem value="2">2</SelectItem>
-                                  <SelectItem value="3">3</SelectItem>
-                                  <SelectItem value="4">4</SelectItem>
-                                  <SelectItem value="5">5</SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <div className="flex flex-col gap-3">
-                              <Label htmlFor="date" className="px-1">
-                                Year of Establishment
-                              </Label>
-                              <Popover open={open} onOpenChange={setOpen}>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    id="date"
-                                    className="w-48 justify-between font-normal"
-                                  >
-                                    {date ? date.toLocaleDateString() : "Select date"}
-                                    <ChevronDownIcon />
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                                  {/* disable future dates */}
-                                  <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    captionLayout="dropdown"
-                                    disabled={(date) => date > new Date()}
-                                    onSelect={(date) => {
-                                      const today = new Date()
-                                      if (date && date < today) {
-                                        setDate(date)
-                                        setOpen(false)
-                                      }
-                                    }}
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={scss.btn_wrapper}>
-                      <button onClick={handleNext} className={scss.next_btn}>Next</button>
-                    </div>
+                    <BasicInfo handleNext={handleNext} />
                   </TabsContent>
 
                   {/* Location Details Tab */}
                   <TabsContent value="location-details" className={scss.custom_tabcontent}>
-                    <div className={scss.form_details}>
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="address">Address line 1</label>
-                            <Input
-                              placeholder="Enter Address line 1"
-                              id="address"
-                            />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="address">Address line 2</label>
-                            <Input
-                              placeholder="Enter Address line 2"
-                              id="address"
-                            />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">City</label>
-                            <Input type="text" placeholder="Enter City" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">District</label>
-                            <Input type="text" placeholder="Enter District" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">State</label>
-                            <Input type="text" placeholder="Enter State" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Pincode</label>
-                            <Input type="text" placeholder="Enter Pincode" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Latitude</label>
-                            <Input type="text" placeholder="Enter Latitude" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Longitude</label>
-                            <Input type="text" placeholder="Enter Longitude" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Google Maps Location Link</label>
-                            <Input type="text" placeholder="Enter Google Maps Location Link" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Nearest Landmark</label>
-                            <Input type="text" placeholder='Enter Nearest Landmark' />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={scss.btn_wrapper}>
-                      <button onClick={handlePrev} className={scss.prev_btn}>Prev</button>
-                      <button onClick={handleNext} className={scss.next_btn}>Next</button>
-                    </div>
+                    <LocationDetails handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
                   </TabsContent>
 
                   {/* Owner Details Tab */}
@@ -333,117 +174,150 @@ function Hotelregister() {
                     </div>
                   </TabsContent>
 
-                  {/* Nodal Details Tab */}
-                  <TabsContent value="nodal-details" className={scss.custom_tabcontent}>
-                    <div className={scss.form_details}>
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Manager Name</label>
-                            <Input type="text" placeholder="Enter Manager Name" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Mobile Number</label>
-                            <Input type="text" placeholder="Enter Mobile Number" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Alternate Contact Number</label>
-                            <Input type="text" placeholder='Enter Alternate Contact Number' />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Email Address</label>
-                            <Input type="email" placeholder='Enter Email Address' />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <label htmlFor="">Preferred Communication Mode</label>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="call" />
-                              <label htmlFor="call">Call</label>
-                            </div>
-                            <div className={scss.input_block}>
-                              <Checkbox id="whatsApp" />
-                              <label htmlFor="whatsApp">WhatsApp</label>
-                            </div>
-                            <div className={scss.input_block}>
-                              <Checkbox id="email" />
-                              <label htmlFor="email">Email</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={scss.btn_wrapper}>
-                      <button onClick={handlePrev} className={scss.prev_btn}>Prev</button>
-                      <button onClick={handleNext} className={scss.next_btn}>Next</button>
-                    </div>
+                  {/* Manager Details Tab */}
+                  <TabsContent value="manager-details" className={scss.custom_tabcontent}>
+                    <ManagerDetails handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
                   </TabsContent>
 
                   {/* Property Details Tab */}
                   <TabsContent value="property-details" className={scss.custom_tabcontent}>
                     <div className={scss.form_details}>
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
+
+                      {/* PROPERTY LEVEL DETAILS */}
+                      <div className="grid grid-cols-2 gap-4 md:gap-6">
+
                         <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Total Number of Rooms</label>
-                            <Input type="text" placeholder="Enter Total Number of Rooms" />
-                          </div>
-                          {/* error message place here  */}
+                          <label>Check-in Time</label>
+                          <Input type="time" />
+                        </div>
+
+                        <div className={scss.form_block}>
+                          <label>Check-out Time</label>
+                          <Input type="time" />
                         </div>
                         <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Room Categories (e.g., Standard, Deluxe, Suite)</label>
-                            <Input type="text" placeholder="Enter Room Categories" />
-                          </div>
-                          {/* error message place here  */}
+                          <label>Parking Capacity</label>
+                          <Input type="number" />
                         </div>
                         <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Maximum Occupancy per Room</label>
-                            <Input type="text" placeholder='Enter Maximum Occupancy per Room' />
-                          </div>
-                          {/* error message place here  */}
+                          <FieldGroup>
+                            <Field orientation="horizontal">
+                              <Checkbox id="lift-available" name="lift-available" />
+                              <FieldLabel htmlFor="lift-available">
+                                Lift Available
+                              </FieldLabel>
+                            </Field>
+                          </FieldGroup>
                         </div>
                         <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Number of Floors</label>
-                            <Input type="text" placeholder='Enter Number of Floors' />
-                          </div>
-                          {/* error message place here  */}
+                          <FieldGroup>
+                            <Field orientation="horizontal">
+                              <Checkbox id="power-backup" name="power-backup" />
+                              <FieldLabel htmlFor="power-backup">
+                                Power Backup
+                              </FieldLabel>
+                            </Field>
+                          </FieldGroup>
                         </div>
                         <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Check-in Time</label>
-                            <Input type="text" placeholder='Select time' />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Check-out Time</label>
-                            <Input type="text" placeholder='Select time' />
-                          </div>
-                          {/* error message place here  */}
+                          <FieldGroup>
+                            <Field orientation="horizontal">
+                              <Checkbox id="wheelchair-accessible" name="wheelchair-accessible" />
+                              <FieldLabel htmlFor="wheelchair-accessible">
+                                Wheelchair Accessible
+                              </FieldLabel>
+                            </Field>
+                          </FieldGroup>
                         </div>
                       </div>
+
+                      {/* ROOM TYPES SECTION */}
+                      <div className="mt-8 space-y-4">
+                        <div className='flex items-center justify-between'>
+                          <h4 className="font-semibold text-sm">Room Types & Tariff</h4>
+                          <Button
+                            type="button"
+                            onClick={addRoomType}
+                            className="bg-white text-blue-600 text-sm hover:text-white"
+                          >
+                            + Add another room type
+                          </Button>
+                        </div>
+
+                        {roomTypes.map((room: any, index: any) => (
+                          <div
+                            key={index}
+                            className="grid grid-cols-4 gap-4 items-end border p-4 rounded-md"
+                          >
+                            {/* Room Type */}
+                            <div>
+                              <label>Room Type</label>
+                              <select
+                                className="w-full border rounded px-2 py-2"
+                                value={room.roomType}
+                                onChange={(e) =>
+                                  updateRoomType(index, "roomType", e.target.value)
+                                }
+                              >
+                                <option value="">Select</option>
+                                {ROOM_TYPES.map((type) => (
+                                  <option key={type} value={type}>
+                                    {type}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Number of Rooms */}
+                            <div>
+                              <label>No. of Rooms</label>
+                              <Input
+                                type="number"
+                                placeholder="e.g. 10"
+                                value={room.roomCount}
+                                onChange={(e) =>
+                                  updateRoomType(index, "roomCount", e.target.value)
+                                }
+                              />
+                            </div>
+
+                            {/* Tariff */}
+                            <div>
+                              <label>Tariff (per night)</label>
+                              <Input
+                                type="number"
+                                placeholder="₹"
+                                value={room.tariff}
+                                onChange={(e) =>
+                                  updateRoomType(index, "tariff", e.target.value)
+                                }
+                              />
+                            </div>
+
+                            {/* Remove */}
+                            <Button
+                              type="button"
+                              onClick={() => removeRoomType(index)}
+                              className="bg-red-500 text-white text-sm"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+
+                    {/* NAVIGATION */}
                     <div className={scss.btn_wrapper}>
-                      <button onClick={handlePrev} className={scss.prev_btn}>Prev</button>
-                      <button onClick={handleNext} className={scss.next_btn}>Next</button>
+                      <button onClick={handlePrev} className={scss.prev_btn}>
+                        Prev
+                      </button>
+                      <button onClick={handleNext} className={scss.next_btn}>
+                        Next
+                      </button>
                     </div>
                   </TabsContent>
+
 
                   {/* Amenity Details Tab */}
                   <TabsContent value="amenity-details" className={scss.custom_tabcontent}>
@@ -548,17 +422,6 @@ function Hotelregister() {
                           </div>
                           {/* error message place here  */}
                         </div>
-                        <div className={clsx(scss.form_block, 'col-span-2 sm:col-span-3 lg:col-span-3')}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="highlite">Highlights</label>
-                            <Textarea
-                              placeholder="Enter Highlights"
-                              id="highlite"
-                              className="min-h-[100px]"
-                            />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
                       </div>
                     </div>
                     <div className={scss.btn_wrapper}>
@@ -572,48 +435,49 @@ function Hotelregister() {
                     <div className={scss.form_details}>
                       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
                         <div className={clsx(scss.form_block, 'col-span-2 sm:col-span-2 lg:col-span-2')}>
-                          <RadioGroup >
-                            <label htmlFor="">In-house Restaurant Available?</label>
-                            <div className={scss.inputblock_wrapper}>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="two single" id="bed-two" />
-                                <label htmlFor="yes">Yes</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="two single" id="bed-two" />
-                                <label htmlFor="yes">Yes</label>
-                              </div>
-                            </div>
-                          </RadioGroup>
-                          {/* error message place here  */}
+                          <FieldGroup className="mx-auto w-56">
+                            <Field orientation="horizontal">
+                              <Checkbox id="in-house-restaurant" name="in-house-restaurant" />
+                              <FieldLabel htmlFor="in-house-restaurant">
+                                In-house Restaurant Available
+                              </FieldLabel>
+                            </Field>
+                          </FieldGroup>
                         </div>
                         <div className={clsx(scss.form_block, 'col-span-2 sm:col-span-2 lg:col-span-2')}>
-                          <RadioGroup >
-                            <label htmlFor="">Meal Plans Offered</label>
-                            <div className={scss.inputblock_wrapper}>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="roomonly" id="roomonly" />
-                                <label htmlFor="roomonly">Room Only(no meals)</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="Breakfast" id="breakfast" />
-                                <label htmlFor="breakfast">Breakfast</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="Half Board" id="hb" />
-                                <label htmlFor="hb">Half Board(breakfast + one other meal, usually dinner)</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="Full Board" id="fb" />
-                                <label htmlFor="fb">Full Board(breakfast, lunch, dinner)</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="All-Inclusive" id="ai" />
-                                <label htmlFor="ai">All-Inclusive (all meals, drinks, extras)</label>
-                              </div>
-                            </div>
-                          </RadioGroup>
-                          {/* error message place here  */}
+                          <FieldGroup className="mx-auto w-56">
+                            <Field orientation="horizontal">
+                              <Checkbox id="room-service" name="room-service" />
+                              <FieldLabel htmlFor="room-service">
+                                Room Service Available
+                              </FieldLabel>
+                            </Field>
+                          </FieldGroup>
+                        </div>
+                        <div className={clsx(scss.form_block, 'col-span-2 sm:col-span-2 lg:col-span-2')}>
+                          <FieldSet className="w-full max-w-xs">
+                            <FieldLegend variant="label">Food Type</FieldLegend>
+                            <RadioGroup defaultValue="VEG">
+                              <Field orientation="horizontal">
+                                <RadioGroupItem value="VEG" id="food-type-veg" />
+                                <FieldLabel htmlFor="food-type-veg" className="font-normal">
+                                  Veg
+                                </FieldLabel>
+                              </Field>
+                              <Field orientation="horizontal">
+                                <RadioGroupItem value="NON-VEG" id="food-type-non-veg" />
+                                <FieldLabel htmlFor="food-type-non-veg" className="font-normal">
+                                  Non-Veg
+                                </FieldLabel>
+                              </Field>
+                              <Field orientation="horizontal">
+                                <RadioGroupItem value="BOTH" id="food-type-both" />
+                                <FieldLabel htmlFor="food-type-both" className="font-normal">
+                                  Both
+                                </FieldLabel>
+                              </Field>
+                            </RadioGroup>
+                          </FieldSet>
                         </div>
                       </div>
                     </div>
@@ -637,7 +501,8 @@ function Hotelregister() {
                         <div className={scss.form_block}>
                           <div className={scss.input_block}>
                             <label htmlFor="">Upload Registration certificate</label>
-                            <Input type="file" placeholder="" />
+                            <Input type="file" placeholder="" accept='.pdf' />
+                            <span className='text-sm text-muted-foreground'>File should be in PDF format and should not be greater than 2MB.</span>
                           </div>
                           {/* error message place here  */}
                         </div>
@@ -670,7 +535,14 @@ function Hotelregister() {
                         <div className={scss.form_block}>
                           <div className={scss.input_block}>
                             <label htmlFor="">Account Number</label>
-                            <Input type="text" placeholder="Enter Account Number" />
+                            <Input type="password" placeholder="Enter Account Number" />
+                          </div>
+                          {/* error message place here  */}
+                        </div>
+                        <div className={scss.form_block}>
+                          <div className={scss.input_block}>
+                            <label htmlFor="">Confirm Account Number</label>
+                            <Input type="text" placeholder="Confirm Account Number" />
                           </div>
                           {/* error message place here  */}
                         </div>
@@ -691,69 +563,11 @@ function Hotelregister() {
                         <div className={scss.form_block}>
                           <div className={scss.input_block}>
                             <label htmlFor="">Cancelled Cheque Upload</label>
-                            <Input type="text" placeholder="Enter Cancelled Cheque Upload" />
+                            <Input type="file" placeholder="Enter Cancelled Cheque Upload" accept='.pdf' />
+                            <span className='text-sm text-muted-foreground'>File should be in PDF format and should not be greater than 2MB.</span>
                           </div>
                           {/* error message place here  */}
                         </div>
-                      </div>
-                    </div>
-                    <div className={scss.btn_wrapper}>
-                      <button onClick={handlePrev} className={scss.prev_btn}>Prev</button>
-                      <button onClick={handleNext} className={scss.next_btn}>Next</button>
-                    </div>
-                  </TabsContent>
-
-                  {/* Online Presence Tab */}
-                  <TabsContent value="presnce" className={scss.custom_tabcontent}>
-                    <div className={scss.form_details}>
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Hotel Website (if any)</label>
-                            <Input type="text" placeholder="Enter Hotel Website (if any)" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Existing Channel Manager (if any)</label>
-                            <Input type="text" placeholder="Enter Existing Channel Manager (if any)" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={clsx(scss.form_block, 'col-span-2 sm:col-span-2 lg:col-span-2')}>
-                          <RadioGroup >
-                            <label htmlFor="">Currently Listed On</label>
-                            <div className={scss.inputblock_wrapper}>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="MMT" id="mmt" />
-                                <label htmlFor="mmt">MakeMyTrip</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="Agoda" id="agoda" />
-                                <label htmlFor="agoda">Agoda</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="Booking" id="booking" />
-                                <label htmlFor="booking">Booking.com</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="Goibibo" id="gb" />
-                                <label htmlFor="gb">Goibibo</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="OYO" id="oyo" />
-                                <label htmlFor="oyo">OYO</label>
-                              </div>
-                              <div className={scss.input_block}>
-                                <RadioGroupItem value="None" id="none" />
-                                <label htmlFor="none">None</label>
-                              </div>
-                            </div>
-                          </RadioGroup>
-                          {/* error message place here  */}
-                        </div>
-
                       </div>
                     </div>
                     <div className={scss.btn_wrapper}>
@@ -772,15 +586,8 @@ function Hotelregister() {
                       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
                         <div className={scss.form_block}>
                           <div className={scss.input_block}>
-                            <label htmlFor="">Owner’s Name</label>
-                            <Input type="text" placeholder="Enter Owner’s Name" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Signature</label>
-                            <Input type="file" placeholder="" />
+                            <label htmlFor="">Owner's Name</label>
+                            <Input type="text" placeholder="Name" />
                           </div>
                           {/* error message place here  */}
                         </div>
@@ -803,8 +610,6 @@ function Hotelregister() {
               </Tabs>
             </div>
           </section>
-
-
         </div>
       </div>
     </>
@@ -812,3 +617,17 @@ function Hotelregister() {
 }
 
 export default Hotelregister
+
+const ROOM_TYPES = [
+  "Standard",
+  "Deluxe",
+  "Super Deluxe",
+  "Suite",
+  "Executive",
+];
+
+type RoomType = {
+  roomType: string;
+  roomCount: number;
+  tariff: number;
+};
