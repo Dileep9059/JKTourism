@@ -24,10 +24,17 @@ public class HotelOwner {
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
-    private String ownerName;
-    private String ownerEmail;
-    private String ownerPhone;
+    private String name;
+    private String email;
+    private String mobile;
 
     private String idProofType;
     private String idProofFileUrl;
+
+    public HotelOwner() {
+    }
+
+    public HotelOwner(Hotel hotel) {
+        this.hotel = hotel;
+    }
 }

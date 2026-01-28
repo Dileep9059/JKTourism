@@ -27,10 +27,10 @@ public class HotelNodalOffice {
     private Hotel hotel;
 
     @Column(nullable = false)
-    private String fullName;
+    private String name;
 
     @Column(nullable = false)
-    private String mobileNumber;
+    private String mobile;
 
     @Column(nullable = false)
     private String email;

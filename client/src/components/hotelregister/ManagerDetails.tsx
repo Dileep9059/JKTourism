@@ -19,7 +19,6 @@ const ManagerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =>
   });
 
   const onSubmit = async (data: ManagerDetailsFormValues) => {
-    console.log("MANAGER DETAILS 👉", data);
     try {
       await axiosPrivate.post(`/api/hotels/${hotelId}/manager`, await e(data));
       toast.success("Manager Information Added Successfully");
@@ -39,12 +38,12 @@ const ManagerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =>
               <div className={scss.input_block}>
                 <label>Manager Name</label>
                 <Input
-                  {...register("managerName")}
+                  {...register("name")}
                   placeholder="Enter Manager Name"
                 />
-                {errors.managerName && (
+                {errors.name && (
                   <p className="text-red-500 text-xs">
-                    {errors.managerName.message}
+                    {errors.name.message}
                   </p>
                 )}
               </div>
@@ -55,12 +54,12 @@ const ManagerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =>
               <div className={scss.input_block}>
                 <label>Mobile Number</label>
                 <Input
-                  {...register("mobileNumber")}
+                  {...register("mobile")}
                   placeholder="Enter Mobile Number"
                 />
-                {errors.mobileNumber && (
+                {errors.mobile && (
                   <p className="text-red-500 text-xs">
-                    {errors.mobileNumber.message}
+                    {errors.mobile.message}
                   </p>
                 )}
               </div>
@@ -71,12 +70,12 @@ const ManagerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =>
               <div className={scss.input_block}>
                 <label>Alternate Contact Number</label>
                 <Input
-                  {...register("alternateContactNumber")}
+                  {...register("alternateContact")}
                   placeholder="Enter Alternate Contact Number"
                 />
-                {errors.alternateContactNumber && (
+                {errors.alternateContact && (
                   <p className="text-red-500 text-xs">
-                    {errors.alternateContactNumber.message}
+                    {errors.alternateContact.message}
                   </p>
                 )}
               </div>
@@ -88,12 +87,12 @@ const ManagerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =>
                 <label>Email Address</label>
                 <Input
                   type="email"
-                  {...register("emailAddress")}
+                  {...register("email")}
                   placeholder="Enter Email Address"
                 />
-                {errors.emailAddress && (
+                {errors.email && (
                   <p className="text-red-500 text-xs">
-                    {errors.emailAddress.message}
+                    {errors.email.message}
                   </p>
                 )}
               </div>

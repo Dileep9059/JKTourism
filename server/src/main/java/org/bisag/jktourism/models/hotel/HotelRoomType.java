@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -33,8 +34,9 @@ import lombok.Setter;
 public class HotelRoomType {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
@@ -60,4 +62,11 @@ public class HotelRoomType {
     @ManyToMany
     @JoinTable(name = "hotel_room_amenities", joinColumns = @JoinColumn(name = "room_type_id"), inverseJoinColumns = @JoinColumn(name = "amenity_id"))
     private Set<Amenity> amenities = new HashSet<>();
+
+    public HotelRoomType(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public HotelRoomType() {
+    }
 }

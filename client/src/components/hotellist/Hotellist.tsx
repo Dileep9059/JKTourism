@@ -731,7 +731,7 @@ const swiperRef = useRef(null);
                             spaceBetween={20}
                             slidesPerGroup={1} 
                             freeMode={true}
-                            navigation={true}
+                            // navigation={true}
                             modules={[FreeMode, Navigation]}
                             navigation={{
                               nextEl: ".swiper-button-next",

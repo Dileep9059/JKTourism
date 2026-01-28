@@ -33,4 +33,11 @@ public class HotelProperty {
     private Boolean liftAvailable;
     private Boolean powerBackup;
     private Boolean wheelchairAccessible;
+
+    public HotelProperty(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public HotelProperty() {
+    }
 }

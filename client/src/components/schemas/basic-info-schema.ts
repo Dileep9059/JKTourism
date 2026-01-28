@@ -14,7 +14,7 @@ export const basicInfoSchema = z.object({
   starRating: z
     .string()
     .optional(),
-  yearOfEstablishment: z.string().min(4, "Select a year"),
+  yearOfEstablishment: z.string().min(4, "Select a year").optional(),
 });
 
 export type BasicInfoFormValues = z.infer<typeof basicInfoSchema>;

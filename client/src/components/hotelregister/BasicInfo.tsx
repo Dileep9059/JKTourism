@@ -13,24 +13,28 @@ import { Input } from "../ui/input";
 import { axiosPrivate } from "@/axios/axios";
 import { toast } from "sonner";
 import { d, e } from "../utils/crypto";
+import { useEffect, useMemo } from "react";
 
 const BasicInfo = ({ handleNext }: { handleNext: () => void }) => {
 
-    const currentYear = new Date().getFullYear()
-    const years = Array.from(
-        { length: currentYear - 1900 + 1 },
-        (_, i) => currentYear - i
-    )
+    const years = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        return Array.from(
+            { length: currentYear - 1950 + 1 },
+            (_, i) => String(currentYear - i)
+        );
+    }, []);
 
     const {
         register,
         handleSubmit,
         control,
-        formState: { errors },
+        formState: { errors }, reset
     } = useForm<BasicInfoFormValues>({
         resolver: zodResolver(basicInfoSchema),
         defaultValues: {
             starRating: "",
+            yearOfEstablishment: undefined as any
         },
     });
 
@@ -43,6 +47,31 @@ const BasicInfo = ({ handleNext }: { handleNext: () => void }) => {
             toast.error(await d(error.response.data.message));
         }
     };
+
+    async function getBasicInfo() {
+        try {
+            const response = await axiosPrivate.get("/api/hotels/basic-info");
+            const data = JSON.parse(await d(response.data));
+            reset({
+                displayName: data?.displayName ?? "",
+                legalName: data?.legalName ?? "",
+                hotelType: data?.hotelType ?? undefined,
+                starRating: data?.starRating ?? "",
+                yearOfEstablishment: data?.establishedYear
+                    ? String(data.establishedYear)
+                    : undefined,
+                websiteUrl: data?.websiteUrl ?? "",
+                publicEmail: data?.publicEmail ?? "",
+                publicPhone: data?.publicPhone ?? "",
+            });
+        } catch (error: any) {
+            toast.error(await d(error.response.data.message));
+        }
+    }
+
+    useEffect(() => {
+        getBasicInfo();
+    }, []);
 
 
     return (
@@ -172,7 +201,7 @@ const BasicInfo = ({ handleNext }: { handleNext: () => void }) => {
                                             </SelectTrigger>
                                             <SelectContent className="max-h-64">
                                                 {years.map((year) => (
-                                                    <SelectItem key={year} value={String(year)}>
+                                                    <SelectItem key={year} value={year}>
                                                         {year}
                                                     </SelectItem>
                                                 ))}

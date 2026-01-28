@@ -6,12 +6,14 @@ import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
-import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field';
 import BasicInfo from './BasicInfo';
 import LocationDetails from './LocationDetails';
 import ManagerDetails from './ManagerDetails';
+import PropertyDetails from './PropertyDetails';
+import OwnerDetails from './OwnerDetails';
+import HoelAmenity from './HoelAmenity';
 
 function Hotelregister() {
   const [currentTab, setCurrentTab] = useState("basic-information");
@@ -23,7 +25,7 @@ function Hotelregister() {
     "basic-information",
     "location-details",
     "owner-details",
-    "nodal-details",
+    "manager-details",
     "property-details",
     "amenity-details",
     "food",
@@ -129,49 +131,7 @@ function Hotelregister() {
 
                   {/* Owner Details Tab */}
                   <TabsContent value="owner-details" className={scss.custom_tabcontent}>
-                    <div className={scss.form_details}>
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Owner’s Full Name</label>
-                            <Input type="text" placeholder="Enter Owner's Full Name" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Mobile Number</label>
-                            <Input type="text" placeholder="Enter Mobile Number" />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">Email Address</label>
-                            <Input type="email" placeholder='Enter Email Address' />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">ID Proof Type</label>
-                            <Input type="text" placeholder='Enter ID Proof Type' />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.input_block}>
-                            <label htmlFor="">ID Proof File</label>
-                            <Input type="file" placeholder='Upload ID Proof File' accept='image/jpg, image/png, image/jpeg' />
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={scss.btn_wrapper}>
-                      <button onClick={handlePrev} className={scss.prev_btn}>Prev</button>
-                      <button onClick={handleNext} className={scss.next_btn}>Next</button>
-                    </div>
+                    <OwnerDetails handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
                   </TabsContent>
 
                   {/* Manager Details Tab */}
@@ -181,253 +141,13 @@ function Hotelregister() {
 
                   {/* Property Details Tab */}
                   <TabsContent value="property-details" className={scss.custom_tabcontent}>
-                    <div className={scss.form_details}>
-
-                      {/* PROPERTY LEVEL DETAILS */}
-                      <div className="grid grid-cols-2 gap-4 md:gap-6">
-
-                        <div className={scss.form_block}>
-                          <label>Check-in Time</label>
-                          <Input type="time" />
-                        </div>
-
-                        <div className={scss.form_block}>
-                          <label>Check-out Time</label>
-                          <Input type="time" />
-                        </div>
-                        <div className={scss.form_block}>
-                          <label>Parking Capacity</label>
-                          <Input type="number" />
-                        </div>
-                        <div className={scss.form_block}>
-                          <FieldGroup>
-                            <Field orientation="horizontal">
-                              <Checkbox id="lift-available" name="lift-available" />
-                              <FieldLabel htmlFor="lift-available">
-                                Lift Available
-                              </FieldLabel>
-                            </Field>
-                          </FieldGroup>
-                        </div>
-                        <div className={scss.form_block}>
-                          <FieldGroup>
-                            <Field orientation="horizontal">
-                              <Checkbox id="power-backup" name="power-backup" />
-                              <FieldLabel htmlFor="power-backup">
-                                Power Backup
-                              </FieldLabel>
-                            </Field>
-                          </FieldGroup>
-                        </div>
-                        <div className={scss.form_block}>
-                          <FieldGroup>
-                            <Field orientation="horizontal">
-                              <Checkbox id="wheelchair-accessible" name="wheelchair-accessible" />
-                              <FieldLabel htmlFor="wheelchair-accessible">
-                                Wheelchair Accessible
-                              </FieldLabel>
-                            </Field>
-                          </FieldGroup>
-                        </div>
-                      </div>
-
-                      {/* ROOM TYPES SECTION */}
-                      <div className="mt-8 space-y-4">
-                        <div className='flex items-center justify-between'>
-                          <h4 className="font-semibold text-sm">Room Types & Tariff</h4>
-                          <Button
-                            type="button"
-                            onClick={addRoomType}
-                            className="bg-white text-blue-600 text-sm hover:text-white"
-                          >
-                            + Add another room type
-                          </Button>
-                        </div>
-
-                        {roomTypes.map((room: any, index: any) => (
-                          <div
-                            key={index}
-                            className="grid grid-cols-4 gap-4 items-end border p-4 rounded-md"
-                          >
-                            {/* Room Type */}
-                            <div>
-                              <label>Room Type</label>
-                              <select
-                                className="w-full border rounded px-2 py-2"
-                                value={room.roomType}
-                                onChange={(e) =>
-                                  updateRoomType(index, "roomType", e.target.value)
-                                }
-                              >
-                                <option value="">Select</option>
-                                {ROOM_TYPES.map((type) => (
-                                  <option key={type} value={type}>
-                                    {type}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-
-                            {/* Number of Rooms */}
-                            <div>
-                              <label>No. of Rooms</label>
-                              <Input
-                                type="number"
-                                placeholder="e.g. 10"
-                                value={room.roomCount}
-                                onChange={(e) =>
-                                  updateRoomType(index, "roomCount", e.target.value)
-                                }
-                              />
-                            </div>
-
-                            {/* Tariff */}
-                            <div>
-                              <label>Tariff (per night)</label>
-                              <Input
-                                type="number"
-                                placeholder="₹"
-                                value={room.tariff}
-                                onChange={(e) =>
-                                  updateRoomType(index, "tariff", e.target.value)
-                                }
-                              />
-                            </div>
-
-                            {/* Remove */}
-                            <Button
-                              type="button"
-                              onClick={() => removeRoomType(index)}
-                              className="bg-red-500 text-white text-sm"
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* NAVIGATION */}
-                    <div className={scss.btn_wrapper}>
-                      <button onClick={handlePrev} className={scss.prev_btn}>
-                        Prev
-                      </button>
-                      <button onClick={handleNext} className={scss.next_btn}>
-                        Next
-                      </button>
-                    </div>
+                    <PropertyDetails handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
                   </TabsContent>
 
 
                   {/* Amenity Details Tab */}
                   <TabsContent value="amenity-details" className={scss.custom_tabcontent}>
-                    <div className={scss.form_details}>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6">
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="air" />
-                              <label htmlFor="air">Air Conditioning</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="center" />
-                              <label htmlFor="center">Business Center</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="iron" />
-                              <label htmlFor="iron">Clothing Iron</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="ports" />
-                              <label htmlFor="ports">Data Ports</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="cleaning" />
-                              <label htmlFor="cleaning">Dry Cleaning</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="room-service" />
-                              <label htmlFor="room-service">Room Service</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="voicemail" />
-                              <label htmlFor="voicemail">Voicemail</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="dryer" />
-                              <label htmlFor="dryer">Hair Dryer</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="mr" />
-                              <label htmlFor="mr">Meeting Rooms</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="op" />
-                              <label htmlFor="op">Outdoor Pools</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                        <div className={scss.form_block}>
-                          <div className={scss.inputblock_wrapper}>
-                            <div className={scss.input_block}>
-                              <Checkbox id="pg" />
-                              <label htmlFor="pg">Parking Garage</label>
-                            </div>
-                          </div>
-                          {/* error message place here  */}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={scss.btn_wrapper}>
-                      <button onClick={handlePrev} className={scss.prev_btn}>Prev</button>
-                      <button onClick={handleNext} className={scss.next_btn}>Next</button>
-                    </div>
+                    <HoelAmenity handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
                   </TabsContent>
 
                   {/* Food Tab */}
@@ -618,13 +338,6 @@ function Hotelregister() {
 
 export default Hotelregister
 
-const ROOM_TYPES = [
-  "Standard",
-  "Deluxe",
-  "Super Deluxe",
-  "Suite",
-  "Executive",
-];
 
 type RoomType = {
   roomType: string;
