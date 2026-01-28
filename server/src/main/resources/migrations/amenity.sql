@@ -1,0 +1,36 @@
+INSERT INTO amenities (name, scope, icon) VALUES
+('Air Conditioning', 'ROOM', 'snowflake'),
+('Television', 'ROOM', 'tv'),
+('Attached Bathroom', 'ROOM', 'bath'),
+('Hot & Cold Water', 'ROOM', 'droplets'),
+('Wardrobe', 'ROOM', 'wardrobe'),
+('Mini Refrigerator', 'ROOM', 'refrigerator'),
+('Electric Kettle', 'ROOM', 'kettle'),
+('Tea / Coffee Maker', 'ROOM', 'coffee'),
+('Room Heater', 'ROOM', 'heater'),
+('Balcony', 'ROOM', 'building-2'),
+('Sofa', 'ROOM', 'sofa'),
+('Hair Dryer', 'ROOM', 'wind'),
+('In-room Safe', 'ROOM', 'lock'),
+('Iron & Ironing Board', 'ROOM', 'iron'),
+('Desk / Work Table', 'ROOM', 'desk'),
+('Extra Pillows', 'ROOM', 'layers');
+
+
+INSERT INTO amenities (name, scope, icon) VALUES
+('Free Parking', 'HOTEL', 'car'),
+('24x7 Front Desk', 'HOTEL', 'bell'),
+('Free WiFi', 'HOTEL', 'wifi'),
+('Restaurant', 'HOTEL', 'utensils'),
+('Bar', 'HOTEL', 'wine'),
+('Swimming Pool', 'HOTEL', 'waves'),
+('Lift / Elevator', 'HOTEL', 'arrow-up-down'),
+('Power Backup', 'HOTEL', 'zap'),
+('Conference Hall', 'HOTEL', 'presentation'),
+('Banquet Hall', 'HOTEL', 'users'),
+('Laundry Service', 'HOTEL', 'shirt'),
+('Room Service', 'HOTEL', 'concierge-bell'),
+('CCTV Security', 'HOTEL', 'cctv'),
+('Wheelchair Accessible', 'HOTEL', 'accessibility'),
+('Fire Safety', 'HOTEL', 'flame'),
+('First Aid', 'HOTEL', 'heart-pulse');
