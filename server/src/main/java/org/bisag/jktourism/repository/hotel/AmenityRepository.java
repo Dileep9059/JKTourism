@@ -21,5 +21,4 @@ public interface AmenityRepository extends JpaRepository<Amenity, Long> {
             """)
     List<AmenityDTO> findByScope(@Param("scope") AmenityScope scope);
 
-
 }

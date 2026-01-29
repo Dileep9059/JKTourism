@@ -33,4 +33,11 @@ public class HotelBanking {
 
     @Column(columnDefinition = "TEXT")
     private String file;
+
+    public HotelBanking(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public HotelBanking() {
+    }
 }

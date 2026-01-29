@@ -2,7 +2,9 @@ package org.bisag.jktourism.models.hotel;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bisag.jktourism.models.hotel.enums.HotelStatus;
@@ -74,4 +76,8 @@ public class Hotel {
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelRoomType> roomTypes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<HotelPropertyAmenity> propertyAmenities = new HashSet<>();
+
 }

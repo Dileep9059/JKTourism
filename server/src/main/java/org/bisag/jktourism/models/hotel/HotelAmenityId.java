@@ -1,6 +1,7 @@
 package org.bisag.jktourism.models.hotel;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
@@ -10,6 +11,6 @@ import lombok.Setter;
 @Getter @Setter
 public class HotelAmenityId implements Serializable {
 
-    private long hotelId;
+    private UUID hotelId;
     private long amenityId;
 }

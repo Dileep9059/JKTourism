@@ -24,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 const roleRedirectMap: Record<string, string> = {
   ROLE_MASTER_ADMIN: "/masterAdmin",
@@ -229,6 +230,7 @@ const Login = () => {
                   <InputOTP
                     maxLength={6}
                     value={otp}
+                    pattern={REGEXP_ONLY_DIGITS}
                     onChange={(value) => setOtp(value.replace(/\D/g, ""))}
                     containerClassName="w-full py-2 mb-2"
                   >
@@ -236,9 +238,6 @@ const Login = () => {
                       <InputOTPSlot index={0} className="flex-1 text-center" inputMode="numeric" />
                       <InputOTPSlot index={1} className="flex-1 text-center" inputMode="numeric" />
                       <InputOTPSlot index={2} className="flex-1 text-center" inputMode="numeric" />
-                    </InputOTPGroup>
-                    <InputOTPSeparator className="my-2" />
-                    <InputOTPGroup className="w-full flex justify-between">
                       <InputOTPSlot index={3} className="flex-1 text-center" inputMode="numeric" />
                       <InputOTPSlot index={4} className="flex-1 text-center" inputMode="numeric" />
                       <InputOTPSlot index={5} className="flex-1 text-center" inputMode="numeric" />

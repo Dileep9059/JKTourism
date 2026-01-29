@@ -26,13 +26,14 @@ public class HotelDocument {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
     // private String documentType;
     private String registrationNumber;
-    private String fileUrl;
+    private String file;
 
     // private LocalDate validFrom;
     // private LocalDate validTo;
@@ -43,4 +44,11 @@ public class HotelDocument {
 
     @UpdateTimestamp
     private Instant updatedAt;
+
+    public HotelDocument(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public HotelDocument() {
+    }
 }

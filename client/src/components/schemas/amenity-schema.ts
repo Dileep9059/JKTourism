@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const amenitySchema = z.object({
   amenities: z
-    .array(z.string())
+    .array(z.number())
     .min(1, "Select at least one amenity"),
 });
 

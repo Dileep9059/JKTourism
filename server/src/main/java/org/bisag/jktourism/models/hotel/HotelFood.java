@@ -28,11 +28,16 @@ public class HotelFood {
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
-    private Boolean foodAvailable;
-
     @Enumerated(EnumType.STRING)
     private FoodType foodType;
 
     private Boolean inhouseRestaurant;
     private Boolean roomService;
+
+    public HotelFood(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public HotelFood() {
+    }
 }

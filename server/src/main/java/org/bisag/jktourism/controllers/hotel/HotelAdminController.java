@@ -1,6 +1,7 @@
 package org.bisag.jktourism.controllers.hotel;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,21 +9,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bisag.jktourism.exceptions.BadRequestException;
 import org.bisag.jktourism.models.User;
 import org.bisag.jktourism.models.hotel.Amenity;
 import org.bisag.jktourism.models.hotel.Hotel;
+import org.bisag.jktourism.models.hotel.HotelAmenityId;
+import org.bisag.jktourism.models.hotel.HotelBanking;
 import org.bisag.jktourism.models.hotel.HotelBasicInfo;
+import org.bisag.jktourism.models.hotel.HotelDeclaration;
+import org.bisag.jktourism.models.hotel.HotelDocument;
+import org.bisag.jktourism.models.hotel.HotelFood;
 import org.bisag.jktourism.models.hotel.HotelLocation;
 import org.bisag.jktourism.models.hotel.HotelNodalOffice;
 import org.bisag.jktourism.models.hotel.HotelOwner;
 import org.bisag.jktourism.models.hotel.HotelProperty;
+import org.bisag.jktourism.models.hotel.HotelPropertyAmenity;
 import org.bisag.jktourism.models.hotel.HotelRoomType;
 import org.bisag.jktourism.models.hotel.enums.AmenityScope;
+import org.bisag.jktourism.models.hotel.enums.FoodType;
 import org.bisag.jktourism.models.hotel.enums.HotelStatus;
 import org.bisag.jktourism.record.AmenityDTO;
 import org.bisag.jktourism.repository.UserRepository;
 import org.bisag.jktourism.repository.hotel.AmenityRepository;
+import org.bisag.jktourism.repository.hotel.HotelBankingRepository;
 import org.bisag.jktourism.repository.hotel.HotelBasicInfoRepository;
+import org.bisag.jktourism.repository.hotel.HotelDeclarationRepository;
+import org.bisag.jktourism.repository.hotel.HotelDocumentRepository;
+import org.bisag.jktourism.repository.hotel.HotelFoodRepository;
 import org.bisag.jktourism.repository.hotel.HotelLocationRepository;
 import org.bisag.jktourism.repository.hotel.HotelNodalOfficeRepository;
 import org.bisag.jktourism.repository.hotel.HotelOwnerRepository;
@@ -56,6 +69,10 @@ public class HotelAdminController {
     private final HotelPropertyRepository hotelPropertyRepo;
     private final HotelOwnerRepository hotelOwnerRepo;
     private final AmenityRepository amenityRepo;
+    private final HotelFoodRepository hotelFoodRepo;
+    private final HotelDocumentRepository hotelDocumentRepo;
+    private final HotelBankingRepository hotelBankingRepo;
+    private final HotelDeclarationRepository hotelDeclarationRepo;
     private final UserRepository userRepository;
 
     // basic info
@@ -198,7 +215,7 @@ public class HotelAdminController {
 
     @PostMapping(value = "/{id}/owner-details", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> ownerDetails(@PathVariable String id, @RequestParam String data,
-            @RequestParam MultipartFile file) throws Exception{
+            @RequestParam MultipartFile file) throws Exception {
         try {
             Hotel hotel = hotelRepo.findById(UUID.fromString(id)).orElse(null);
             if (hotel == null) {
@@ -227,8 +244,7 @@ public class HotelAdminController {
     }
 
     // nodal-details
-    // /{id}/nodal-officer
-
+    // /{id}/manager
     @PostMapping("/{id}/manager")
     public ResponseEntity<?> managerDetails(@PathVariable String id, @RequestBody String request) throws Exception {
         try {
@@ -296,7 +312,6 @@ public class HotelAdminController {
         }
     }
 
-
     @PostMapping("/amenities")
     public ResponseEntity<?> getAmenities(@RequestBody String request) throws Exception {
         try {
@@ -310,36 +325,83 @@ public class HotelAdminController {
     }
 
     @PostMapping("/{id}/amenities")
-    public ResponseEntity<?> amenities(@PathVariable String id, @RequestBody String request) throws Exception {
+    public ResponseEntity<?> amenities(
+            @PathVariable String id,
+            @RequestBody String request) throws Exception {
         try {
-            Hotel hotel = hotelRepo.findById(UUID.fromString(id)).orElse(null);
-            if (hotel == null) {
-                throw new Exception("Hotel Not Found.");
-            }
+            Hotel hotel = hotelRepo.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
 
             JsonNode json = Json.deserialize(JsonNode.class, request);
-            List<String> amenities = new ArrayList<>();
-            for (JsonNode amenity : json.get("amenities")) {
-                amenities.add(amenity.asText());
+
+            List<Long> amenityIds = new ArrayList<>();
+            for (JsonNode node : json.get("amenities")) {
+                amenityIds.add(node.asLong());
             }
 
-            // hotel.setAmenities(amenities);
+            List<Amenity> amenityList = amenityRepo.findAllById(amenityIds);
+
+            if (amenityList.isEmpty()) {
+                throw new BadRequestException("No valid amenities found");
+            }
+
+            // 🔴 IMPORTANT: clear existing amenities (overwrite behavior)
+            hotel.getPropertyAmenities().clear();
+
+            for (Amenity amenity : amenityList) {
+
+                HotelPropertyAmenity mapping = new HotelPropertyAmenity();
+
+                HotelAmenityId amenityId = new HotelAmenityId();
+                amenityId.setHotelId(hotel.getId()); // UUID → adapt if needed
+                amenityId.setAmenityId(amenity.getId());
+
+                mapping.setId(amenityId);
+                mapping.setHotel(hotel);
+                mapping.setAmenity(amenity);
+
+                hotel.getPropertyAmenities().add(mapping);
+            }
+
             hotelRepo.save(hotel);
 
-            return ResponseEntity.ok().body(Json.serialize("Amenities Added Successfully."));
+            return ResponseEntity.ok(
+                    Json.serialize("Amenities Added Successfully."));
+
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Json.serialize(e.getMessage()));
         }
     }
 
     // food
     // /{id}/food
     @PostMapping("/{id}/food")
-    public ResponseEntity<?> food(@RequestBody String request) {
+    public ResponseEntity<?> food(@PathVariable String id, @RequestBody String request) throws Exception {
         try {
-            return ResponseEntity.ok().body(null);
+
+            Hotel hotel = hotelRepo.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
+
+            JsonNode json = Json.deserialize(JsonNode.class, request);
+
+            boolean inHouseRestaurant = json.get("inHouseRestaurant").asBoolean();
+            boolean roomService = json.get("roomService").asBoolean();
+            String foodType = json.get("foodType").asText();
+
+            HotelFood food = new HotelFood(hotel);
+            food.setInhouseRestaurant(inHouseRestaurant);
+            food.setRoomService(roomService);
+            // NON-VEG -> NON_VEG
+            // VEG -> VEG
+            // BOTH -> BOTH
+            food.setFoodType(FoodType.valueOf(foodType.toUpperCase().replace("-", "_")));
+
+            hotelFoodRepo.save(food);
+
+            return ResponseEntity.ok().body(Json.serialize("Food Details Added Successfully."));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
         }
     }
 
@@ -347,23 +409,59 @@ public class HotelAdminController {
     // /{id}/registration
 
     @PostMapping("/{id}/registration")
-    public ResponseEntity<?> registrationDetails(@RequestBody String request) {
+    public ResponseEntity<?> registrationDetails(@PathVariable String id, @RequestParam String data,
+            @RequestParam(required = false) MultipartFile file) throws Exception {
         try {
-            return ResponseEntity.ok().body(null);
+            Hotel hotel = hotelRepo.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
+
+            JsonNode json = Json.deserialize(JsonNode.class, data);
+            String registrationNumber = json.get("registrationNumber").asText();
+
+            HotelDocument document = new HotelDocument(hotel);
+            document.setRegistrationNumber(registrationNumber);
+            // document.setFile();
+
+            hotelDocumentRepo.save(document);
+
+            return ResponseEntity.ok().body(Json.serialize("Registration Details Added Successfully."));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
         }
     }
 
     // banking-details
     // /{id}/bank
 
-    @PostMapping("/{id}/bank")
-    public ResponseEntity<?> bankingDetails(@RequestBody String request) {
+    @PostMapping(value = "/{id}/bank", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> bankingDetails(@PathVariable String id, @RequestParam String data,
+            @RequestParam(required = false) MultipartFile file) throws Exception {
         try {
-            return ResponseEntity.ok().body(null);
+            Hotel hotel = hotelRepo.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
+
+            JsonNode json = Json.deserialize(JsonNode.class, data);
+            String bankName = json.get("bankName").asText();
+            String accountNumber = json.get("accountNumber").asText();
+            String confirmAccountNumber = json.get("confirmAccountNumber").asText();
+            String ifscCode = json.get("ifscCode").asText();
+            String accountHolderName = json.get("accountHolderName").asText();
+
+            if (!accountNumber.equals(confirmAccountNumber)) {
+                throw new BadRequestException("Account Number and Confirm Account Number do not match");
+            }
+
+            HotelBanking bank = new HotelBanking(hotel);
+            bank.setBankName(bankName);
+            bank.setAccountNumber(accountNumber);
+            bank.setIfscCode(ifscCode);
+            bank.setAccountHolderName(accountHolderName);
+
+            hotelBankingRepo.save(bank);
+
+            return ResponseEntity.ok().body(Json.serialize("Bank Details Added Successfully."));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
         }
     }
 
@@ -371,11 +469,28 @@ public class HotelAdminController {
     // /{id}/declaration
 
     @PostMapping("/{id}/declaration")
-    public ResponseEntity<?> declaration(@RequestBody String request) {
+    public ResponseEntity<?> declaration(@PathVariable String id, @RequestBody String data) throws Exception {
         try {
-            return ResponseEntity.ok().body(null);
+            Hotel hotel = hotelRepo.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
+
+            JsonNode json = Json.deserialize(JsonNode.class, data);
+
+            boolean consent = json.get("consent").asBoolean();
+            String ownerName = json.get("ownerName").asText();
+            String declarationDate = json.get("declarationDate").asText();
+
+            HotelDeclaration declaration = new HotelDeclaration(hotel);
+            declaration.setDeclarationAccepted(consent);
+            declaration.setSignedName(ownerName);
+            // "2026-01-29" -> 2026-01-29T00:00:00Z
+            declaration.setSignedAt(Instant.parse(declarationDate + "T00:00:00Z"));
+
+            hotelDeclarationRepo.save(declaration);
+
+            return ResponseEntity.ok().body(Json.serialize("Declaration Added Successfully."));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
         }
     }
 }

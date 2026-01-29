@@ -8,10 +8,9 @@ import { d, e } from "../utils/crypto";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
 
-const HoelAmenity = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void, handlePrev: () => void, hotelId: string }) => {
+const HotelAmenity = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void, handlePrev: () => void, hotelId: string }) => {
     const [amenitiesFromDB, setAmenitiesFromDB] = useState<any[]>([]);
     const {
-        control,
         handleSubmit,
         watch,
         setValue,
@@ -39,9 +38,8 @@ const HoelAmenity = ({ handleNext, handlePrev, hotelId }: { handleNext: () => vo
             const payload = {
                 amenities: data.amenities
             }
-            const response = await axiosPrivate.post(`/api/hotels/${hotelId}/amenities`, await e(payload));
-            const res = JSON.parse(await d(response.data));
-            toast.success(res.message);
+            await axiosPrivate.post(`/api/hotels/${hotelId}/amenities`, await e(payload));
+            toast.success("Amenities Added Successfully.");
             handleNext();
         } catch (error: any) {
             toast.error(JSON.parse(await d(error.response.data)))
@@ -64,12 +62,12 @@ const HoelAmenity = ({ handleNext, handlePrev, hotelId }: { handleNext: () => vo
                                     <div className={scss.input_block}>
                                         <Checkbox
                                             id={`amenity-${amenity.id}`}
-                                            checked={selectedAmenities.includes(amenity.name)}
+                                            checked={selectedAmenities.includes(amenity.id)}
                                             onCheckedChange={(checked) => {
                                                 const updated = checked
-                                                    ? [...selectedAmenities, amenity.name]
+                                                    ? [...selectedAmenities, amenity.id]
                                                     : selectedAmenities.filter(
-                                                        (a) => a !== amenity.name
+                                                        (a) => a !== amenity.id
                                                     );
 
                                                 setValue("amenities", updated, {
@@ -109,4 +107,4 @@ const HoelAmenity = ({ handleNext, handlePrev, hotelId }: { handleNext: () => vo
     )
 }
 
-export default HoelAmenity
+export default HotelAmenity

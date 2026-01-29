@@ -29,4 +29,11 @@ public class HotelDeclaration {
     private Boolean declarationAccepted;
     private String signedName;
     private Instant signedAt;
+
+    public HotelDeclaration(Hotel hotel) {
+        this.hotel = hotel;
+    }
+
+    public HotelDeclaration() {
+    }
 }
