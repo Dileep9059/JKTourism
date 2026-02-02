@@ -3,13 +3,17 @@ package org.bisag.jktourism.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bisag.jktourism.crypto.Crypto;
+import org.bisag.jktourism.dto.admin.HotelAdminListDto;
+import org.bisag.jktourism.dto.admin.HotelApprovalDto;
 import org.bisag.jktourism.models.Activity;
 import org.bisag.jktourism.models.Cuisine;
 import org.bisag.jktourism.models.Event;
 import org.bisag.jktourism.models.Experience;
 import org.bisag.jktourism.models.Shopping;
+import org.bisag.jktourism.models.hotel.enums.HotelStatus;
 import org.bisag.jktourism.payload.response.MessageResponse;
 import org.bisag.jktourism.services.ActivityService;
 import org.bisag.jktourism.services.CuisineService;
@@ -19,12 +23,15 @@ import org.bisag.jktourism.services.EventService;
 import org.bisag.jktourism.services.ExperienceService;
 import org.bisag.jktourism.services.ShoppingService;
 import org.bisag.jktourism.services.WhyVisitService;
+import org.bisag.jktourism.services.hotel.HotelService;
 import org.bisag.jktourism.utils.Json;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,39 +41,24 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/admin")
+@RequiredArgsConstructor
 public class AdminController {
 
-    @Autowired
-    Crypto crypto;
-
-    @Autowired
-    JdbcTemplate template;
-
-    @Autowired
-    DestinationCategoryService categoryService;
-
-    @Autowired
-    WhyVisitService whyVisitService;
-
-    @Autowired
-    DestinationService destinationService;
-
-    @Autowired
-    EventService eventService;
-
-    @Autowired
-    ActivityService activityService;
-
-    @Autowired
-    ExperienceService experienceService;
-
-    @Autowired
-    ShoppingService shoppingService;
-
-    @Autowired
-    CuisineService cuisineService;
+    private final Crypto crypto;
+    private final JdbcTemplate template;
+    private final DestinationCategoryService categoryService;
+    private final WhyVisitService whyVisitService;
+    private final DestinationService destinationService;
+    private final EventService eventService;
+    private final ActivityService activityService;
+    private final ExperienceService experienceService;
+    private final ShoppingService shoppingService;
+    private final CuisineService cuisineService;
+    private final HotelService hotelService;
 
     @PostMapping("/add-category")
     public MessageResponse addCategory(@RequestParam String data,
@@ -454,4 +446,51 @@ public class AdminController {
         }
         return new MessageResponse("Cuisine Status Updated Successfully.");
     }
+
+    // Hotel List View
+    @PostMapping("/list-hotels")
+    public ResponseEntity<?> listHotels(@RequestBody String req) {
+        try {
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
+            int page = jsonNode.get("page").asInt(0);
+            int size = jsonNode.get("size").asInt(10);
+
+            List<Order> orders = new ArrayList<>();
+            if (jsonNode.has("sort") && jsonNode.get("sort").isArray()) {
+                for (JsonNode sortNode : jsonNode.get("sort")) {
+                    String field = sortNode.get("field").asText();
+                    String dir = sortNode.get("direction").asText("asc");
+                    orders.add(new Order(Sort.Direction.fromString(dir), field));
+                }
+            }
+
+            Sort sort = orders.isEmpty() ? Sort.by("submittedAt").ascending() : Sort.by(orders);
+
+            Page<HotelAdminListDto> result = hotelService.getHotelsForApproval(HotelStatus.SUBMITTED, page, size, sort);
+
+            return ResponseEntity.ok(Json.serialize(result));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error getting hotels: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/hotel-stats")
+    public ResponseEntity<?> hotelStats() {
+        try {
+            return ResponseEntity.ok(Json.serialize(hotelService.getHotelStatusCounts()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error getting hotel stats: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/hotel-details/{hotelId}")
+    public ResponseEntity<?> getHotelDetails(@PathVariable UUID hotelId) {
+        try {
+            HotelApprovalDto dto = hotelService.getHotelDetailsForApproval(hotelId);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error getting hotel details: " + e.getMessage());
+        }
+    }
+
 }

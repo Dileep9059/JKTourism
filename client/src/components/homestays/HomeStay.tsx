@@ -23,7 +23,7 @@ import axiosInstance from "@/axios/axios";
 import { d, e } from "../utils/crypto";
 import DocumentTitle from "../DocumentTitle";
 
-type HomeStay = {
+type HomeStayType = {
   id: number;
   name: string;
   properitorName: string;
@@ -33,7 +33,7 @@ type HomeStay = {
 
 const HomeStay = () => {
 
-  const [data, setData] = useState<HomeStay[]>([]);
+  const [data, setData] = useState<HomeStayType[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -101,7 +101,7 @@ const HomeStay = () => {
     fetchHomeStays();
   }, [pageIndex, pageSize, sorting, search, state, district]);
 
-  const columns: ColumnDef<HomeStay>[] = [
+  const columns: ColumnDef<HomeStayType>[] = [
     {
       // accessorKey: "id",
       header: "S.No.",

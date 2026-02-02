@@ -47,7 +47,7 @@ export const InnerHeader = ({
   return (
     <header
       className={cn(
-        "bg-background sticky top-0 flex h-16 items-center gap-3 p-4 sm:gap-4 z-100",
+        "bg-background sticky top-0 flex h-16 items-center gap-3 p-4 sm:gap-4 z-50",
         className
       )}
       {...props}
