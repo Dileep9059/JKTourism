@@ -1,5 +1,6 @@
 package org.bisag.jktourism.services.hotel;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +30,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,12 +42,11 @@ public class HotelService {
     private final HotelRepository hotelRepository;
 
     public Page<HotelAdminListDto> getHotelsForApproval(
-            HotelStatus status,
             int page,
             int size,
             Sort sort) {
         Pageable pageable = PageRequest.of(page, size, sort);
-        return hotelRepository.findForAdminApproval(status, pageable);
+        return hotelRepository.findForAdminApproval(pageable);
     }
 
     public Map<String, Long> getHotelStatusCounts() {
@@ -87,10 +87,13 @@ public class HotelService {
         if (hotel.getBasicInfo() != null) {
             HotelBasicInfo bi = hotel.getBasicInfo();
             dto.setBasicInfo(new HotelBasicInfoDto(
-                    bi.getRegistrationNumber(),
-                    bi.getWebsite(),
-                    bi.getEmail(),
-                    bi.getMobile()));
+                    bi.getDescription(),
+                    bi.getHotelType(),
+                    bi.getStarRating(),
+                    bi.getEstablishedYear(),
+                    bi.getWebsiteUrl(),
+                    bi.getPublicEmail(),
+                    bi.getPublicPhone()));
         }
 
         // Location
@@ -122,29 +125,31 @@ public class HotelService {
         if (hotel.getProperty() != null) {
             HotelProperty p = hotel.getProperty();
             dto.setProperty(new HotelPropertyDto(
-                    // p.getTotalRooms(),
-                    // p.getFloors(),
-                    p.getCheckInTime(),
-                    p.getCheckOutTime()));
+                    p.getCheckInTime(), 
+                    p.getCheckOutTime(),
+                    p.getParkingCapacity(),
+                    p.getLiftAvailable(),
+                    p.getPowerBackup(),
+                    p.getWheelchairAccessible()));
         }
 
         // Room Types
-        List<HotelRoomTypeDto> roomDtos = new ArrayList<>();
-        if (hotel.getRoomTypes() != null) {
-            for (HotelRoomType room : hotel.getRoomTypes()) {
-                roomDtos.add(new HotelRoomTypeDto(
-                        room.getType(),
-                        room.getNumberOfRooms(),
-                        room.getTariff(),
-                        room.getAmenities().stream()
-                                .map(a -> a.getAmenity().getName())
-                                .toList(),
-                        room.getImages().stream()
-                                .map(img -> img.getUrl())
-                                .toList()));
-            }
-        }
-        dto.setRoomTypes(roomDtos);
+        // List<HotelRoomTypeDto> roomDtos = new ArrayList<>();
+        // if (hotel.getRoomTypes() != null) {
+        //     for (HotelRoomType room : hotel.getRoomTypes()) {
+        //         roomDtos.add(new HotelRoomTypeDto(
+        //                 room.getType(),
+        //                 room.getNumberOfRooms(),
+        //                 room.getTariff(),
+        //                 room.getAmenities().stream()
+        //                         .map(a -> a.getAmenity().getName())
+        //                         .toList(),
+        //                 room.getImages().stream()
+        //                         .map(img -> img.getUrl())
+        //                         .toList()));
+        //     }
+        // }
+        // dto.setRoomTypes(roomDtos);
 
         // Property Amenities
         List<AmenityDto> amenities = new ArrayList<>();
@@ -162,4 +167,14 @@ public class HotelService {
 
         return dto;
     }
+
+    @Transactional
+    public void updteHotelStatus(UUID hotelId, HotelStatus status) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new RuntimeException("Hotel not found"));
+        hotel.setStatus(status);
+        hotel.setApprovedAt(Instant.now());
+        hotelRepository.save(hotel);
+    }
+    
 }

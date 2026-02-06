@@ -1,13 +1,12 @@
 package org.bisag.jktourism.repository.hotel;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.bisag.jktourism.dto.admin.HotelAdminListDto;
+import org.bisag.jktourism.dto.janta.PublicHotelListDto;
 import org.bisag.jktourism.models.hotel.Hotel;
-import org.bisag.jktourism.models.hotel.enums.HotelStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,11 +34,9 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
                 FROM Hotel h
                 LEFT JOIN h.location l
                 LEFT JOIN h.owner o
-                WHERE (:status IS NULL OR h.status = :status)
                 ORDER BY h.createdAt DESC
             """)
     Page<HotelAdminListDto> findForAdminApproval(
-            @Param("status") HotelStatus status,
             Pageable pageable);
 
     @Query("""
@@ -48,5 +45,26 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
                 GROUP BY h.status
             """)
     List<Object[]> countByStatusRaw();
+
+    @Query("""
+                SELECT new org.bisag.jktourism.dto.janta.PublicHotelListDto(
+                    h.id,
+                    h.displayName,
+                    h.legalName,
+                    loc.city,
+                    loc.district,
+                    loc.state
+                )
+                FROM Hotel h
+                JOIN h.location loc
+                WHERE h.status = org.bisag.jktourism.models.hotel.enums.HotelStatus.APPROVED
+                  AND (:name IS NULL OR LOWER(h.displayName) LIKE LOWER(CONCAT('%', :name, '%')))
+                  AND (:district IS NULL OR LOWER(loc.district) = LOWER(:district))
+                ORDER BY h.approvedAt DESC
+            """)
+    Page<PublicHotelListDto> findPublicHotels(
+            @Param("name") String name,
+            @Param("district") String district,
+            Pageable pageable);
 
 }

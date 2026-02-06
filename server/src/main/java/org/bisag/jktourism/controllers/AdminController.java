@@ -466,7 +466,7 @@ public class AdminController {
 
             Sort sort = orders.isEmpty() ? Sort.by("submittedAt").ascending() : Sort.by(orders);
 
-            Page<HotelAdminListDto> result = hotelService.getHotelsForApproval(HotelStatus.SUBMITTED, page, size, sort);
+            Page<HotelAdminListDto> result = hotelService.getHotelsForApproval(page, size, sort);
 
             return ResponseEntity.ok(Json.serialize(result));
         } catch (Exception e) {
@@ -490,6 +490,32 @@ public class AdminController {
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error getting hotel details: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/approve-hotel")
+    public ResponseEntity<?> approveHotel(@RequestBody String req) throws Exception {
+        try {
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
+            UUID hotelId = UUID.fromString(jsonNode.get("hotelId").asText());
+
+            hotelService.updteHotelStatus(hotelId, HotelStatus.APPROVED);
+            return ResponseEntity.ok(Json.serialize("Hotel approved successfully."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error approving hotel: " + e.getLocalizedMessage());
+        }
+    }
+
+    @PostMapping("/reject-hotel")
+    public MessageResponse rejectHotel(@RequestBody String req) throws Exception {
+        try {
+            JsonNode jsonNode = Json.deserialize(JsonNode.class, req);
+            UUID hotelId = UUID.fromString(jsonNode.get("hotelId").asText());
+
+            hotelService.updteHotelStatus(hotelId, HotelStatus.REJECTED);
+            return new MessageResponse("Hotel rejected successfully.");
+        } catch (Exception e) {
+            return new MessageResponse("Error rejecting hotel: " + e.getLocalizedMessage());
         }
     }
 

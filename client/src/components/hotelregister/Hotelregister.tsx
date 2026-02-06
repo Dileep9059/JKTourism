@@ -2,12 +2,8 @@ import { useState } from 'react';
 import scss from './hotelregister.module.scss';
 import clsx from 'clsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from '../ui/input';
-import { Checkbox } from '../ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 import { toast } from 'sonner';
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../ui/field';
 import BasicInfo from './BasicInfo';
 import LocationDetails from './LocationDetails';
 import ManagerDetails from './ManagerDetails';

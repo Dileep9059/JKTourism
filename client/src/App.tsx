@@ -63,6 +63,7 @@ import Hotelregister from "./components/hotelregister/Hotelregister";
 import HotelRegistration from "./components/hotel/HotelRegistration";
 import HotelDashboard from "./components/hotel/HotelDashboard";
 import AppliedHotels from "./components/hotel/AppliedHotels";
+import HotelUploadAssets from "./components/hotelregister/HotelUploadAssets";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -113,10 +114,16 @@ const roleRoutes = [
       { path: "shopping-location/add", element: <AddShopping /> },
       { path: "feedback", element: <Feedbacks /> },
 
-      {path: "dashboard/applied-hotels", element: <AppliedHotels />}
+      { path: "dashboard/applied-hotels", element: <AppliedHotels /> }
     ],
   },
-  { role: ROLES.HOTEL, routes: [{ path: "hotel/dashboard", element: <HotelDashboard /> }, { path: "hotel/add", element: <Hotelregister /> }] }
+  {
+    role: ROLES.HOTEL, routes: [
+      { path: "hotel/dashboard", element: <HotelDashboard /> },
+      { path: "hotel/add", element: <Hotelregister /> },
+      { path: "hotel/upload", element: <HotelUploadAssets /> },
+    ]
+  }
 ];
 
 function App() {

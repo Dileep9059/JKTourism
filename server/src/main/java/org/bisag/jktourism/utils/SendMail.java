@@ -2,14 +2,14 @@ package org.bisag.jktourism.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,6 +23,7 @@ import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -34,7 +35,7 @@ public class SendMail {
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
-    public String sendMail(String subject, InternetAddress[] to, String msgcontent, List<File> files) {
+    public String sendMail(String subject, InternetAddress[] to, String msgcontent, List<MultipartFile> files) {
         if (activeProfile.equals("dev")) {
             return sendLocalMail(subject, to, msgcontent, files);
         } else {
@@ -71,16 +72,14 @@ public class SendMail {
                 Multipart multipart = new MimeMultipart();
                 multipart.addBodyPart(messageBodyPart);
 
-                if (files != null) {
-                    MimeBodyPart fileBodyPart = new MimeBodyPart();
-                    files.stream().forEach(file -> {
-                        try {
-                            fileBodyPart.attachFile(file);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    multipart.addBodyPart(fileBodyPart);
+                for (MultipartFile multipartFile : files) {
+                    File tempFile = File.createTempFile("mail-", multipartFile.getOriginalFilename());
+                    multipartFile.transferTo(tempFile);
+
+                    MimeBodyPart bodyPart = new MimeBodyPart();
+                    bodyPart.attachFile(tempFile);
+
+                    multipart.addBodyPart(bodyPart);
                 }
 
                 msg.setContent(multipart);
@@ -95,23 +94,25 @@ public class SendMail {
         }
     }
 
-       private String sendLocalMail(String subject, InternetAddress[] to, String msgcontent, List<File> files) {
+    public static String sendLocalMail(String subject, InternetAddress[] to, String msgcontent,
+            List<MultipartFile> attachments) {
         try {
             // getting jwt token
             OkHttpClient client = new OkHttpClient();
 
             MediaType mediaType = MediaType.parse("application/json");
             RequestBody body = RequestBody.create(
-                    "{\n    \"username\": \"ocbis\",\n    \"password\": \"ocbis\"\n}",
+                    "{\"username\": \"ocbis\", \"password\": \"ocbis\"}",
                     mediaType);
 
             Request request = new Request.Builder()
-                    .url("https://amritsarovar.gov.in/EmailSmsServer/authenticate")
+                    .url("https://amritsarovar.gov.in/AsiEmailSmsServer/authenticate")
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .build();
 
             try (Response response = client.newCall(request).execute()) {
+
                 if (response.isSuccessful() && response.body() != null) {
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode jsonNode = mapper.readTree(response.body().string());
@@ -122,33 +123,46 @@ public class SendMail {
                     // using token to send mail
                     OkHttpClient clientUsingToken = new OkHttpClient();
 
-                    // Encode each value
-                    String encodedSubject = URLEncoder.encode(subject, StandardCharsets.UTF_8);
-                    String encodedMessage = URLEncoder.encode(msgcontent, StandardCharsets.UTF_8);
-                    String encodedEmail = URLEncoder.encode(to[0].getAddress(), StandardCharsets.UTF_8);
-                    // Concatenate into request body string
-                    String requestBodyString = "subject=" + encodedSubject +
-                            "&message=" + encodedMessage +
-                            "&emailto=" + encodedEmail;
+                    MultipartBody.Builder builder = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM)
+                            .addFormDataPart("subject", subject)
+                            .addFormDataPart("emailto", to[0].getAddress())
+                            .addFormDataPart("message", msgcontent)
+                            .addFormDataPart("senderId", "ncog@digitalindia.gov.in")
+                            .addFormDataPart("senderPassword", "Ncog@1948");
 
-                    MediaType mediaTypeUsingToken = MediaType.parse("application/x-www-form-urlencoded");
-                    RequestBody bodyUsingToken = RequestBody.create(
-                            requestBodyString,
-                            mediaTypeUsingToken);
+                    if (attachments != null && !attachments.isEmpty()) {
+                        for (MultipartFile file : attachments) {
+                            if (!file.isEmpty()) {
+                                String mimeType = file.getContentType();
+                                if (mimeType == null)
+                                    mimeType = "application/octet-stream";
+
+                                // create RequestBody directly from bytes
+                                RequestBody fileBody = RequestBody.create(file.getBytes(), MediaType.parse(mimeType));
+
+                                // 'attachments' is the field name expected by server
+                                builder.addFormDataPart("files", file.getOriginalFilename(), fileBody);
+                            }
+                        }
+                    }
+
+                    RequestBody bodyUsingToken = builder.build();
+
                     Request requestUsingToken = new Request.Builder()
-                            .url("https://amritsarovar.gov.in/EmailSmsServer/api/sendemail")
+                            .url("https://amritsarovar.gov.in/AsiEmailSmsServer/api/send-new-email")
                             .post(bodyUsingToken)
                             .addHeader("Authorization",
                                     "Bearer " + token)
-                            .addHeader("Content-Type", "application/x-www-form-urlencoded")
                             .build();
 
                     try (Response responseUsingToken = clientUsingToken.newCall(requestUsingToken).execute()) {
-                        System.out.println(responseUsingToken);
-                        return "SUCCESS";
-                    } catch (IOException e) {
+                        return "SUCCCESS";
+                    } catch (Exception e) {
                         return "FAIL";
                     }
+
+                    // System.out.println("Response Code: " + responseUsingToken.code());
 
                 } else {
                     System.out.println("Request failed: " + response.code() + " - " + response.message());

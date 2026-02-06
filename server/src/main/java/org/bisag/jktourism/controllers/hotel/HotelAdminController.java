@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bisag.jktourism.exceptions.BadRequestException;
 import org.bisag.jktourism.models.User;
@@ -24,6 +25,7 @@ import org.bisag.jktourism.models.hotel.HotelNodalOffice;
 import org.bisag.jktourism.models.hotel.HotelOwner;
 import org.bisag.jktourism.models.hotel.HotelProperty;
 import org.bisag.jktourism.models.hotel.HotelPropertyAmenity;
+import org.bisag.jktourism.models.hotel.HotelRoomPhoto;
 import org.bisag.jktourism.models.hotel.HotelRoomType;
 import org.bisag.jktourism.models.hotel.enums.AmenityScope;
 import org.bisag.jktourism.models.hotel.enums.FoodType;
@@ -293,6 +295,8 @@ public class HotelAdminController {
             boolean powerBackup = json.get("powerBackup").asBoolean();
             boolean wheelchairAccessible = json.get("wheelchairAccessible").asBoolean();
 
+            // hotel.getProperty()
+
             HotelProperty property = new HotelProperty(hotel);
             property.setCheckInTime(checkInTime);
             property.setCheckOutTime(checkOutTime);
@@ -303,8 +307,21 @@ public class HotelAdminController {
 
             hotelPropertyRepo.save(property);
 
-            // HotelRoomType roomType = new HotelRoomType(hotel);
-            // hotelRoomTypeRepo.save(roomType);
+            // 🔴 overwrite old room types
+            hotel.getRoomTypes().clear();
+
+            for (JsonNode rt : json.get("roomTypes")) {
+
+                HotelRoomType roomType = new HotelRoomType();
+                roomType.setHotel(hotel);
+                roomType.setRoomTypeName(rt.get("roomType").asText());
+                roomType.setRoomCount(rt.get("roomCount").asInt());
+                roomType.setTariff(rt.get("tariff").decimalValue());
+
+                hotel.getRoomTypes().add(roomType);
+            }
+
+            hotelRepo.save(hotel);
 
             return ResponseEntity.ok().body(Json.serialize("Property Details Added Successfully."));
         } catch (Exception e) {
@@ -493,4 +510,68 @@ public class HotelAdminController {
             return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
         }
     }
+
+    @GetMapping("/{id}/room-types")
+    public ResponseEntity<?> roomTypes(@PathVariable String id) throws Exception {
+        try {
+            Hotel hotel = hotelRepo.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
+
+            List<String> roomTypes = hotel.getRoomTypes().stream().map(HotelRoomType::getRoomTypeName).toList();
+
+            return ResponseEntity.ok().body(Json.serialize(roomTypes));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
+        }
+    }
+
+    @PostMapping(value = "/{id}/assets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadAssets(@PathVariable String id, @RequestParam String data,
+            @RequestParam(required = false) MultipartFile[] propertyImages,
+            @RequestParam(required = false) MultipartFile[] roomImages) throws Exception {
+        try {
+            Hotel hotel = hotelRepo.findById(UUID.fromString(id))
+                    .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
+
+            JsonNode json = Json.deserialize(JsonNode.class, data);
+            // json =
+            // [{"roomType":"Standard","imageIndexes":[0,1,2],"amenities":[4,12,11,3]},{"roomType":"Deluxe","imageIndexes":[3,4,5,6],"amenities":[7,14,8,15,9]}]
+
+            List<HotelRoomType> roomTypes = hotel.getRoomTypes();
+            // save room amenity
+            for (JsonNode roomType : json.get("rooms")) {
+                String roomTypeName = roomType.get("roomType").asText();
+                JsonNode imageIndexes = roomType.get("imageIndexes");
+
+                HotelRoomType roomtype = roomTypes.stream().filter(r -> r.getRoomTypeName().equals(roomTypeName)).findFirst().orElseThrow(() -> new BadRequestException("Room Type Not Found"));
+
+                List<Long> amenityIds = new ArrayList<>();
+                for (JsonNode node : roomType.get("amenities")) {
+                    amenityIds.add(node.asLong());
+                }
+
+                List<Amenity> amenityList = amenityRepo.findAllById(amenityIds);
+                
+                roomtype.setAmenities(amenityList.stream().collect(Collectors.toSet()));
+
+                // roomtype.getPhotos().clear();
+                // saving room images
+                for (int i = 0; i < imageIndexes.size(); i++) {
+                    int index = imageIndexes.get(i).asInt();
+                    MultipartFile file = roomImages[index];
+                    HotelRoomPhoto photo = new HotelRoomPhoto();
+                    photo.setPhotoUrl("");
+                    photo.setRoomType(roomtype);
+                    roomtype.getPhotos().add(photo);
+                }
+            }
+
+            hotelRepo.save(hotel);
+
+            return ResponseEntity.ok().body(Json.serialize("Assets Uploaded Successfully."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
+        }
+    }
+
 }
