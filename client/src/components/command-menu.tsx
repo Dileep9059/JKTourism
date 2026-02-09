@@ -3,12 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   IconArrowRightDashed,
   IconChevronRight,
-  IconDeviceLaptop,
-  IconMoon,
-  IconSun,
 } from "@tabler/icons-react";
 import { useSearch } from "@/context/search-context";
-import { useTheme } from "@/context/theme-context";
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,14 +12,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command";
 import { getSidebarData } from "./layout/data/sidebar-data";
 import { ScrollArea } from "./ui/scroll-area";
 
 export function CommandMenu() {
   const navigate = useNavigate();
-  const { setTheme } = useTheme();
   const { open, setOpen } = useSearch();
 
   const sidebarData = getSidebarData();
@@ -78,20 +72,6 @@ export function CommandMenu() {
               })}
             </CommandGroup>
           ))}
-          <CommandSeparator />
-          <CommandGroup heading="Theme">
-            <CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
-              <IconSun /> <span>Light</span>
-            </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => setTheme("dark"))}>
-              <IconMoon className="scale-90" />
-              <span>Dark</span>
-            </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => setTheme("system"))}>
-              <IconDeviceLaptop />
-              <span>System</span>
-            </CommandItem>
-          </CommandGroup>
         </ScrollArea>
       </CommandList>
     </CommandDialog>

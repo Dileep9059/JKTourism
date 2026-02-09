@@ -1,5 +1,6 @@
 package org.bisag.jktourism.controllers.hotel;
 
+import java.io.File;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalTime;
@@ -23,6 +24,7 @@ import org.bisag.jktourism.models.hotel.HotelFood;
 import org.bisag.jktourism.models.hotel.HotelLocation;
 import org.bisag.jktourism.models.hotel.HotelNodalOffice;
 import org.bisag.jktourism.models.hotel.HotelOwner;
+import org.bisag.jktourism.models.hotel.HotelPhoto;
 import org.bisag.jktourism.models.hotel.HotelProperty;
 import org.bisag.jktourism.models.hotel.HotelPropertyAmenity;
 import org.bisag.jktourism.models.hotel.HotelRoomPhoto;
@@ -43,7 +45,11 @@ import org.bisag.jktourism.repository.hotel.HotelNodalOfficeRepository;
 import org.bisag.jktourism.repository.hotel.HotelOwnerRepository;
 import org.bisag.jktourism.repository.hotel.HotelPropertyRepository;
 import org.bisag.jktourism.repository.hotel.HotelRepository;
+import org.bisag.jktourism.services.FileService;
+import org.bisag.jktourism.services.FileValidation.ImageValidationService;
 import org.bisag.jktourism.utils.Json;
+import org.bisag.jktourism.utils.Utility;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,6 +70,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequiredArgsConstructor
 public class HotelAdminController {
 
+    @Value("${mediaPath}")
+    String mediaPath;
+
     private final HotelRepository hotelRepo;
     private final HotelBasicInfoRepository basicInfoRepo;
     private final HotelLocationRepository hotelLocationRepo;
@@ -76,10 +85,31 @@ public class HotelAdminController {
     private final HotelBankingRepository hotelBankingRepo;
     private final HotelDeclarationRepository hotelDeclarationRepo;
     private final UserRepository userRepository;
+    private final ImageValidationService imageValidationService;
+    private final Utility utility;
+    private final FileService fileService;
+
+    @GetMapping("/get-hotel")
+    public ResponseEntity<?> getHotelByUser(Principal principal) throws Exception {
+        try {
+            User user = userRepository.findByUsername(principal.getName()).orElse(null);
+            if (user == null) {
+                throw new Exception("User Not Found.");
+            }
+
+            Hotel hotel = hotelRepo.findByOwnerUserId(UUID.fromString(user.getUuid())).orElse(null);
+            if (hotel == null) {
+                throw new Exception("Hotel Not Found.");
+            }
+
+            return ResponseEntity.ok().body(Json.serialize(hotel.getId()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Json.serialize(e.getMessage()));
+        }
+    }
 
     // basic info
     // /basic-info
-
     @GetMapping("/basic-info")
     public ResponseEntity<?> getBasicInfo(Principal principal) throws Exception {
         try {
@@ -131,15 +161,20 @@ public class HotelAdminController {
             String hotelType = json.get("hotelType").asText();
             int establishedYear = Integer.parseInt(json.get("yearOfEstablishment").asText());
 
-            Hotel h = new Hotel();
-            h.setStatus(HotelStatus.DRAFT);
-            h.setLegalName(legalName);
-            h.setDisplayName(displayName);
-
             User user = userRepository.findByUsername(principal.getName()).orElse(null);
             if (user == null) {
                 throw new Exception("User Not Found.");
             }
+
+            // if already exists then update the hotel
+            Hotel h = hotelRepo.findByOwnerUserId(UUID.fromString(user.getUuid())).orElse(null);
+            if (h == null) {
+                h = new Hotel();
+            }
+            h.setStatus(HotelStatus.DRAFT);
+            h.setLegalName(legalName);
+            h.setDisplayName(displayName);
+
             h.setOwnerUserId(UUID.fromString(user.getUuid()));
 
             Hotel hotel = hotelRepo.save(h);
@@ -534,8 +569,6 @@ public class HotelAdminController {
                     .orElseThrow(() -> new BadRequestException("Hotel Not Found"));
 
             JsonNode json = Json.deserialize(JsonNode.class, data);
-            // json =
-            // [{"roomType":"Standard","imageIndexes":[0,1,2],"amenities":[4,12,11,3]},{"roomType":"Deluxe","imageIndexes":[3,4,5,6],"amenities":[7,14,8,15,9]}]
 
             List<HotelRoomType> roomTypes = hotel.getRoomTypes();
             // save room amenity
@@ -543,7 +576,8 @@ public class HotelAdminController {
                 String roomTypeName = roomType.get("roomType").asText();
                 JsonNode imageIndexes = roomType.get("imageIndexes");
 
-                HotelRoomType roomtype = roomTypes.stream().filter(r -> r.getRoomTypeName().equals(roomTypeName)).findFirst().orElseThrow(() -> new BadRequestException("Room Type Not Found"));
+                HotelRoomType roomtype = roomTypes.stream().filter(r -> r.getRoomTypeName().equals(roomTypeName))
+                        .findFirst().orElseThrow(() -> new BadRequestException("Room Type Not Found"));
 
                 List<Long> amenityIds = new ArrayList<>();
                 for (JsonNode node : roomType.get("amenities")) {
@@ -551,19 +585,58 @@ public class HotelAdminController {
                 }
 
                 List<Amenity> amenityList = amenityRepo.findAllById(amenityIds);
-                
+
                 roomtype.setAmenities(amenityList.stream().collect(Collectors.toSet()));
 
-                // roomtype.getPhotos().clear();
-                // saving room images
+                roomtype.getPhotos().clear();
+                
+                
                 for (int i = 0; i < imageIndexes.size(); i++) {
                     int index = imageIndexes.get(i).asInt();
                     MultipartFile file = roomImages[index];
                     HotelRoomPhoto photo = new HotelRoomPhoto();
-                    photo.setPhotoUrl("");
-                    photo.setRoomType(roomtype);
-                    roomtype.getPhotos().add(photo);
+                    // photo path
+                    imageValidationService.validateImage(file);
+
+                    String extension = utility.getFileExtensionWithDot(file.getOriginalFilename());
+                    String fileDir = mediaPath + File.separator + utility.generateYearMonth()
+                            + File.separator + "hotel" + File.separator + hotel.getId().toString() + File.separator
+                            + "Images";
+                    String fileName = utility.generateUniqueNumber() + extension;
+                    boolean isSaved = fileService.uploadFile(fileDir, fileName, file);
+                    if (isSaved) {
+                        photo.setPhotoUrl(fileDir + File.separator + fileName);
+                        photo.setRoomType(roomtype);
+                        roomtype.getPhotos().add(photo);
+                    } else {
+                        throw new Exception("Error saving room photos.");
+                    }
+
                 }
+            }
+
+            // save hotel property images
+            System.out.println(propertyImages.length);
+            for (int i = 0; i < propertyImages.length; i++) {
+                MultipartFile file = propertyImages[i];
+                HotelPhoto photo = new HotelPhoto();
+
+                imageValidationService.validateImage(file);
+
+                String extension = utility.getFileExtensionWithDot(file.getOriginalFilename());
+                String fileDir = mediaPath + File.separator + utility.generateYearMonth()
+                        + File.separator + "hotel" + File.separator + hotel.getId().toString() + File.separator
+                        + "Images";
+                String fileName = utility.generateUniqueNumber() + extension;
+                boolean isSaved = fileService.uploadFile(fileDir, fileName, file);
+                if (isSaved) {
+                    photo.setPhotoUrl(fileDir + File.separator + fileName);
+                    photo.setHotel(hotel);
+                    hotel.getPhotos().add(photo);
+                } else {
+                    throw new Exception("Error saving room photos.");
+                }
+
             }
 
             hotelRepo.save(hotel);

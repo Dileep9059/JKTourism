@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import scss from './hotelregister.module.scss';
 import clsx from 'clsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { toast } from 'sonner';
 import BasicInfo from './BasicInfo';
 import LocationDetails from './LocationDetails';
 import ManagerDetails from './ManagerDetails';
@@ -14,13 +13,12 @@ import FoodDetail from './FoodDetail';
 import DirectrateRegistration from './DirectrateRegistration';
 import BankDetails from './BankDetails';
 import Declaration from './Declaration';
+import { axiosPrivate } from '@/axios/axios';
+import { d } from '../utils/crypto';
 
 function Hotelregister() {
   const [currentTab, setCurrentTab] = useState("basic-information");
 
-
-
-  // Define the order of tabs
   const tabOrder = [
     "basic-information",
     "location-details",
@@ -30,39 +28,12 @@ function Hotelregister() {
     "amenity-details",
     "food",
     "registration-details",
+    // "online-presence",
     "banking-details",
     "declaration",
   ];
 
-  const [roomTypes, setRoomTypes] = useState<RoomType[]>([
-    { roomType: "", roomCount: 0, tariff: 0 },
-  ]);
-
-  const [hotelId, setHotelId] = useState<string>("8c608176-681e-45ae-99fd-b9068f5f0dfc");
-
-  const addRoomType = () => {
-    // max 5 types can be added if already selected then cannot add same type
-    if (roomTypes.length >= 5) {
-      toast.error("Maximum 5 room types can be added");
-      return;
-    }
-    setRoomTypes([...roomTypes, { roomType: "", roomCount: 0, tariff: 0 }]);
-  };
-
-  const removeRoomType = (index: number) => {
-    setRoomTypes(roomTypes.filter((_, i) => i !== index));
-  };
-
-  const updateRoomType = (index: number, field: string, value: string) => {
-    if (field === "roomType" && roomTypes.some((type) => type.roomType === value)) {
-      toast.error("Room type already exists");
-      return;
-    }
-    const updated = [...roomTypes];
-    updated[index][field] = field === "roomCount" || field === "tariff" ? Number(value) : value;
-    setRoomTypes(updated);
-  };
-
+  const [hotelId, setHotelId] = useState<string>("");
 
   // Function to handle "Next" button click
   const handleNext = () => {
@@ -80,7 +51,18 @@ function Hotelregister() {
     }
   };
 
-  const [date, setDate] = useState<Date | undefined>(undefined)
+  async function getHotel() {
+    try {
+      const response = await axiosPrivate.get(`/api/hotels/get-hotel`);
+      setHotelId(JSON.parse(await d(response.data)));
+    } catch (error: any) {
+
+    }
+  }
+  useEffect(() => {
+    getHotel();
+  }, [currentTab]);
+
   return (
     <>
       <div className={scss.common_page}>
@@ -103,7 +85,7 @@ function Hotelregister() {
               <div className={scss.destination_title}>
                 <h2 className={clsx(scss.cattitle, "mt-5")}>List Your Hotel</h2>
               </div>
-              <Tabs value={currentTab} onValueChange={setCurrentTab} className={scss.custom_tab}>
+              <Tabs value={currentTab} onValueChange={() => { }} className={scss.custom_tab}>
                 <TabsList className={scss.custom_tablist}>
                   <TabsTrigger value="basic-information" className='w-full'>Property Basic Information</TabsTrigger>
                   <TabsTrigger value="location-details" className='w-full'>Location Details</TabsTrigger>
@@ -112,7 +94,8 @@ function Hotelregister() {
                   <TabsTrigger value="property-details" className='w-full'>Property Details</TabsTrigger>
                   <TabsTrigger value="amenity-details" className='w-full'>Hotel Amenities</TabsTrigger>
                   <TabsTrigger value="food" className='w-full'>Food & Beverage</TabsTrigger>
-                  <TabsTrigger value="registration-details" className='w-full'>Registration Details with Directorate</TabsTrigger>
+                  <TabsTrigger value="registration-details" className='w-full'>Registration with Directorate</TabsTrigger>
+                  {/* <TabsTrigger value="online-presence" className='w-full'>Online Presence</TabsTrigger> */}
                   <TabsTrigger value="banking-details" className='w-full'>Banking Details (for Payments)</TabsTrigger>
                   <TabsTrigger value="declaration" className='w-full'>Declaration</TabsTrigger>
                 </TabsList>
@@ -143,7 +126,6 @@ function Hotelregister() {
                     <PropertyDetails handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
                   </TabsContent>
 
-
                   {/* Amenity Details Tab */}
                   <TabsContent value="amenity-details" className={scss.custom_tabcontent}>
                     <HotelAmenity handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
@@ -166,7 +148,7 @@ function Hotelregister() {
 
                   {/* Declaration Tab */}
                   <TabsContent value="declaration" className={scss.custom_tabcontent}>
-                    <Declaration handleNext={handleNext} handlePrev={handlePrev} hotelId={hotelId} />
+                    <Declaration handlePrev={handlePrev} hotelId={hotelId} />
                   </TabsContent>
                 </div>
               </Tabs>
@@ -178,11 +160,4 @@ function Hotelregister() {
   )
 }
 
-export default Hotelregister
-
-
-type RoomType = {
-  roomType: string;
-  roomCount: number;
-  tariff: number;
-};
+export default Hotelregister;

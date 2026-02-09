@@ -1,12 +1,16 @@
 import { axiosPrivate } from "@/axios/axios"
 import { useEffect, useState } from "react"
 import { d, e } from "../utils/crypto"
+import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
 
 const HotelUploadAssets = () => {
     const [propertyImages, setPropertyImages] = useState<File[]>([])
-    const [hotelId, setHotelId] = useState<string>("8c608176-681e-45ae-99fd-b9068f5f0dfc");
+    const [hotelId, setHotelId] = useState<string>("");
 
     const [roomTypes, setRoomTypes] = useState([]);
+
+    const navigate = useNavigate();
 
     const [rooms, setRooms] = useState(
         roomTypes?.map((room) => ({
@@ -92,11 +96,6 @@ const HotelUploadAssets = () => {
         // metadata
         formData.append("data", await e(roomData));
 
-        // property images
-        propertyImages.forEach((img) =>
-            formData.append("propertyImages", img)
-        );
-
         // room images (flattened)
         rooms.forEach((room) => {
             room.images.forEach((img) => {
@@ -104,16 +103,39 @@ const HotelUploadAssets = () => {
             });
         });
 
-        const response = await axiosPrivate.post(`/api/hotels/${hotelId}/assets`, formData);
+        await axiosPrivate.post(`/api/hotels/${hotelId}/assets`, formData);
+        toast.success("Assets Uploaded Successfully.");
         // const data = JSON.parse(await d(response.data));
         // console.log("UPLOAD RESPONSE 👉", data);
+        // reset property images
+        setPropertyImages([]);
+        // reset room images
+        setRooms(rooms.map((room) => ({ ...room, images: [] })));
 
     }
 
+    async function getHotel() {
+        try {
+            const response = await axiosPrivate.get(`/api/hotels/get-hotel`);
+            const id = JSON.parse(await d(response.data));
+            if (id === "") {
+                navigate("/hotel/add", { replace: true });
+            }
+            setHotelId(id);
+        } catch (error: any) {
+
+        }
+    }
+
     useEffect(() => {
+        getHotel();
+    }, []);
+
+    useEffect(() => {
+        if (!hotelId) return;
         fetchAmenities();
         fetchRoomTypes();
-    }, []);
+    }, [hotelId]);
     useEffect(() => {
         setRooms(
             roomTypes.map((roomType) => ({

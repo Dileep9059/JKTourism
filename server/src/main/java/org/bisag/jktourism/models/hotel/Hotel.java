@@ -80,4 +80,7 @@ public class Hotel {
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HotelPropertyAmenity> propertyAmenities = new HashSet<>();
 
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HotelPhoto> photos = new ArrayList<>();
+
 }
