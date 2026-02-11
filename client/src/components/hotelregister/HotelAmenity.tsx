@@ -15,6 +15,7 @@ const HotelAmenity = ({ handleNext, handlePrev, hotelId }: { handleNext: () => v
         watch,
         setValue,
         formState: { errors },
+        reset,
     } = useForm<AmenityFormValues>({
         resolver: zodResolver(amenitySchema),
         defaultValues: {
@@ -28,9 +29,12 @@ const HotelAmenity = ({ handleNext, handlePrev, hotelId }: { handleNext: () => v
         const payload = {
             scope: "PROPERTY"
         }
-        const response = await axiosPrivate.post("/api/hotels/amenities", await e(payload));
+        const response = await axiosPrivate.post(`/api/hotels/${hotelId}/get-amenities`, await e(payload));
         const data = JSON.parse(await d(response.data));
-        setAmenitiesFromDB(data);
+        setAmenitiesFromDB(data?.amenities);
+        reset({
+            amenities: data?.savedAmenities,
+        })
     };
 
     const onSubmit = async (data: AmenityFormValues) => {

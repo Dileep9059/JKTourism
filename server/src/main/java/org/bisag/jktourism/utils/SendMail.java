@@ -72,14 +72,17 @@ public class SendMail {
                 Multipart multipart = new MimeMultipart();
                 multipart.addBodyPart(messageBodyPart);
 
-                for (MultipartFile multipartFile : files) {
-                    File tempFile = File.createTempFile("mail-", multipartFile.getOriginalFilename());
-                    multipartFile.transferTo(tempFile);
+                if (files != null) {
 
-                    MimeBodyPart bodyPart = new MimeBodyPart();
-                    bodyPart.attachFile(tempFile);
+                    for (MultipartFile multipartFile : files) {
+                        File tempFile = File.createTempFile("mail-", multipartFile.getOriginalFilename());
+                        multipartFile.transferTo(tempFile);
 
-                    multipart.addBodyPart(bodyPart);
+                        MimeBodyPart bodyPart = new MimeBodyPart();
+                        bodyPart.attachFile(tempFile);
+
+                        multipart.addBodyPart(bodyPart);
+                    }
                 }
 
                 msg.setContent(multipart);

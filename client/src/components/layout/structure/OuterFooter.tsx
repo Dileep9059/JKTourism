@@ -787,8 +787,8 @@ const sections: FooterSection[] = [
     title: "Legal Links",
     links: [
       { label: "Privacy Policy", href: "/policy" },
-      { label: "Terms & Conditions", href: "/amenities" },
-      { label: "Disclaimer", href: "/travel-agent" },
+      { label: "Terms & Conditions", href: "/terms-and-conditions" },
+      { label: "Disclaimer", href: "/disclaimer" },
     ],
   },
 ];

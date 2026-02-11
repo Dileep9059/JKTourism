@@ -105,8 +105,6 @@ const HotelUploadAssets = () => {
 
         await axiosPrivate.post(`/api/hotels/${hotelId}/assets`, formData);
         toast.success("Assets Uploaded Successfully.");
-        // const data = JSON.parse(await d(response.data));
-        // console.log("UPLOAD RESPONSE 👉", data);
         // reset property images
         setPropertyImages([]);
         // reset room images
@@ -117,14 +115,15 @@ const HotelUploadAssets = () => {
     async function getHotel() {
         try {
             const response = await axiosPrivate.get(`/api/hotels/get-hotel`);
-            const id = JSON.parse(await d(response.data));
-            if (id === "") {
-                navigate("/hotel/add", { replace: true });
+            const res = JSON.parse(await d(response.data));
+            if (res.isApproved === 'APPROVED' || res.isApproved === 'REJECTED') {
+                navigate("/hotel/dashboard", { replace: true });
+                toast.error("Hotel is not added.");
             }
-            setHotelId(id);
+            setHotelId(res.hotelId);
         } catch (error: any) {
 
-        }
+        } 
     }
 
     useEffect(() => {
@@ -213,11 +212,4 @@ const HotelUploadAssets = () => {
     )
 }
 
-export default HotelUploadAssets
-
-
-
-type Amenity = {
-    id: string
-    name: string
-}
+export default HotelUploadAssets;

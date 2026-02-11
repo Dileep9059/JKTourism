@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { foodSchema, type FoodFormValues } from '../schemas/food-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -34,6 +34,19 @@ const FoodDetail = ({ handleNext, handlePrev, hotelId }: { handleNext: () => voi
             toast.error(JSON.parse(await d(error.response.data)))
         }
     };
+
+    useEffect(() => {
+        const getFoodDetails = async () => {
+            try {
+                const response = await axiosPrivate.get(`/api/hotels/${hotelId}/food`);
+                const data = JSON.parse(await d(response.data));
+                form.reset(data);
+            } catch (error: any) {
+                toast.error(JSON.parse(await d(error.response.data)))
+            }
+        };
+        getFoodDetails();
+    }, [hotelId]);
 
 
     return (

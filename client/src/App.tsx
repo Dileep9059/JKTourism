@@ -64,6 +64,8 @@ import HotelRegistration from "./components/hotel/HotelRegistration";
 import HotelDashboard from "./components/hotel/HotelDashboard";
 import AppliedHotels from "./components/hotel/AppliedHotels";
 import HotelUploadAssets from "./components/hotelregister/HotelUploadAssets";
+import Disclaimer from "./components/footer/Disclaimer";
+import TermsAndConditions from "./components/footer/TermsAndConditions";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -141,6 +143,8 @@ function App() {
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/plan-trip" element={<Plantrip />} />
               <Route path="/policy" element={<PrivacyPolicy />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
 
               <Route path="/categories" element={<Categories />} />
               <Route path="/most-visited-destinations" element={<DestinationCategories />} />

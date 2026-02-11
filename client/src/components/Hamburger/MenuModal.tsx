@@ -230,7 +230,7 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                         </Link>
                       </li>
                     ))}
-                    <li>
+                    {/* <li>
                       <a
                         role="button"
                         className="flex items-center hover:text-orange-400 transition group italic text-base cursor-pointer"
@@ -241,7 +241,7 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
                         </span>
                         Feedback
                       </a>
-                    </li>
+                    </li> */}
                     <li>
                       <Link
                         role="button"
@@ -265,7 +265,7 @@ export default function MenuModal({ open, onClose }: HamModalProps) {
         </div>
       </div>
 
-      <FeedbackModal open={feedbackModal.open} onClose={closeFeedbackModal} />
+      {/* <FeedbackModal open={feedbackModal.open} onClose={closeFeedbackModal} /> */}
     </>
   );
 }
@@ -327,7 +327,6 @@ const menuColumns: MenuItem[] = [
     icon: "/images/JKT15.gif",
     items: [{ title: "JKTDC", url: "https://www.jktdc.co.in/" },
       { title: "Book Hotel", url: "/hotel-search" },
-      { title: "Register Hotel", url: "/hotel-register" }
     ],
   },
   {

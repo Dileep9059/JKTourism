@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { d, e } from '../utils/crypto';
 import { registrationSchema, type RegistrationFormValues } from '../schemas/hotel-registration-schema';
 import { Input } from '../ui/input';
+import { useEffect } from 'react';
 
 const DirectrateRegistration = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void, handlePrev: () => void, hotelId: string }) => {
 
@@ -20,7 +21,6 @@ const DirectrateRegistration = ({ handleNext, handlePrev, hotelId }: { handleNex
 
     const {
         register,
-        control,
         formState: { errors },
     } = form;
 
@@ -41,6 +41,22 @@ const DirectrateRegistration = ({ handleNext, handlePrev, hotelId }: { handleNex
             toast.error(JSON.parse(await d(error.response?.data)) || "Failed to update hotel documents.");
         }
     };
+
+    useEffect(() => {
+        const fetchRegistrationDetails = async () => {
+            try {
+                const response = await axiosPrivate.get(`/api/hotels/${hotelId}/registration`);
+                const data = JSON.parse(await d(response.data));
+                form.reset({
+                    registrationNumber: data.registrationNumber,
+                    registrationCertificate: undefined,
+                });
+            } catch (error: any) {
+                toast.error(JSON.parse(await d(error.response?.data)) || "Failed to fetch hotel registration details.");
+            }
+        };
+        fetchRegistrationDetails();
+    }, [hotelId]);
 
     return (
         <Form {...form}>

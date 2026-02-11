@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import useRefreshToken from "../../hooks/useRefreshToken";
@@ -9,8 +9,9 @@ import type { AuthType } from "../../context/AuthProvider";
 const PersistLogin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const refresh = useRefreshToken();
-  const { auth } = useAuth() as { auth: AuthType };
+  const { auth, setAuth } = useAuth() as { auth: AuthType, setAuth: (auth: AuthType) => void };
   const persist = true;
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -18,7 +19,8 @@ const PersistLogin = () => {
       try {
         await refresh();
       } catch (error) {
-        // console.log(error);
+        setAuth({} as AuthType);
+        navigate("/", { replace: true });
       } finally {
         isMounted && setIsLoading(false);
       }

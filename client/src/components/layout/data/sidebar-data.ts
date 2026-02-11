@@ -7,7 +7,7 @@ import {
   IconUserCog,
   IconUsers,
 } from '@tabler/icons-react'
-import { CalendarSync, ChartBarStacked, Command, HandPlatter, ImagePlus, ImageUp, MapPinHouse, MountainSnow, Flower, Soup, TentTree, WandSparkles, WavesLadder, MessageSquareQuote, ShoppingBag, ShoppingBasket, TruckElectric, Hotel } from 'lucide-react'
+import { CalendarSync, ChartBarStacked, Command, HandPlatter, ImagePlus, ImageUp, MapPinHouse, MountainSnow, Flower, Soup, TentTree, WandSparkles, WavesLadder, MessageSquareQuote, ShoppingBag, ShoppingBasket, TruckElectric, Hotel, Plus } from 'lucide-react'
 import { type SidebarData } from '../types'
 import useAuth from '@/hooks/useAuth'
 import type { AuthType } from '@/context/AuthProvider'
@@ -166,7 +166,7 @@ export function getSidebarData(): SidebarData {
           title: 'Hotel',
           icon: Hotel,
           items: [
-            { title: 'Add Hotel', url: '/hotel/add', icon: ImagePlus },
+            { title: 'Add Hotel', url: '/hotel/add', icon: Plus },
             { title: 'Upload Data', url: '/hotel/upload', icon: ImageUp },
           ],
         },

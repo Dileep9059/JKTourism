@@ -1,7 +1,6 @@
 package org.bisag.jktourism.repository.hotel;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.bisag.jktourism.models.hotel.Hotel;
 import org.bisag.jktourism.models.hotel.HotelDocument;

@@ -8,6 +8,7 @@ import { d, e } from '../utils/crypto';
 import { Input } from '../ui/input';
 import { declarationSchema, type DeclarationFormValues } from '../schemas/declaration-schema';
 import { Checkbox } from '../ui/checkbox';
+import { useEffect } from 'react';
 
 const Declaration = ({handlePrev, hotelId }: { handlePrev: () => void, hotelId: string }) => {
 
@@ -41,6 +42,19 @@ const Declaration = ({handlePrev, hotelId }: { handlePrev: () => void, hotelId: 
             toast.error(JSON.parse(await d(error.response.data)) ?? "Something went wrong");
         }
     };
+
+    useEffect(() => {
+        const fetchDeclaration = async () => {
+            try {
+                const response = await axiosPrivate.get(`/api/hotels/${hotelId}/declaration`);
+                const data = JSON.parse(await d(response.data));
+                form.reset(data);
+            } catch (error: any) {
+                toast.error(JSON.parse(await d(error.response.data)) ?? "Something went wrong");
+            }
+        };
+        fetchDeclaration();
+    }, [hotelId]);
 
     return (
         <Form {...form}>

@@ -10,13 +10,14 @@ import { axiosPrivate } from "@/axios/axios";
 import { toast } from "sonner";
 import { d, e } from "../utils/crypto";
 import { Button } from "../ui/button";
+import { useEffect } from "react";
 
 const PropertyDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void, handlePrev: () => void, hotelId: string }) => {
 
     const {
         register,
         control,
-        handleSubmit,
+        handleSubmit, reset,
         formState: { errors },
     } = useForm<PropertyDetailsFormValues>({
         resolver: zodResolver(propertyDetailsSchema),
@@ -35,7 +36,6 @@ const PropertyDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =
     });
 
     const onSubmit = async (data: PropertyDetailsFormValues) => {
-        console.log("PROPERTY DETAILS 👉", data);
         try {
             await axiosPrivate.post(`/api/hotels/${hotelId}/property-details`, await e(data));
             toast.success("Property Details Added Successfully");
@@ -44,6 +44,19 @@ const PropertyDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =
             toast.error(await d(error.response.data.message));
         }
     };
+
+    useEffect(() => {
+        const fetchPropertyDetails = async () => {
+            try {
+                const response = await axiosPrivate.get(`/api/hotels/${hotelId}/property-details`);
+                const data = JSON.parse(await d(response.data));
+                reset(data);
+            } catch (error: any) {
+                toast.error(JSON.parse(await d(error.response.data)));
+            }
+        };
+        fetchPropertyDetails();
+    }, [])
 
     return (
         <>

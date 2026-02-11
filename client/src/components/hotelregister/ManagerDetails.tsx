@@ -6,13 +6,14 @@ import { Input } from "../ui/input";
 import { axiosPrivate } from "@/axios/axios";
 import { toast } from "sonner";
 import { d, e } from "../utils/crypto";
+import { useEffect } from "react";
 
 
 const ManagerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void, handlePrev: () => void, hotelId: string }) => {
 
   const {
     register,
-    handleSubmit,
+    handleSubmit, reset,
     formState: { errors },
   } = useForm<ManagerDetailsFormValues>({
     resolver: zodResolver(managerDetailsSchema),
@@ -27,6 +28,20 @@ const ManagerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =>
       toast.error(JSON.parse(await d(error.response.data)));
     }
   };
+
+  useEffect(() => {
+    const fetchManagerDetails = async () => {
+      try {
+        const response = await axiosPrivate.get(`/api/hotels/${hotelId}/manager`);
+        const data = JSON.parse(await d(response.data));
+        reset(data);
+      } catch (error: any) {
+        toast.error(JSON.parse(await d(error.response.data)));
+      }
+    };
+    fetchManagerDetails();
+  }, [])
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>

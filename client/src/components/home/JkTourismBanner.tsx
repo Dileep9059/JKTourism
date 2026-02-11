@@ -56,10 +56,10 @@ const JkTourismBanner = () => {
             </div>
 
             <div className={scss.app_download}>
-              <a href="">
+              <a href="https://play.google.com/store/apps/details?id=com.bisagn.jktourism.jk_tourism" target="_blank">
                 <img src={`${import.meta.env.VITE_BASE}images/playstore-img.png`} alt="playstore icon" />
               </a>
-              <a href="">
+              <a href="https://apps.apple.com/in/app/jk-tourism/id6749749227" target="_blank">
                 <img src={`${import.meta.env.VITE_BASE}images/appstore-img.png`} alt="appstore icon" />
               </a>
             </div>

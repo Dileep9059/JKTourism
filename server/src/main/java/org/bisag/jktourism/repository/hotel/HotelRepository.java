@@ -34,6 +34,7 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
                 FROM Hotel h
                 LEFT JOIN h.location l
                 LEFT JOIN h.owner o
+                WHERE h.status != org.bisag.jktourism.models.hotel.enums.HotelStatus.DRAFT
                 ORDER BY h.createdAt DESC
             """)
     Page<HotelAdminListDto> findForAdminApproval(
@@ -67,4 +68,5 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
             @Param("district") String district,
             Pageable pageable);
 
+    void deleteById(UUID id);
 }

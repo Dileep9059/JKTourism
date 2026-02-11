@@ -15,9 +15,12 @@ import BankDetails from './BankDetails';
 import Declaration from './Declaration';
 import { axiosPrivate } from '@/axios/axios';
 import { d } from '../utils/crypto';
+import { useNavigate } from 'react-router-dom';
+import DocumentTitle from '../DocumentTitle';
 
 function Hotelregister() {
   const [currentTab, setCurrentTab] = useState("basic-information");
+  const navigate = useNavigate();
 
   const tabOrder = [
     "basic-information",
@@ -54,7 +57,11 @@ function Hotelregister() {
   async function getHotel() {
     try {
       const response = await axiosPrivate.get(`/api/hotels/get-hotel`);
-      setHotelId(JSON.parse(await d(response.data)));
+      const res = JSON.parse(await d(response.data));
+      if (res.isApproved) {
+        navigate("/hotel/dashboard", { replace: true });
+      }
+      setHotelId(res.hotelId);
     } catch (error: any) {
 
     }
@@ -65,6 +72,7 @@ function Hotelregister() {
 
   return (
     <>
+      <DocumentTitle title={"Add Your Hotel"} />
       <div className={scss.common_page}>
         <div className={scss.banner}>
           <div className={scss.filter_bg}>

@@ -1,7 +1,6 @@
 package org.bisag.jktourism.repository.hotel;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.bisag.jktourism.models.hotel.Amenity;

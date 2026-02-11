@@ -9,19 +9,19 @@ import { toast } from "sonner";
 import { d, e } from "../utils/crypto";
 import { ownerDetailsSchema } from "../schemas/owner-detail-schema";
 import type { OwnerDetailsFormValues } from "../schemas/owner-detail-schema";
+import { useEffect } from "react";
 
 const OwnerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void, handlePrev: () => void, hotelId: string }) => {
 
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors }, reset
     } = useForm<OwnerDetailsFormValues>({
         resolver: zodResolver(ownerDetailsSchema),
     });
 
     const onSubmit = async (data: OwnerDetailsFormValues) => {
-        console.log("OWNER DETAILS 👉", data);
         try {
             const { idProofFile, ...restData } = data;
             const formData = new FormData();
@@ -36,6 +36,19 @@ const OwnerDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () => v
             toast.error(JSON.parse(await d(error.response.data)));
         }
     };
+
+    useEffect(() => {
+        const fetchOwnerDetails = async () => {
+            try {
+                const response = await axiosPrivate.get(`/api/hotels/${hotelId}/owner-details`);
+                const data = JSON.parse(await d(response.data));
+                reset(data);
+            } catch (error: any) {
+                toast.error(JSON.parse(await d(error.response.data)));
+            }
+        };
+        fetchOwnerDetails();
+    }, [])
 
     return (
         <>

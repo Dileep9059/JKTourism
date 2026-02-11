@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { d, e } from '../utils/crypto';
 import { Input } from '../ui/input';
 import { bankDetailsSchema, type BankDetailsFormValues } from '../schemas/bank-detail-schema';
+import { useEffect } from 'react';
 
 const BankDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void; handlePrev: () => void, hotelId: string }) => {
 
@@ -43,6 +44,19 @@ const BankDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () => vo
           toast.error(JSON.parse(await d(error.response.data)) ?? "Something went wrong")  ;
         }
     };
+
+    useEffect(() => {
+        const fetchBankDetails = async () => {
+            try {
+                const response = await axiosPrivate.get(`/api/hotels/${hotelId}/bank`);
+                const data = JSON.parse(await d(response.data));
+                form.reset(data);
+            } catch (error: any) {
+                toast.error(JSON.parse(await d(error.response.data)) ?? "Something went wrong");
+            }
+        };
+        fetchBankDetails();
+    }, [hotelId]);
 
     return (
         <Form {...form}>

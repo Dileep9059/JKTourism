@@ -60,8 +60,6 @@ public class Hotel {
     @UpdateTimestamp
     private Instant updatedAt;
 
-    /* -------- Relationships -------- */
-
     @OneToOne(mappedBy = "hotel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private HotelBasicInfo basicInfo;
 

@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { axiosPrivate } from "@/axios/axios";
 import { toast } from "sonner";
 import { d, e } from "../utils/crypto";
+import { useEffect } from "react";
 
 
 const LocationDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () => void, handlePrev: () => void, hotelId: string }) => {
@@ -13,7 +14,7 @@ const LocationDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors }, reset,
     } = useForm<LocationDetailsFormValues>({
         resolver: zodResolver(locationDetailsSchema),
     });
@@ -27,6 +28,19 @@ const LocationDetails = ({ handleNext, handlePrev, hotelId }: { handleNext: () =
             toast.error(JSON.parse(await d(error.response.data)));
         }
     };
+
+    useEffect(() => {
+        const fetchLocationDetails = async () => {
+            try {
+                const response = await axiosPrivate.get(`/api/hotels/${hotelId}/location`);
+                const data = JSON.parse(await d(response.data));
+                reset(data);
+            } catch (error: any) {
+                toast.error(JSON.parse(await d(error.response.data)));
+            }
+        };
+        fetchLocationDetails();
+    }, [])
 
     return (
         <>

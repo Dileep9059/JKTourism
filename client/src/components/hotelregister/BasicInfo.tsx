@@ -44,7 +44,7 @@ const BasicInfo = ({ handleNext }: { handleNext: () => void }) => {
             toast.success("Basic Information Added Successfully");
             handleNext();
         } catch (error: any) {
-            toast.error(await d(error.response.data.message));
+            toast.error(await d(error.response.data));
         }
     };
 
@@ -65,7 +65,7 @@ const BasicInfo = ({ handleNext }: { handleNext: () => void }) => {
                 publicPhone: data?.publicPhone ?? "",
             });
         } catch (error: any) {
-            toast.error(await d(error.response.data.message));
+            toast.error(JSON.parse(await d(error.response.data)));
         }
     }
 

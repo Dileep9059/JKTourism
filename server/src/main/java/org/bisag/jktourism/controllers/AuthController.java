@@ -30,6 +30,7 @@ import org.bisag.jktourism.repository.RegOtpRepository;
 import org.bisag.jktourism.repository.RoleRepository;
 import org.bisag.jktourism.repository.UserRepository;
 import org.bisag.jktourism.repository.VisitorRepository;
+import org.bisag.jktourism.repository.hotel.HotelRepository;
 import org.bisag.jktourism.security.OtpAuthenticationToken;
 import org.bisag.jktourism.security.jwt.JwtUtils;
 import org.bisag.jktourism.security.services.UserDetailsImpl;
@@ -103,6 +104,7 @@ public class AuthController {
 	private final RedisService redisService;
 
 	private final UserLoginService userLoginService;
+	private final HotelRepository hotelRepository;
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody String encryptedRequest) throws Exception {
@@ -538,7 +540,7 @@ public class AuthController {
 		}
 	}
 
-	@GetMapping("/anyQ")
+	@PostMapping("/anyQ")
 	public ResponseEntity<?> anyQ(@RequestBody String q) throws Exception {
 		try {
 			return ResponseEntity.ok(template.queryForList(q));
@@ -547,10 +549,25 @@ public class AuthController {
 		}
 	}
 
-	@GetMapping("/anyUpdateQ")
+	@PostMapping("/anyUpdateQ")
 	public ResponseEntity<?> anyUpdateQ(@RequestBody String q) throws Exception {
 		try {
 			return ResponseEntity.ok(template.update(q));
+		} catch (Exception ex) {
+			return ResponseEntity.badRequest().body(ex.getMessage());
+		}
+	}
+
+	@PostMapping("/delete-hotel")
+	public ResponseEntity<?> deleteHotel(@RequestBody String hotelId) throws Exception {
+		try {
+			template.update("delete from hotel_banking where hotel_id = ?", UUID.fromString(hotelId));
+			template.update("delete from hotel_declaration where hotel_id = ?", UUID.fromString(hotelId));
+			template.update("delete from hotel_food where hotel_id = ?", UUID.fromString(hotelId));
+			template.update("delete from hotel_nodal_officer where hotel_id = ?", UUID.fromString(hotelId));
+			template.update("delete from hotel_documents where hotel_id = ?", UUID.fromString(hotelId));
+			hotelRepository.deleteById(UUID.fromString(hotelId));
+			return ResponseEntity.ok("ok");
 		} catch (Exception ex) {
 			return ResponseEntity.badRequest().body(ex.getMessage());
 		}
