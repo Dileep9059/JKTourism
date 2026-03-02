@@ -119,7 +119,7 @@ public class WebSecurityConfig {
 						.requestMatchers("/api/user/**").hasRole("USER")
 						.requestMatchers("/api/admin/**").hasRole("ADMIN")
 						.requestMatchers("/api/profile/**").hasAnyRole("ADMIN", "USER")
-						.requestMatchers("/api/auth/**", "/gis/**", "/error").permitAll()
+						.requestMatchers("/api/auth/**", "/gis/**", "/api/files/**", "/error").permitAll()
 						.requestMatchers(publicUrls.toArray(String[]::new)).permitAll()
 						.anyRequest().authenticated());
 		http.addFilterBefore(mobileTokenCheckFilter, UsernamePasswordAuthenticationFilter.class);

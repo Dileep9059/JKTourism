@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import scss from './hotellist.module.scss';
 import {
   Select,
@@ -8,33 +8,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { format } from "date-fns";
-import { ArrowDown, Calendar as CalendarIcon, ChevronDown, ChevronRight, ChevronUp, Clock, Coffee, Leaf, MapPin, Minus, Plus, Search, User } from "lucide-react";
+import {
+  ArrowDown, Calendar as CalendarIcon, ChevronDown, ChevronUp,
+  MapPin, Minus, Plus, Star, Building2, Loader2
+} from "lucide-react";
 import type { DateRange } from "react-day-picker";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import clsx from 'clsx';
-import { FaChevronLeft, FaChevronRight, FaMapMarkerAlt } from 'react-icons/fa';
-import { Input } from '../ui/input';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Navigation } from "swiper/modules";
-
-import { Splide, SplideSlide } from "@splidejs/react-splide";
-import "@splidejs/react-splide/css";
-
-
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
-import axiosInstance, { axiosPrivate } from '@/axios/axios';
-import { d } from '../utils/crypto';
-// import required modules
+import axiosInstance from '@/axios/axios';
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+interface Hotel {
+  id: string;
+  displayName: string;
+  legalName: string;
+  city: string;
+  district: string;
+  state: string;
+  landmark: string | null;
+  description: string | null;
+  starRating: number | null;
+  hotelType: string | null;
+  minTariff: number | null;
+  coverPhotoUrl: string | null;
+}
+
+interface HotelPage {
+  content: Hotel[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+}
+
+// Only Jammu and Kashmir as requested
+const DISTRICTS = ["Jammu", "Kashmir"];
+
+// ── Component ──────────────────────────────────────────────────────────────────
 
 function Hotellist() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -44,144 +66,167 @@ function Hotellist() {
 
   const [childrenCount, setChildrenCount] = useState(0);
   const [childrenAges, setChildrenAges] = useState<number[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isChildOpen, setIsChildOpen] = useState(false);
 
-  const [hotelList, setHotelList] = useState<any[]>([]);
+  // ── Search filter state ───────────────────────────────────────────────────
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
+  const [selectedStarRating, setSelectedStarRating] = useState<string>('all');
 
-  const handleIncrement = () => {
-    setChildrenCount((prev) => prev + 1);
-    setChildrenAges((prev) => [...prev, 0]); // Default age is 0
-  };
+  // ── Hotel list state ──────────────────────────────────────────────────────
+  const [hotelList, setHotelList] = useState<Hotel[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleDecrement = () => {
-    if (childrenCount > 0) {
-      setChildrenCount((prev) => prev - 1);
-      setChildrenAges((prev) => prev.slice(0, -1));
-    }
-  };
-
-  const handleAgeChange = (index: number, value: number) => {
-    const newAges = [...childrenAges];
-    newAges[index] = value;
-    setChildrenAges(newAges);
-  };
-
-  // State for selected filters and expanded view
+  // ── Sidebar filter state ──────────────────────────────────────────────────
   const [selectedFilters, setSelectedFilters] = useState<number[]>([]);
-  // State to track which list is expanded
   const [expandedLists, setExpandedLists] = useState<Record<string, boolean>>({
     suggested: false,
     facility: false,
-    bedtype: false,
-    accomodation: false,
-    ratings: false,
-    // Add more lists as needed
   });
 
-  // Toggle filter selection
-  const toggleFilter = (id: number) => {
-    setSelectedFilters((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+  const swiperRef = useRef<any>(null);
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const handleIncrement = () => {
+    setChildrenCount(p => p + 1);
+    setChildrenAges(p => [...p, 0]);
+  };
+  const handleDecrement = () => {
+    if (childrenCount > 0) {
+      setChildrenCount(p => p - 1);
+      setChildrenAges(p => p.slice(0, -1));
+    }
+  };
+  const handleAgeChange = (index: number, value: number) => {
+    const ages = [...childrenAges];
+    ages[index] = value;
+    setChildrenAges(ages);
+  };
+  const toggleFilter = (id: number) =>
+    setSelectedFilters(p => p.includes(id) ? p.filter(i => i !== id) : [...p, id]);
+  const toggleList = (name: string) =>
+    setExpandedLists(p => ({ ...p, [name]: !p[name] }));
+
+  // ── API call ──────────────────────────────────────────────────────────────
+  const fetchHotelList = useCallback(async (page = 0) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const payload: Record<string, any> = { page, size: 10 };
+      if (selectedDistrict !== 'all')   payload.district   = selectedDistrict;
+      if (selectedStarRating !== 'all') payload.starRating = Number(selectedStarRating);
+
+      const response = await axiosInstance.post('/api/v1/hotels/hotellist', payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const data: HotelPage = response.data;
+      setHotelList(data.content);
+      setTotalElements(data.totalElements);
+      setTotalPages(data.totalPages);
+      setCurrentPage(data.number);
+    } catch (err: any) {
+      setError('Failed to load hotels. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDistrict, selectedStarRating]);
+
+  useEffect(() => {
+    fetchHotelList(0);
+  }, []);
+
+  const handleSearch = () => {
+    setCurrentPage(0);
+    fetchHotelList(0);
+  };
+
+  // ── Star icons helper ─────────────────────────────────────────────────────
+  const renderStars = (count: number | null) => {
+    if (!count) return null;
+    return (
+      <span className="flex gap-0.5">
+        {Array.from({ length: count }, (_, i) => (
+          <Star key={i} size={12} className="fill-yellow-400 text-yellow-400" />
+        ))}
+      </span>
     );
   };
 
-  // Toggle show more/less
-  // Toggle the expanded state for a specific list
-  const toggleList = (listName: string) => {
-    setExpandedLists((prev) => ({
-      ...prev,
-      [listName]: !prev[listName],
-    }));
+  // ── Photo URL helper ──────────────────────────────────────────────────────
+  const getPhotoUrl = (url: string | null) => {
+    if (!url) return `${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`;
+    if (url.startsWith('http')) return url;
+    return `${import.meta.env.VITE_APP_API_BASE_URL}${url}`;
   };
 
-  async function fetchHotelList() {
-    try {
-      const response = await axiosInstance.post('/api/v1/hotels/hotellist');
-      // const data = JSON.parse(await d(response?.data));
-      // setHotelList(data);
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  const mainSliderRef = useRef<Splide>(null);
-  const thumbSliderRef = useRef<Splide>(null);
-  const swiperRef = useRef(null);
-
-  useEffect(() => {
-    if (mainSliderRef.current && thumbSliderRef.current) {
-      // Sync the sliders
-      mainSliderRef.current.sync(thumbSliderRef.current.splide);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchHotelList();
-  }, [])
-
-
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <>
       <div className={scss.common_page}>
+
+        {/* ── Top search bar ─────────────────────────────────────────────── */}
         <section className={scss.filter_top}>
           <div className="container mx-auto">
             <div className={scss.filter_wrapper}>
               <div className={scss.custom_form}>
                 <div className={scss.form_block}>
                   <div className={scss.filter_group}>
+
+                    {/* District — Jammu / Kashmir only */}
                     <div className={scss.input_block}>
-                      <Select>
+                      <Select
+                        value={selectedDistrict}
+                        onValueChange={setSelectedDistrict}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="City/Location" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {/* <SelectLabel>City/Location</SelectLabel> */}
-                            <SelectItem value="jammu">Jammu</SelectItem>
-                            <SelectItem value="kashmir">Kashmir</SelectItem>
+                            <SelectItem value="all">All</SelectItem>
+                            {DISTRICTS.map(d => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Room Type (UI only) */}
                     <div className={scss.input_block}>
                       <Select>
-                        <SelectTrigger >
+                        <SelectTrigger>
                           <SelectValue placeholder="Room Type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {/* <SelectLabel>City/Location</SelectLabel> */}
-                            <SelectItem value="jammu">Deluxe Room</SelectItem>
-                            <SelectItem value="kashmir">Super Deluxe Room</SelectItem>
+                            <SelectItem value="deluxe">Deluxe Room</SelectItem>
+                            <SelectItem value="superdeluxe">Super Deluxe Room</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Date range */}
                     <div className={scss.input_block}>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             id="date"
-                            variant={"outline"}
-                            className={cn(
-                              "w-[300px] justify-start text-left font-normal",
-                              !dateRange && "text-muted-foreground"
-                            )}
+                            variant="outline"
+                            className={cn("w-[300px] justify-start text-left font-normal", !dateRange && "text-muted-foreground")}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {dateRange?.from ? (
-                              dateRange.to ? (
-                                <>
-                                  {format(dateRange.from, "LLL dd, y")} -{" "}
-                                  {format(dateRange.to, "LLL dd, y")}
-                                </>
-                              ) : (
-                                format(dateRange.from, "LLL dd, y")
-                              )
-                            ) : (
-                              <span>Pick a date range</span>
-                            )}
+                              dateRange.to
+                                ? <>{format(dateRange.from, "LLL dd, y")} – {format(dateRange.to, "LLL dd, y")}</>
+                                : format(dateRange.from, "LLL dd, y")
+                            ) : <span>Pick a date range</span>}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -196,638 +241,412 @@ function Hotellist() {
                         </PopoverContent>
                       </Popover>
                     </div>
+
+                    {/* Rooms (UI only) */}
                     <div className={scss.input_block}>
                       <Select>
-                        <SelectTrigger >
-                          <SelectValue placeholder="Rooms" />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Rooms" /></SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {/* <SelectLabel>City/Location</SelectLabel> */}
-                            <SelectItem value="jammu">1</SelectItem>
-                            <SelectItem value="kashmir">2</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className={scss.input_block}>
-                      <Select>
-                        <SelectTrigger >
-                          <SelectValue placeholder="Adults" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {/* <SelectLabel>City/Location</SelectLabel> */}
                             <SelectItem value="1">1</SelectItem>
                             <SelectItem value="2">2</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Adults (UI only) */}
                     <div className={scss.input_block}>
-                      <div className="relative">
-                        <Popover open={isOpen} onOpenChange={setIsOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-between"
-                              onClick={() => setIsOpen(!isOpen)}
-                            >
-                              Children (below 17): {childrenCount}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className={clsx(scss.age_body, "w-80 p-4")}>
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <h4 className="font-medium">Children</h4>
-                                  <p className="text-sm text-muted-foreground">Ages 0-17</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={handleDecrement}
-                                    disabled={childrenCount === 0}
-                                  >
-                                    <Minus className="h-4 w-4" />
-                                  </Button>
-                                  <span className="w-8 text-center">{childrenCount}</span>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={handleIncrement}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                      <Select>
+                        <SelectTrigger><SelectValue placeholder="Adults" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Children */}
+                    <div className={scss.input_block}>
+                      <Popover open={isChildOpen} onOpenChange={setIsChildOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between"
+                            onClick={() => setIsChildOpen(!isChildOpen)}
+                          >
+                            Children (below 17): {childrenCount}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className={clsx(scss.age_body, "w-80 p-4")}>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium">Children</h4>
+                                <p className="text-sm text-muted-foreground">Ages 0–17</p>
                               </div>
-                              {childrenAges.map((age, index) => (
-                                <div key={index} className="flex items-center justify-between">
-                                  <span>Child {index + 1}</span>
-                                  <Select
-                                    value={age.toString()}
-                                    onValueChange={(value) => handleAgeChange(index, parseInt(value))}
-                                  >
-                                    <SelectTrigger className="w-[100px]">
-                                      <SelectValue placeholder="Age" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {Array.from({ length: 18 }, (_, i) => (
-                                        <SelectItem key={i} value={i.toString()}>
-                                          {i}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              ))}
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="icon" onClick={handleDecrement} disabled={childrenCount === 0}>
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="w-8 text-center">{childrenCount}</span>
+                                <Button variant="outline" size="icon" onClick={handleIncrement}>
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
+                            {childrenAges.map((age, i) => (
+                              <div key={i} className="flex items-center justify-between">
+                                <span>Child {i + 1}</span>
+                                <Select value={age.toString()} onValueChange={v => handleAgeChange(i, parseInt(v))}>
+                                  <SelectTrigger className="w-[100px]"><SelectValue placeholder="Age" /></SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 18 }, (_, n) => (
+                                      <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
+
+                    {/* Search button */}
                     <div className={scss.input_block}>
-                      <Link role="button" className={scss.search_btn} to={"/hotel-list"}><span>Search</span> <div className={scss.search_icon}><ArrowDown /></div></Link>
+                      <button className={scss.search_btn} onClick={handleSearch}>
+                        <span>Search</span>
+                        <div className={scss.search_icon}><ArrowDown /></div>
+                      </button>
                     </div>
+
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* ── Main content ───────────────────────────────────────────────── */}
         <section className={scss.hotel_list}>
           <div className={scss.list_wrapper}>
             <div style={{ display: 'flex', width: '100%', gap: '1rem' }}>
+
+              {/* ── Left sidebar ─────────────────────────────────────────── */}
               <div className={scss.list_filter}>
+
+                {/* Suggested */}
                 <div className={scss.facility_list}>
                   <h3 className={scss.list_title}>Suggested For You</h3>
                   <ul>
-                    <li>
-                      <Checkbox
-                        id="filter-1"
-                        checked={selectedFilters.includes(1)}
-                        onCheckedChange={() => toggleFilter(1)}
-                      />
-                      <label
-                        htmlFor="filter-1"
-                        className=""
-                      >
-                        Breakfast included
-                      </label>
-                    </li>
-                    <li>
-                      <Checkbox
-                        id="filter-1"
-                        checked={selectedFilters.includes(2)}
-                        onCheckedChange={() => toggleFilter(2)}
-                      />
-                      <label
-                        htmlFor="filter-1"
-                        className=""
-                      >
-                        All-inclusive
-                      </label>
-                    </li>
-                    <li>
-                      <Checkbox
-                        id="filter-1"
-                        checked={selectedFilters.includes(3)}
-                        onCheckedChange={() => toggleFilter(3)}
-                      />
-                      <label
-                        htmlFor="filter-1"
-                        className=""
-                      >
-                        Free Cancellation
-                      </label>
-                    </li>
+                    {[
+                      { id: 1, label: 'Breakfast included' },
+                      { id: 2, label: 'All-inclusive' },
+                      { id: 3, label: 'Free Cancellation' },
+                    ].map(f => (
+                      <li key={f.id}>
+                        <Checkbox
+                          id={`sug-${f.id}`}
+                          checked={selectedFilters.includes(f.id)}
+                          onCheckedChange={() => toggleFilter(f.id)}
+                        />
+                        <label htmlFor={`sug-${f.id}`}>{f.label}</label>
+                      </li>
+                    ))}
                     {expandedLists.suggested && (
                       <>
-                        <li>
-                          <Checkbox
-                            id="filter-1"
-                            checked={selectedFilters.includes(4)}
-                            onCheckedChange={() => toggleFilter(4)}
-                          />
-                          <label
-                            htmlFor="filter-1"
-                            className=""
-                          >
-                            Extra 1
-                          </label>
-                        </li>
-                        <li>
-                          <Checkbox
-                            id="filter-1"
-                            checked={selectedFilters.includes(5)}
-                            onCheckedChange={() => toggleFilter(5)}
-                          />
-                          <label
-                            htmlFor="filter-1"
-                            className=""
-                          >
-                            Extra 2
-                          </label>
-                        </li>
-                        <li>
-                          <Checkbox
-                            id="filter-1"
-                            checked={selectedFilters.includes(6)}
-                            onCheckedChange={() => toggleFilter(6)}
-                          />
-                          <label
-                            htmlFor="filter-1"
-                            className=""
-                          >
-                            Extra 3
-                          </label>
-                        </li>
+                        {[
+                          { id: 4, label: 'Pool included' },
+                          { id: 5, label: 'Free Wifi' },
+                        ].map(f => (
+                          <li key={f.id}>
+                            <Checkbox
+                              id={`sug-${f.id}`}
+                              checked={selectedFilters.includes(f.id)}
+                              onCheckedChange={() => toggleFilter(f.id)}
+                            />
+                            <label htmlFor={`sug-${f.id}`}>{f.label}</label>
+                          </li>
+                        ))}
                       </>
                     )}
                   </ul>
-                  <button onClick={() => toggleList("suggested")} className="flex items-center text-sm text-blue-600 hover:underline" >
-                    {expandedLists.suggested ? (
-                      <>
-                        <ChevronUp className="mr-1 h-3 w-3" /> Show less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="mr-1 h-3 w-3" /> Show more
-                      </>
-                    )}
+                  <button onClick={() => toggleList('suggested')} className="flex items-center text-sm text-blue-600 hover:underline">
+                    {expandedLists.suggested
+                      ? <><ChevronUp className="mr-1 h-3 w-3" /> Show less</>
+                      : <><ChevronDown className="mr-1 h-3 w-3" /> Show more</>}
                   </button>
                 </div>
+
+                {/* Room Facilities */}
                 <div className={scss.facility_list}>
                   <h3 className={scss.list_title}>Room Facilities</h3>
                   <ul>
-                    <li>
-                      <Checkbox
-                        id="filter-1"
-                        checked={selectedFilters.includes(1)}
-                        onCheckedChange={() => toggleFilter(1)}
-                      />
-                      <label
-                        htmlFor="filter-1"
-                        className=""
-                      >
-                        Baby Bed
-                      </label>
-                    </li>
-                    <li>
-                      <Checkbox
-                        id="filter-1"
-                        checked={selectedFilters.includes(2)}
-                        onCheckedChange={() => toggleFilter(2)}
-                      />
-                      <label
-                        htmlFor="filter-1"
-                        className=""
-                      >
-                        Bathtub
-                      </label>
-                    </li>
+                    {[
+                      { id: 10, label: 'Baby Bed' },
+                      { id: 11, label: 'Bathtub' },
+                    ].map(f => (
+                      <li key={f.id}>
+                        <Checkbox
+                          id={`fac-${f.id}`}
+                          checked={selectedFilters.includes(f.id)}
+                          onCheckedChange={() => toggleFilter(f.id)}
+                        />
+                        <label htmlFor={`fac-${f.id}`}>{f.label}</label>
+                      </li>
+                    ))}
                     {expandedLists.facility && (
                       <>
-                        <li>
-                          <Checkbox
-                            id="filter-1"
-                            checked={selectedFilters.includes(4)}
-                            onCheckedChange={() => toggleFilter(4)}
-                          />
-                          <label
-                            htmlFor="filter-1"
-                            className=""
-                          >
-                            Swimming Pool
-                          </label>
-                        </li>
-                        <li>
-                          <Checkbox
-                            id="filter-1"
-                            checked={selectedFilters.includes(5)}
-                            onCheckedChange={() => toggleFilter(5)}
-                          />
-                          <label
-                            htmlFor="filter-1"
-                            className=""
-                          >
-                            Internet access
-                          </label>
-                        </li>
-                        <li>
-                          <Checkbox
-                            id="filter-1"
-                            checked={selectedFilters.includes(6)}
-                            onCheckedChange={() => toggleFilter(6)}
-                          />
-                          <label
-                            htmlFor="filter-1"
-                            className=""
-                          >
-                            Heating
-                          </label>
-                        </li>
+                        {[
+                          { id: 12, label: 'Swimming Pool' },
+                          { id: 13, label: 'Internet access' },
+                          { id: 14, label: 'Heating' },
+                        ].map(f => (
+                          <li key={f.id}>
+                            <Checkbox
+                              id={`fac-${f.id}`}
+                              checked={selectedFilters.includes(f.id)}
+                              onCheckedChange={() => toggleFilter(f.id)}
+                            />
+                            <label htmlFor={`fac-${f.id}`}>{f.label}</label>
+                          </li>
+                        ))}
                       </>
                     )}
                   </ul>
-                  <button onClick={() => toggleList("facility")} className="flex items-center text-sm text-blue-600 hover:underline" >
-                    {expandedLists.facility ? (
-                      <>
-                        <ChevronUp className="mr-1 h-3 w-3" /> Show less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="mr-1 h-3 w-3" /> Show more
-                      </>
-                    )}
+                  <button onClick={() => toggleList('facility')} className="flex items-center text-sm text-blue-600 hover:underline">
+                    {expandedLists.facility
+                      ? <><ChevronUp className="mr-1 h-3 w-3" /> Show less</>
+                      : <><ChevronDown className="mr-1 h-3 w-3" /> Show more</>}
                   </button>
                 </div>
+
+                {/* Bed Type */}
                 <div className={scss.facility_list}>
                   <h3 className={scss.list_title}>Bed Type</h3>
-                  <RadioGroup >
+                  <RadioGroup defaultValue="any-bed">
                     <ul>
-                      <li>
-                        <RadioGroupItem value="two single" id="bed-two" />
-                        <label
-                          htmlFor="bed-two"
-                          className=""
-                        >
-                          Two Single Beds
-                        </label>
-                      </li>
-                      <li>
-                        <RadioGroupItem value="kind beds" id="bed-king" />
-                        <label
-                          htmlFor="bed-king"
-                          className=""
-                        >
-                          King Beds
-                        </label>
-                      </li>
-                      <li>
-                        <RadioGroupItem value="baby cots" id="babay-cots" />
-                        <label
-                          htmlFor="baby-cots"
-                          className=""
-                        >
-                          Baby Cots
-                        </label>
-                      </li>
-                      <li>
-                        <RadioGroupItem value="double bed" id="double-bed" />
-                        <label
-                          htmlFor="double-bed"
-                          className=""
-                        >
-                          Double Bed
-                        </label>
-                      </li>
-                      <li>
-                        <RadioGroupItem value="single bed" id="single-bed" />
-                        <label
-                          htmlFor="single-bed"
-                          className=""
-                        >
-                          Single Bed
-                        </label>
-                      </li>
-                      {expandedLists.bedtype && (
-                        <>
-                          <li>
-                            <RadioGroupItem value="queen" id="queen" />
-                            <label
-                              htmlFor="queen"
-                              className=""
-                            >
-                              Queen
-                            </label>
-                          </li>
-                          <li>
-                            <RadioGroupItem value="bannk bed" id="bunk-bed" />
-                            <label
-                              htmlFor="bunk-bed"
-                              className=""
-                            >
-                              Bunk bed
-                            </label>
-                          </li>
-                        </>
-                      )}
+                      {[
+                        { value: 'two-single', label: 'Two Single Beds' },
+                        { value: 'king',       label: 'King Beds' },
+                        { value: 'baby-cots',  label: 'Baby Cots' },
+                        { value: 'double',     label: 'Double Bed' },
+                        { value: 'single',     label: 'Single Bed' },
+                      ].map(b => (
+                        <li key={b.value}>
+                          <RadioGroupItem value={b.value} id={b.value} />
+                          <label htmlFor={b.value}>{b.label}</label>
+                        </li>
+                      ))}
                     </ul>
                   </RadioGroup>
-                  <button onClick={() => toggleList("bedtype")} className="flex items-center text-sm text-blue-600 hover:underline" >
-                    {expandedLists.bedtype ? (
-                      <>
-                        <ChevronUp className="mr-1 h-3 w-3" /> Show less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="mr-1 h-3 w-3" /> Show more
-                      </>
-                    )}
-                  </button>
                 </div>
+
+                {/* Star rating — wired to API */}
                 <div className={scss.facility_list}>
-                  <h3 className={scss.list_title}>Accommodation classification </h3>
-                  <RadioGroup >
+                  <h3 className={scss.list_title}>Accommodation Classification</h3>
+                  <RadioGroup
+                    value={selectedStarRating}
+                    onValueChange={setSelectedStarRating}
+                  >
                     <ul>
                       <li>
-                        <RadioGroupItem value="five star" id="five-star" />
-                        <label
-                          htmlFor="five-star"
-                          className=""
-                        >
-                          5 Stars
-                        </label>
+                        <RadioGroupItem value="all" id="star-all" />
+                        <label htmlFor="star-all">All</label>
                       </li>
-                      <li>
-                        <RadioGroupItem value="four star" id="four-star" />
-                        <label
-                          htmlFor="four-star"
-                          className=""
-                        >
-                          4 Stars
-                        </label>
-                      </li>
-                      <li>
-                        <RadioGroupItem value="three star" id="three-star" />
-                        <label
-                          htmlFor="three-star"
-                          className=""
-                        >
-                          3 Stars
-                        </label>
-                      </li>
-                      {expandedLists.accomodation && (
-                        <>
-                          <li>
-                            <RadioGroupItem value="two star" id="two-star" />
-                            <label
-                              htmlFor="two-star"
-                              className=""
-                            >
-                              2 Stars
-                            </label>
-                          </li>
-                          <li>
-                            <RadioGroupItem value="one star" id="one-star" />
-                            <label
-                              htmlFor="one-star"
-                              className=""
-                            >
-                              1 Star
-                            </label>
-                          </li>
-                        </>
-                      )}
+                      {[5, 4, 3, 2, 1].map(s => (
+                        <li key={s}>
+                          <RadioGroupItem value={String(s)} id={`star-${s}`} />
+                          <label htmlFor={`star-${s}`}>{s} Stars</label>
+                        </li>
+                      ))}
                     </ul>
                   </RadioGroup>
-                  <button onClick={() => toggleList("accomodation")} className="flex items-center text-sm text-blue-600 hover:underline" >
-                    {expandedLists.accomodation ? (
-                      <>
-                        <ChevronUp className="mr-1 h-3 w-3" /> Show less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="mr-1 h-3 w-3" /> Show more
-                      </>
-                    )}
-                  </button>
                 </div>
+
               </div>
+
+              {/* ── Right results panel ───────────────────────────────────── */}
               <div className={scss.result_block}>
-                <div className={clsx(scss.filter_slider, "relative")}>
+
+                {/* Sort slider */}
+                <div className={clsx(scss.filter_slider, 'relative')}>
                   <button
                     onClick={() => swiperRef.current?.swiper.slidePrev()}
-                    className={clsx(scss.prev_btn, "swiper-button-prev rounded-full bg-white p-2 shadow-md")}
+                    className={clsx(scss.prev_btn, 'swiper-button-prev rounded-full bg-white p-2 shadow-md')}
                   >
                     <FaChevronLeft />
                   </button>
                   <div className={scss.filter_slider_wrapper}>
                     <Swiper
+                      ref={swiperRef}
                       slidesPerView={3}
                       spaceBetween={20}
-                      slidesPerGroup={1}
-                      freeMode={true}
-                      // navigation={true}
+                      freeMode
                       modules={[FreeMode, Navigation]}
-                      navigation={{
-                        nextEl: ".swiper-button-next",
-                        prevEl: ".swiper-button-prev",
-                      }}
+                      navigation={{ nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }}
                       className="mySwiper"
                     >
-                      <SwiperSlide>
-                        <div className={scss.filter_btn}>
-                          <input type="radio" id='popularity' name='filter' />
-                          <label htmlFor="popularity">Popularity</label>
-                        </div>
-                      </SwiperSlide>
-                      <SwiperSlide>
-                        <div className={scss.filter_btn}>
-                          <input type="radio" id='pricelth' name='filter' />
-                          <label htmlFor="pricelth">Price (Low to High)</label>
-                        </div>
-                      </SwiperSlide>
-                      <SwiperSlide>
-                        <div className={scss.filter_btn}>
-                          <input type="radio" id='rating' name='filter' />
-                          <label htmlFor="rating">User Rating (Highest)</label>
-                        </div>
-                      </SwiperSlide>
-                      <SwiperSlide>
-                        <div className={scss.filter_btn}>
-                          <input type="radio" id='lp' name='filter' />
-                          <label htmlFor="lp">Lowest Price & Best Rated</label>
-                        </div>
-                      </SwiperSlide>
-                      <SwiperSlide>
-                        <div className={scss.filter_btn}>
-                          <input type="radio" id='nearest' name='filter' />
-                          <label htmlFor="nearest">Nearest to -</label>
-                        </div>
-                      </SwiperSlide>
+                      {['Popularity', 'Price (Low to High)', 'User Rating (Highest)', 'Lowest Price & Best Rated', 'Nearest to -'].map(label => (
+                        <SwiperSlide key={label}>
+                          <div className={scss.filter_btn}>
+                            <input type="radio" id={label} name="sort-filter" />
+                            <label htmlFor={label}>{label}</label>
+                          </div>
+                        </SwiperSlide>
+                      ))}
                     </Swiper>
                   </div>
                   <button
                     onClick={() => swiperRef.current?.swiper.slideNext()}
-                    className={clsx(scss.next_btn, "swiper-button-next rounded-full bg-white p-2 shadow-md")}
+                    className={clsx(scss.next_btn, 'swiper-button-next rounded-full bg-white p-2 shadow-md')}
                   >
                     <FaChevronRight />
                   </button>
                 </div>
-                <h4 className={scss.result_head}>Srinagar : 18 Results found lore</h4>
-                <div className={scss.hotel_card_wrapper}>
-                  { }
-                  <div className={scss.hotel_card}>
-                    <div className={scss.gallery}>
-                      <div className={scss.main_slider}>
-                        <Splide
-                          ref={mainSliderRef}
-                          options={{
-                            type: "loop",
-                            perPage: 1,
-                            arrows: false,
-                            pagination: false,
-                          }}
-                          aria-label="Main Slider"
-                        >
-                          {/* Main Slides */}
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`}
-                              alt="image"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.1.png`}
-                              alt="image"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.2.png`}
-                              alt="image"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.3.png`}
-                              alt="image"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                        </Splide>
-                      </div>
-                      {/* Thumbnail Slider */}
-                      <div className={scss.thumb_slider}>
-                        <Splide
-                          ref={thumbSliderRef}
-                          options={{
-                            direction: "ttb",
-                            height: "300px",
-                            rewind: true,
-                            gap: "1rem",
-                            pagination: false,
-                            fixedWidth: 100,
-                            fixedHeight: 70,
-                            isNavigation: true,
-                            updateOnMove: true,
-                            cover: true,
-                            focus: "center",
-                            wheels: false,
-                          }}
-                          aria-label="Thumbnail Navigation"
-                        >
-                          {/* Thumbnail Slides */}
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`}
-                              alt="Thumbnail 2"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.1.png`}
-                              alt="Thumbnail 2"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.2.png`}
-                              alt="Thumbnail 3"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                          <SplideSlide>
-                            <img
-                              src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.3.png`}
-                              alt="Thumbnail 4"
-                              className="w-full h-full object-cover"
-                            />
-                          </SplideSlide>
-                        </Splide>
-                      </div>
-                    </div>
-                    <div className={scss.card_content}>
-                      <div className={scss.card_head}>
-                        <h4 className={scss.hotel_name}>Hotel Name</h4>
-                        <ul className={scss.facility_list}>
-                          <li><MapPin /><span>Located In Srinagar, 500m Distance to pathan</span></li>
-                          <li><Coffee /> <span>Breakfast Included</span></li>
-                          <li><User /><span>1 Adult, 2 Children </span></li>
-                          <li><Clock /><span>4 Nights </span></li>
-                        </ul>
-                      </div>
-                      <div className={scss.card_footer}>
-                        <div className={scss.detail_block}>
-                          <p className='text-muted'>Experience Unique Opportunity </p>
-                          <p>Standard rooms </p>
-                          <div className={scss.review_detail}><h5>Very Good ,</h5><span>2.259 Reviews</span></div>
-                        </div>
-                        <div className={scss.price_block}>
-                          <h5>6800/-</h5>
-                          <p>Includes taxes and charges</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
-                </div>
+                {/* Result count heading */}
+                <h4 className={scss.result_head}>
+                  {selectedDistrict !== 'all' ? `${selectedDistrict} : ` : ''}
+                  {totalElements} Result{totalElements !== 1 ? 's' : ''} found
+                </h4>
+
+                {/* Loading */}
+                {loading && (
+                  <div className="flex items-center justify-center py-16 gap-3 text-muted-foreground">
+                    <Loader2 className="animate-spin" size={24} />
+                    <span>Loading hotels...</span>
+                  </div>
+                )}
+
+                {/* Error */}
+                {!loading && error && (
+                  <div className="py-10 text-center text-red-500">{error}</div>
+                )}
+
+                {/* Empty */}
+                {!loading && !error && hotelList.length === 0 && (
+                  <div className="py-16 text-center text-muted-foreground">
+                    <Building2 size={48} className="mx-auto mb-3 opacity-30" />
+                    <p>No approved hotels found for your search.</p>
+                    <p className="text-sm mt-1">Try selecting a different district or star rating.</p>
+                  </div>
+                )}
+
+                {/* Hotel cards */}
+                {!loading && !error && hotelList.length > 0 && (
+                  <div className={scss.hotel_card_wrapper}>
+                    {hotelList.map(hotel => (
+                      <div key={hotel.id} className={scss.hotel_card}>
+
+                        {/* Photo */}
+                        <div className={scss.gallery}>
+                          <div className={scss.main_slider}>
+                            <img
+                              src={getPhotoUrl(hotel.coverPhotoUrl)}
+                              alt={hotel.displayName || hotel.legalName}
+                              className="w-full h-full object-cover"
+                              onError={e => {
+                                (e.target as HTMLImageElement).src =
+                                  `${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`;
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Card content */}
+                        <div className={scss.card_content}>
+                          <div className={scss.card_head}>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className={scss.hotel_name}>
+                                {hotel.displayName || hotel.legalName}
+                              </h4>
+                              {renderStars(hotel.starRating)}
+                            </div>
+                            <ul className={scss.facility_list}>
+                              <li>
+                                <MapPin />
+                                <span>
+                                  {[hotel.city, hotel.district, hotel.state].filter(Boolean).join(', ')}
+                                  {hotel.landmark ? ` — ${hotel.landmark}` : ''}
+                                </span>
+                              </li>
+                              {hotel.hotelType && (
+                                <li><Building2 /><span>{hotel.hotelType}</span></li>
+                              )}
+                              {hotel.description && (
+                                <li>
+                                  <span className="text-muted-foreground text-sm line-clamp-2">
+                                    {hotel.description}
+                                  </span>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+
+                          <div className={scss.card_footer}>
+                            <div className={scss.detail_block}>
+                              <p className="text-muted">Experience Unique Opportunity</p>
+                              <p>Standard rooms</p>
+                              <div className={scss.review_detail}>
+                                <h5>Very Good ,</h5>
+                                <span>Reviews</span>
+                              </div>
+                            </div>
+                            <div className={scss.price_block}>
+                              {hotel.minTariff != null ? (
+                                <>
+                                  <h5>₹{hotel.minTariff.toLocaleString('en-IN')}/-</h5>
+                                  <p>Includes taxes and charges</p>
+                                </>
+                              ) : (
+                                <p className="text-muted-foreground text-sm">Price on request</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {totalPages > 1 && !loading && (
+                  <div className="flex items-center justify-center gap-3 mt-6 pb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage === 0}
+                      onClick={() => fetchHotelList(currentPage - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {currentPage + 1} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage >= totalPages - 1}
+                      onClick={() => fetchHotelList(currentPage + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+
               </div>
             </div>
           </div>
         </section>
+
       </div>
     </>
-  )
+  );
 }
 
-export default Hotellist
+export default Hotellist;
