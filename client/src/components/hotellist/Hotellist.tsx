@@ -68,9 +68,13 @@ function Hotellist() {
   const [childrenAges, setChildrenAges] = useState<number[]>([]);
   const [isChildOpen, setIsChildOpen] = useState(false);
 
-  // ── Search filter state ───────────────────────────────────────────────────
+  // ── Search filter state (what user selected in UI) ────────────────────────
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedStarRating, setSelectedStarRating] = useState<string>('all');
+
+  // ── Applied filter state (what was last searched) ─────────────────────────
+  const [appliedDistrict, setAppliedDistrict] = useState<string>('all');
+  const [appliedStarRating, setAppliedStarRating] = useState<string>('all');
 
   // ── Hotel list state ──────────────────────────────────────────────────────
   const [hotelList, setHotelList] = useState<Hotel[]>([]);
@@ -116,8 +120,8 @@ function Hotellist() {
     setError(null);
     try {
       const payload: Record<string, any> = { page, size: 10 };
-      if (selectedDistrict !== 'all')   payload.district   = selectedDistrict;
-      if (selectedStarRating !== 'all') payload.starRating = Number(selectedStarRating);
+      if (appliedDistrict !== 'all')   payload.district   = appliedDistrict;
+      if (appliedStarRating !== 'all') payload.starRating = Number(appliedStarRating);
 
       const response = await axiosInstance.post('/api/v1/hotels/hotellist', payload, {
         headers: { 'Content-Type': 'application/json' },
@@ -134,15 +138,43 @@ function Hotellist() {
     } finally {
       setLoading(false);
     }
-  }, [selectedDistrict, selectedStarRating]);
+  }, [appliedDistrict, appliedStarRating]);
+
+  // Direct fetch with explicit filters — avoids stale state timing issues
+  const fetchHotelListWithFilters = async (page = 0, district: string, starRating: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const payload: Record<string, any> = { page, size: 10 };
+      if (district !== 'all')   payload.district   = district;
+      if (starRating !== 'all') payload.starRating = Number(starRating);
+
+      const response = await axiosInstance.post('/api/v1/hotels/hotellist', payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const data: HotelPage = response.data;
+      setHotelList(data.content);
+      setTotalElements(data.totalElements);
+      setTotalPages(data.totalPages);
+      setCurrentPage(data.number);
+    } catch (err: any) {
+      setError('Failed to load hotels. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchHotelList(0);
   }, []);
 
   const handleSearch = () => {
+    setAppliedDistrict(selectedDistrict);
+    setAppliedStarRating(selectedStarRating);
     setCurrentPage(0);
-    fetchHotelList(0);
+    fetchHotelListWithFilters(0, selectedDistrict, selectedStarRating);
   };
 
   // ── Star icons helper ─────────────────────────────────────────────────────
@@ -510,7 +542,7 @@ function Hotellist() {
 
                 {/* Result count heading */}
                 <h4 className={scss.result_head}>
-                  {selectedDistrict !== 'all' ? `${selectedDistrict} : ` : ''}
+                  {appliedDistrict !== 'all' ? `${appliedDistrict} : ` : ''}
                   {totalElements} Result{totalElements !== 1 ? 's' : ''} found
                 </h4>
 
