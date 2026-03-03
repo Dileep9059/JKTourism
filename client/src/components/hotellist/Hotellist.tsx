@@ -543,12 +543,12 @@ function Hotellist() {
                       <div key={hotel.id} className={scss.hotel_card}>
 
                         {/* Photo */}
-                        <div className={scss.gallery}>
-                          <div className={scss.main_slider}>
+                        <div className={scss.gallery} style={{ minWidth: '280px', maxWidth: '280px' }}>
+                          <div className={scss.main_slider} style={{ height: '200px', width: '280px' }}>
                             <img
                               src={getPhotoUrl(hotel.coverPhotoUrl)}
                               alt={hotel.displayName || hotel.legalName}
-                              className="w-full h-full object-cover"
+                              style={{ height: '200px', width: '280px', objectFit: 'cover', borderRadius: '6px' }}
                               onError={e => {
                                 (e.target as HTMLImageElement).src =
                                   `${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`;
