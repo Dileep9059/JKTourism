@@ -43,6 +43,7 @@ interface Hotel {
   starRating: number | null;
   hotelType: string | null;
   minTariff: number | null;
+  roomTypeName: string | null;
   coverPhotoUrl: string | null;
 }
 
@@ -71,10 +72,12 @@ function Hotellist() {
   // ── Search filter state (what user selected in UI) ────────────────────────
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedStarRating, setSelectedStarRating] = useState<string>('all');
+  const [selectedRoomType, setSelectedRoomType] = useState<string>('all');
 
   // ── Applied filter state (what was last searched) ─────────────────────────
   const [appliedDistrict, setAppliedDistrict] = useState<string>('all');
   const [appliedStarRating, setAppliedStarRating] = useState<string>('all');
+  const [appliedRoomType, setAppliedRoomType] = useState<string>('all');
 
   // ── Hotel list state ──────────────────────────────────────────────────────
   const [hotelList, setHotelList] = useState<Hotel[]>([]);
@@ -141,13 +144,14 @@ function Hotellist() {
   }, [appliedDistrict, appliedStarRating]);
 
   // Direct fetch with explicit filters — avoids stale state timing issues
-  const fetchHotelListWithFilters = async (page = 0, district: string, starRating: string) => {
+  const fetchHotelListWithFilters = async (page = 0, district: string, starRating: string, roomType: string) => {
     setLoading(true);
     setError(null);
     try {
       const payload: Record<string, any> = { page, size: 10 };
       if (district !== 'all')   payload.district   = district;
       if (starRating !== 'all') payload.starRating = Number(starRating);
+      if (roomType !== 'all')   payload.roomType   = roomType;
 
       const response = await axiosInstance.post('/api/v1/hotels/hotellist', payload, {
         headers: { 'Content-Type': 'application/json' },
@@ -173,8 +177,9 @@ function Hotellist() {
   const handleSearch = () => {
     setAppliedDistrict(selectedDistrict);
     setAppliedStarRating(selectedStarRating);
+    setAppliedRoomType(selectedRoomType);
     setCurrentPage(0);
-    fetchHotelListWithFilters(0, selectedDistrict, selectedStarRating);
+    fetchHotelListWithFilters(0, selectedDistrict, selectedStarRating, selectedRoomType);
   };
 
   // ── Star icons helper ─────────────────────────────────────────────────────
@@ -229,16 +234,18 @@ function Hotellist() {
                       </Select>
                     </div>
 
-                    {/* Room Type (UI only) */}
+                    {/* Room Type */}
                     <div className={scss.input_block}>
-                      <Select>
+                      <Select value={selectedRoomType} onValueChange={setSelectedRoomType}>
                         <SelectTrigger>
                           <SelectValue placeholder="Room Type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="deluxe">Deluxe Room</SelectItem>
-                            <SelectItem value="superdeluxe">Super Deluxe Room</SelectItem>
+                            <SelectItem value="all">All Room Types</SelectItem>
+                            <SelectItem value="Standard Room">Standard Room</SelectItem>
+                            <SelectItem value="Deluxe Room">Deluxe Room</SelectItem>
+                            <SelectItem value="Super Deluxe Room">Super Deluxe Room</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -622,7 +629,7 @@ function Hotellist() {
                           <div className={scss.card_footer}>
                             <div className={scss.detail_block}>
                               <p className="text-muted">Experience Unique Opportunity</p>
-                              <p>Standard rooms</p>
+                              <p>{hotel.roomTypeName || 'Standard rooms'}</p>
                               <div className={scss.review_detail}>
                                 <h5>Very Good ,</h5>
                                 <span>Reviews</span>

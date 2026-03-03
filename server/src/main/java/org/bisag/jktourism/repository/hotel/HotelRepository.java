@@ -47,19 +47,6 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
             """)
     List<Object[]> countByStatusRaw();
 
-    /**
-     * Public hotel search — only APPROVED hotels are returned.
-     *
-     * Filters:
-     *   :name     — partial match on displayName (pass "" or null to skip)
-     *   :district — exact match on district     (pass "" or null to skip)
-     *   :hotelType — exact match on hotelType   (pass "" or null to skip)
-     *   :starRating — exact star rating         (pass null to skip)
-     *
-     * Returns one row per hotel. coverPhotoUrl comes from the hotel_photos
-     * row with the lowest sort_order value (a sub-select keeps the main
-     * query non-duplicating without a GROUP BY on every column).
-     */
     @Query("""
                 SELECT new org.bisag.jktourism.dto.janta.PublicHotelListDto(
                     h.id,
@@ -73,6 +60,10 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
                     bi.starRating,
                     bi.hotelType,
                     (SELECT MIN(rt.tariff) FROM HotelRoomType rt WHERE rt.hotel = h),
+                    (SELECT rt2.roomTypeName FROM HotelRoomType rt2
+                        WHERE rt2.hotel = h
+                        ORDER BY rt2.createdAt ASC
+                        LIMIT 1),
                     (SELECT p.photoUrl FROM HotelPhoto p
                         WHERE p.hotel = h
                         ORDER BY p.sortOrder ASC, p.createdAt ASC
@@ -82,10 +73,15 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
                 LEFT JOIN h.location loc
                 LEFT JOIN h.basicInfo bi
                 WHERE h.status = org.bisag.jktourism.models.hotel.enums.HotelStatus.APPROVED
-                  AND (:name     IS NULL OR :name     = '' OR LOWER(h.displayName) LIKE LOWER(CONCAT('%', :name,     '%')))
-                  AND (:district IS NULL OR :district = '' OR LOWER(loc.district)  = LOWER(:district))
-                  AND (:hotelType IS NULL OR :hotelType = '' OR LOWER(bi.hotelType) = LOWER(:hotelType))
+                  AND (:name      IS NULL OR :name      = '' OR LOWER(h.displayName) LIKE LOWER(CONCAT('%', :name, '%')))
+                  AND (:district  IS NULL OR :district  = '' OR LOWER(loc.district)  = LOWER(:district))
+                  AND (:hotelType IS NULL OR :hotelType = '' OR LOWER(bi.hotelType)  = LOWER(:hotelType))
                   AND (:starRating IS NULL OR bi.starRating = :starRating)
+                  AND (:roomType  IS NULL OR :roomType  = '' OR EXISTS (
+                      SELECT 1 FROM HotelRoomType rt
+                      WHERE rt.hotel = h
+                      AND LOWER(rt.roomTypeName) = LOWER(:roomType)
+                  ))
                 ORDER BY h.approvedAt DESC
             """)
     Page<PublicHotelListDto> findPublicHotels(
@@ -93,6 +89,7 @@ public interface HotelRepository extends JpaRepository<Hotel, UUID> {
             @Param("district") String district,
             @Param("hotelType") String hotelType,
             @Param("starRating") Integer starRating,
+            @Param("roomType") String roomType,
             Pageable pageable);
 
     void deleteById(UUID id);

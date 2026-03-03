@@ -32,6 +32,9 @@ public class PublicHotelListDto {
     // Pricing — minimum tariff across all room types
     private BigDecimal minTariff;
 
+    // Room type name
+    private String roomTypeName;
+
     // Cover photo (first photo by sort order)
     private String coverPhotoUrl;
 }

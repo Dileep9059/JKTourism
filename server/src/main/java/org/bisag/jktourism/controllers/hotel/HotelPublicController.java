@@ -20,19 +20,6 @@ public class HotelPublicController {
 
     private final HotelRepository hotelRepo;
 
-    /**
-     * POST /api/v1/hotels/hotellist
-     *
-     * Body (all fields optional):
-     * {
-     *   "name":       "Radisson",   // hotel display name (partial match)
-     *   "district":   "Srinagar",   // exact district name
-     *   "hotelType":  "Resort",     // e.g. Hotel, Resort, Boutique
-     *   "starRating": 4,            // 1–5
-     *   "page":       0,            // 0-based page index (default 0)
-     *   "size":       10            // page size (default 10, max 50)
-     * }
-     */
     @PostMapping("/hotellist")
     public ResponseEntity<?> getHotelList(@RequestBody(required = false) HotelSearchRequest req) {
         try {
@@ -48,39 +35,38 @@ public class HotelPublicController {
                     req.getDistrict(),
                     req.getHotelType(),
                     req.getStarRating(),
+                    req.getRoomType(),
                     pageable
             );
 
             return ResponseEntity.ok().body(hotelList);
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // ── Inner request class (keeps things self-contained) ──────────────────
     public static class HotelSearchRequest {
         private String name;
         private String district;
         private String hotelType;
         private Integer starRating;
+        private String roomType;
         private Integer page;
         private Integer size;
 
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
-
         public String getDistrict() { return district; }
         public void setDistrict(String district) { this.district = district; }
-
         public String getHotelType() { return hotelType; }
         public void setHotelType(String hotelType) { this.hotelType = hotelType; }
-
         public Integer getStarRating() { return starRating; }
         public void setStarRating(Integer starRating) { this.starRating = starRating; }
-
+        public String getRoomType() { return roomType; }
+        public void setRoomType(String roomType) { this.roomType = roomType; }
         public Integer getPage() { return page; }
         public void setPage(Integer page) { this.page = page; }
-
         public Integer getSize() { return size; }
         public void setSize(Integer size) { this.size = size; }
     }
