@@ -172,7 +172,7 @@ function App() {
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/hotel-search" element={<Hotelsearch />} />
               <Route path="/hotel-list" element={<Hotellist />} />
-              <Route path="/hotel-detail" element={<Hoteldetail />} />
+              <Route path="/hotel-detail/:id" element={<Hoteldetail />} />
 
               <Route path="/hotel-registration" element={<HotelRegistration />} />
             </Route>

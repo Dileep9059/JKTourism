@@ -1,409 +1,500 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import scss from './hotedetail.module.scss';
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select" ;
-import { Link } from "react-router-dom";  
+  Select, SelectContent, SelectGroup, SelectItem,
+  SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Link, useParams } from "react-router-dom";
 import { format } from "date-fns";
-import { ArrowDown, Calendar as CalendarIcon,   Minus, Plus } from "lucide-react";
+import { ArrowDown, Calendar as CalendarIcon, Minus, Plus, MapPin, Phone, Mail, Globe, Star, Loader2, Building2 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
-import clsx from 'clsx'; 
+import clsx from 'clsx';
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { FaStar } from 'react-icons/fa';
- 
- 
- 
-// import required modules
+import axiosInstance from '@/axios/axios';
 
+// ── Types ──────────────────────────────────────────────────────────────────────
+interface RoomTypeInfo {
+  roomTypeName: string;
+  roomCount: number;
+  tariff: number;
+}
+
+interface AmenityInfo {
+  name: string;
+  icon: string;
+  scope: string;
+}
+
+interface HotelDetail {
+  hotelId: string;
+  displayName: string;
+  legalName: string;
+  description: string | null;
+  hotelType: string | null;
+  starRating: number | null;
+  establishedYear: number | null;
+  publicEmail: string | null;
+  publicPhone: string | null;
+  websiteUrl: string | null;
+  addressLine1: string | null;
+  city: string | null;
+  district: string | null;
+  state: string | null;
+  pincode: string | null;
+  landmark: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  googleMapsUrl: string | null;
+  photos: string[];
+  roomTypes: RoomTypeInfo[];
+  amenities: AmenityInfo[];
+  checkInTime: string | null;
+  checkOutTime: string | null;
+  parkingAvailable: boolean | null;
+  liftAvailable: boolean | null;
+  powerBackup: boolean | null;
+  wheelchairAccessible: boolean | null;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+const FALLBACK = `${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`;
+
+const getPhotoUrl = (url: string | null | undefined) => {
+  if (!url) return FALLBACK;
+  if (url.startsWith('http')) return url;
+  return `${import.meta.env.VITE_APP_API_BASE_URL}${url}`;
+};
+
+const renderStars = (count: number | null) => {
+  if (!count) return null;
+  return (
+    <ul className={scss.hotel_ratings}>
+      {Array.from({ length: count }, (_, i) => (
+        <li key={i}><FaStar /></li>
+      ))}
+    </ul>
+  );
+};
+
+// ── Component ──────────────────────────────────────────────────────────────────
 function Hoteldetail() {
-   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-      from: new Date(2025, 5, 12),
-      to: new Date(2025, 6, 15),
-    });
+  const { id } = useParams<{ id: string }>();
 
-    const [childrenCount, setChildrenCount] = React.useState(0);
-    const [childrenAges, setChildrenAges] = React.useState<number[]>([]);
-    const [isOpen, setIsOpen] = React.useState(false);
-    
-    const handleIncrement = () => {
-      setChildrenCount((prev) => prev + 1);
-      setChildrenAges((prev) => [...prev, 0]); // Default age is 0
-    };
-  
-    const handleDecrement = () => {
-      if (childrenCount > 0) {
-        setChildrenCount((prev) => prev - 1);
-        setChildrenAges((prev) => prev.slice(0, -1));
-      }
-    };
-  
-    const handleAgeChange = (index: number, value: number) => {
-      const newAges = [...childrenAges];
-      newAges[index] = value;
-      setChildrenAges(newAges);
-    };
-    
-    useEffect(() => {
-      // Initialize Fancybox
-      Fancybox.bind("[data-fancybox='gallery']", {
-        // Your custom options
-      });
-  
-      // Cleanup on unmount
-      return () => {
-        Fancybox.unbind("[data-fancybox='gallery']");
-      };
-    }, []);
- 
+  const [hotel, setHotel] = useState<HotelDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+  });
+  const [childrenCount, setChildrenCount] = React.useState(0);
+  const [childrenAges, setChildrenAges] = React.useState<number[]>([]);
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleIncrement = () => {
+    setChildrenCount(p => p + 1);
+    setChildrenAges(p => [...p, 0]);
+  };
+  const handleDecrement = () => {
+    if (childrenCount > 0) {
+      setChildrenCount(p => p - 1);
+      setChildrenAges(p => p.slice(0, -1));
+    }
+  };
+  const handleAgeChange = (index: number, value: number) => {
+    const newAges = [...childrenAges];
+    newAges[index] = value;
+    setChildrenAges(newAges);
+  };
+
+  // ── Fetch hotel detail ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    axiosInstance.get(`/api/v1/hotels/${id}`)
+      .then(res => setHotel(res.data))
+      .catch(() => setError('Failed to load hotel details.'))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  // ── Fancybox ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    Fancybox.bind("[data-fancybox='gallery']", {});
+    return () => { Fancybox.unbind("[data-fancybox='gallery']"); };
+  }, [hotel]);
+
+  // ── Loading / Error states ────────────────────────────────────────────────
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen gap-3 text-muted-foreground">
+      <Loader2 className="animate-spin" size={32} />
+      <span>Loading hotel details...</span>
+    </div>
+  );
+
+  if (error || !hotel) return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-3 text-muted-foreground">
+      <Building2 size={48} className="opacity-30" />
+      <p>{error || 'Hotel not found.'}</p>
+      <Link to="/hotel-list" className="text-blue-600 underline">← Back to Hotel List</Link>
+    </div>
+  );
+
+  const photos = hotel.photos?.length > 0 ? hotel.photos : [FALLBACK];
 
   return (
     <>
       <div className={scss.common_page}>
-          <section className={scss.filter_top}>
-            <div className="container mx-auto">
-                <div className={scss.filter_wrapper}>
-                  <div className={scss.custom_form}>
-                    <div className={scss.form_block}>
-                      <div className={scss.filter_group}>
-                        <div className={scss.input_block}>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="City/Location" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                {/* <SelectLabel>City/Location</SelectLabel> */}
-                                <SelectItem value="jammu">Jammu</SelectItem>
-                                <SelectItem value="kashmir">Kashmir</SelectItem> 
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className={scss.input_block}>
-                            <Select>
-                              <SelectTrigger >
-                                <SelectValue placeholder="Room Type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {/* <SelectLabel>City/Location</SelectLabel> */}
-                                  <SelectItem value="jammu">Deluxe Room</SelectItem>
-                                  <SelectItem value="kashmir">Super Deluxe Room</SelectItem> 
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                        </div>
-                        <div className={scss.input_block}>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  id="date"
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[300px] justify-start text-left font-normal",
-                                    !dateRange && "text-muted-foreground"
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
-                                  {dateRange?.from ? (
-                                    dateRange.to ? (
-                                      <>
-                                        {format(dateRange.from, "LLL dd, y")} -{" "}
-                                        {format(dateRange.to, "LLL dd, y")}
-                                      </>
-                                    ) : (
-                                      format(dateRange.from, "LLL dd, y")
-                                    )
-                                  ) : (
-                                    <span>Pick a date range</span>
-                                  )}
+
+        {/* ── Top search bar ──────────────────────────────────────────────── */}
+        <section className={scss.filter_top}>
+          <div className="container mx-auto">
+            <div className={scss.filter_wrapper}>
+              <div className={scss.custom_form}>
+                <div className={scss.form_block}>
+                  <div className={scss.filter_group}>
+                    <div className={scss.input_block}>
+                      <Select>
+                        <SelectTrigger><SelectValue placeholder="City/Location" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="jammu">Jammu</SelectItem>
+                            <SelectItem value="kashmir">Kashmir</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className={scss.input_block}>
+                      <Select>
+                        <SelectTrigger><SelectValue placeholder="Room Type" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="deluxe">Deluxe Room</SelectItem>
+                            <SelectItem value="superdeluxe">Super Deluxe Room</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className={scss.input_block}>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button id="date" variant="outline"
+                            className={cn("w-[300px] justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dateRange?.from ? (
+                              dateRange.to
+                                ? <>{format(dateRange.from, "LLL dd, y")} – {format(dateRange.to, "LLL dd, y")}</>
+                                : format(dateRange.from, "LLL dd, y")
+                            ) : <span>Pick a date range</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar initialFocus mode="range" defaultMonth={dateRange?.from}
+                            selected={dateRange} onSelect={setDateRange} numberOfMonths={2} />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className={scss.input_block}>
+                      <Select>
+                        <SelectTrigger><SelectValue placeholder="Rooms" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className={scss.input_block}>
+                      <Select>
+                        <SelectTrigger><SelectValue placeholder="Adults" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className={scss.input_block}>
+                      <Popover open={isOpen} onOpenChange={setIsOpen}>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-between"
+                            onClick={() => setIsOpen(!isOpen)}>
+                            Children (below 17): {childrenCount}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className={clsx(scss.age_body, "w-80 p-4")}>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium">Children</h4>
+                                <p className="text-sm text-muted-foreground">Ages 0–17</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="icon" onClick={handleDecrement} disabled={childrenCount === 0}>
+                                  <Minus className="h-4 w-4" />
                                 </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  initialFocus
-                                  mode="range"
-                                  defaultMonth={dateRange?.from}
-                                  selected={dateRange}
-                                  onSelect={setDateRange}
-                                  numberOfMonths={2}
-                                />
-                              </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className={scss.input_block}>
-                            <Select>
-                              <SelectTrigger >
-                                <SelectValue placeholder="Rooms/ Cottages" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {/* <SelectLabel>City/Location</SelectLabel> */}
-                                  <SelectItem value="jammu">1</SelectItem>
-                                  <SelectItem value="kashmir">2</SelectItem> 
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                        </div>
-                        <div className={scss.input_block}>
-                            <Select>
-                              <SelectTrigger >
-                                <SelectValue placeholder="Extra bed" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {/* <SelectLabel>City/Location</SelectLabel> */}
-                                  <SelectItem value="1">1</SelectItem>
-                                  <SelectItem value="2">2</SelectItem> 
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                        </div>
-                        <div className={scss.input_block}>
-                            <Select>
-                              <SelectTrigger >
-                                <SelectValue placeholder="Meal Plan" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {/* <SelectLabel>City/Location</SelectLabel> */}
-                                  <SelectItem value="1">EP</SelectItem>
-                                  <SelectItem value="2">MEP</SelectItem> 
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                        </div>
-                        <div className={scss.input_block}>
-                            <Select>
-                              <SelectTrigger >
-                                <SelectValue placeholder="Adults" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {/* <SelectLabel>City/Location</SelectLabel> */}
-                                  <SelectItem value="1">1</SelectItem>
-                                  <SelectItem value="2">2</SelectItem> 
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                        </div>
-                        <div className={scss.input_block}>
-                                                    <div className="relative">
-                                                      <Popover open={isOpen} onOpenChange={setIsOpen}>
-                                                        <PopoverTrigger asChild>
-                                                          <Button
-                                                            variant="outline"
-                                                            className="w-full justify-between"
-                                                            onClick={() => setIsOpen(!isOpen)}
-                                                          >
-                                                            Children (below 17): {childrenCount}
-                                                          </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className={clsx(scss.age_body,"w-80 p-4")}>
-                                                          <div className="space-y-4">
-                                                            <div className="flex items-center justify-between">
-                                                              <div>
-                                                                <h4 className="font-medium">Children</h4>
-                                                                <p className="text-sm text-muted-foreground">Ages 0-17</p>
-                                                              </div>
-                                                              <div className="flex items-center gap-2">
-                                                                <Button
-                                                                  variant="outline"
-                                                                  size="icon"
-                                                                  onClick={handleDecrement}
-                                                                  disabled={childrenCount === 0}
-                                                                >
-                                                                  <Minus className="h-4 w-4" />
-                                                                </Button>
-                                                                <span className="w-8 text-center">{childrenCount}</span>
-                                                                <Button
-                                                                  variant="outline"
-                                                                  size="icon"
-                                                                  onClick={handleIncrement}
-                                                                >
-                                                                  <Plus className="h-4 w-4" />
-                                                                </Button>
-                                                              </div>
-                                                            </div>
-                                                            {childrenAges.map((age, index) => (
-                                                              <div key={index} className="flex items-center justify-between">
-                                                                <span>Child {index + 1}</span>
-                                                                <Select
-                                                                  value={age.toString()}
-                                                                  onValueChange={(value) => handleAgeChange(index, parseInt(value))}
-                                                                >
-                                                                  <SelectTrigger className="w-[100px]">
-                                                                    <SelectValue placeholder="Age" />
-                                                                  </SelectTrigger>
-                                                                  <SelectContent>
-                                                                    {Array.from({ length: 18 }, (_, i) => (
-                                                                      <SelectItem key={i} value={i.toString()}>
-                                                                        {i}
-                                                                      </SelectItem>
-                                                                    ))}
-                                                                  </SelectContent>
-                                                                </Select>
-                                                              </div>
-                                                            ))}
-                                                          </div>
-                                                        </PopoverContent>
-                                                      </Popover>
-                                                    </div>
-                        </div>
-                        <div className={scss.input_block}>
-                          <Link role="button" className={scss.search_btn} to={"/hotel-list"}><span>Search</span> <div className={scss.search_icon}><ArrowDown /></div></Link>
-                        </div>
-                      </div>
+                                <span className="w-8 text-center">{childrenCount}</span>
+                                <Button variant="outline" size="icon" onClick={handleIncrement}>
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            {childrenAges.map((age, i) => (
+                              <div key={i} className="flex items-center justify-between">
+                                <span>Child {i + 1}</span>
+                                <Select value={age.toString()} onValueChange={v => handleAgeChange(i, parseInt(v))}>
+                                  <SelectTrigger className="w-[100px]"><SelectValue placeholder="Age" /></SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 18 }, (_, n) => (
+                                      <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
-                  </div>
-                </div>
-            </div>
-          </section>
-
-          <section className={scss.hotel_photos}>
-            <div className='container mx-auto'>
-              <div className={scss.photo_wrapper}>
-                <div className={scss.w_50}>
-                  <div className={scss.photo_block}>
-                    <a
-                      data-fancybox="gallery" data-caption='OUTDOOR'
-                      href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-1.png`}
-                    >
-                      <img
-                        src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-1.png`}
-                        alt="image"
-                        className="w-full h-full object-cover"
-                      />
-                    </a>
-                  </div>
-                </div>
-                <div className={scss.w_50}>
-                  <div className={scss.photo_block_wrapper}>
-                    <div className={scss.photo_block}>
-                      <a
-                        data-fancybox="gallery" data-caption='HALL'
-                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-2.png`}
-                      >
-                        <img
-                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-2.png`}
-                          alt="image"
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
-                    </div>
-                    <div className={scss.photo_block}>
-                      <a
-                        data-fancybox="gallery" data-caption='BALCONY'
-                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-3.png`}
-                      >
-                        <img
-                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-3.png`}
-                          alt="image"
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
-                    </div>
-                    <div className={scss.photo_block}>
-                      <a
-                        data-fancybox="gallery" data-caption='BALCONY VIEW'
-                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-4.png`}
-                      >
-                        <img
-                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-4.png`}
-                          alt="image"
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
-                    </div>
-                    <div className={scss.photo_block}>
-                      <a
-                        data-fancybox="gallery" data-caption='DELUXE BADROOM'
-                        href={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-5.png`}
-                      >
-                        <img
-                          src={`${import.meta.env.VITE_BASE}assets/images/hotel-booking/hp-5.png`}
-                          alt="image"
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
+                    <div className={scss.input_block}>
+                      <Link role="button" className={scss.search_btn} to="/hotel-list">
+                        <span>Search</span>
+                        <div className={scss.search_icon}><ArrowDown /></div>
+                      </Link>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section className={scss.hotel_details}>
-            <div className='container mx-auto'>
-              <div className={scss.hotel_container}>
-                <ul className={scss.list_head}>
-                  <li className={scss.active}>
-                    <p>Overview</p>
-                  </li>
-                  <li>
-                    <p>Facilities</p>
-                  </li>
-                  <li>
-                    <p>Rooms</p>
-                  </li>
-                  <li>
-                    <p>Location</p>
-                  </li>
-                  <li>
-                    <p>Reviews</p>
-                  </li>
-                  <li>
-                    <p>Policies</p>
-                  </li>
-                </ul>
-                <div className={scss.hotel_content}>
-                  <div className={scss.hotel_head_content}>
-                    <div className={scss.hotel_name}>
-                      <h3>Hotel Name</h3>
-                      <ul className={scss.hotel_ratings}>
-                        <li><FaStar /></li>
-                        <li><FaStar /></li>
-                        <li><FaStar /></li>
-                        <li><FaStar /></li>
-                        <li><FaStar /></li>
+        {/* ── Photo Gallery ───────────────────────────────────────────────── */}
+        <section className={scss.hotel_photos}>
+          <div className="container mx-auto">
+            <div className={scss.photo_wrapper}>
+              {/* Main large photo */}
+              <div className={scss.w_50}>
+                <div className={scss.photo_block}>
+                  <a data-fancybox="gallery" href={getPhotoUrl(photos[0])}>
+                    <img src={getPhotoUrl(photos[0])} alt={hotel.displayName}
+                      className="w-full h-full object-cover"
+                      onError={e => { (e.target as HTMLImageElement).src = FALLBACK; }} />
+                  </a>
+                </div>
+              </div>
+              {/* Side photos grid */}
+              <div className={scss.w_50}>
+                <div className={scss.photo_block_wrapper}>
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className={scss.photo_block}>
+                      <a data-fancybox="gallery" href={getPhotoUrl(photos[i] || photos[0])}>
+                        <img src={getPhotoUrl(photos[i] || photos[0])} alt={`Photo ${i + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={e => { (e.target as HTMLImageElement).src = FALLBACK; }} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Hotel Details ───────────────────────────────────────────────── */}
+        <section className={scss.hotel_details}>
+          <div className="container mx-auto">
+            <div className={scss.hotel_container}>
+
+              {/* Nav tabs */}
+              <ul className={scss.list_head}>
+                <li className={scss.active}><p>Overview</p></li>
+                <li><p>Facilities</p></li>
+                <li><p>Rooms</p></li>
+                <li><p>Location</p></li>
+                <li><p>Policies</p></li>
+              </ul>
+
+              <div className={scss.hotel_content}>
+
+                {/* Hotel name + book now */}
+                <div className={scss.hotel_head_content}>
+                  <div className={scss.hotel_name}>
+                    <h3>{hotel.displayName || hotel.legalName}</h3>
+                    {renderStars(hotel.starRating)}
+                    <div className={scss.map_link}>
+                      <MapPin size={14} />
+                      <p>
+                        {[hotel.addressLine1, hotel.city, hotel.district, hotel.state, hotel.pincode]
+                          .filter(Boolean).join(', ')}
+                        {hotel.landmark ? ` — ${hotel.landmark}` : ''}
+                      </p>
+                      {hotel.googleMapsUrl && (
+                        <a href={hotel.googleMapsUrl} target="_blank" rel="noreferrer">View on Map</a>
+                      )}
+                    </div>
+                  </div>
+                  <button className={scss.book_btn}>Book Now</button>
+                </div>
+
+                {/* Overview */}
+                <div className={scss.facilities}>
+                  <div className={scss.facility_block}>
+                    <h3>Overview</h3>
+                    <p>{hotel.description || 'No description available.'}</p>
+
+                    {/* Quick info */}
+                    <div className="flex flex-wrap gap-6 mt-4 text-sm text-gray-600">
+                      {hotel.hotelType && (
+                        <span className="flex items-center gap-1">
+                          <Building2 size={14} /> {hotel.hotelType}
+                        </span>
+                      )}
+                      {hotel.establishedYear && (
+                        <span>Est. {hotel.establishedYear}</span>
+                      )}
+                      {hotel.checkInTime && (
+                        <span>Check-in: {hotel.checkInTime}</span>
+                      )}
+                      {hotel.checkOutTime && (
+                        <span>Check-out: {hotel.checkOutTime}</span>
+                      )}
+                    </div>
+
+                    {/* Contact info */}
+                    <div className="flex flex-wrap gap-4 mt-3 text-sm">
+                      {hotel.publicPhone && (
+                        <a href={`tel:${hotel.publicPhone}`} className="flex items-center gap-1 text-blue-600">
+                          <Phone size={14} /> {hotel.publicPhone}
+                        </a>
+                      )}
+                      {hotel.publicEmail && (
+                        <a href={`mailto:${hotel.publicEmail}`} className="flex items-center gap-1 text-blue-600">
+                          <Mail size={14} /> {hotel.publicEmail}
+                        </a>
+                      )}
+                      {hotel.websiteUrl && (
+                        <a href={hotel.websiteUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-blue-600">
+                          <Globe size={14} /> Website
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Amenities */}
+                  {hotel.amenities?.length > 0 && (
+                    <div className={scss.facility_block}>
+                      <h3>Amenities</h3>
+                      <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                        {hotel.amenities.map((a, i) => (
+                          <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                            {a.icon && <span>{a.icon}</span>}
+                            <span>{a.name}</span>
+                          </li>
+                        ))}
                       </ul>
-                      <div className={scss.map_link}>
-                        <p>Located In Srinagar, 500m Distance to pathan - </p><Link to={''}>show map</Link>
+                    </div>
+                  )}
+
+                  {/* Property features */}
+                  {(hotel.parkingAvailable || hotel.liftAvailable || hotel.powerBackup || hotel.wheelchairAccessible) && (
+                    <div className={scss.facility_block}>
+                      <h3>Property Features</h3>
+                      <ul className="flex flex-wrap gap-3 mt-2">
+                        {hotel.parkingAvailable && <li className="text-sm bg-gray-100 px-3 py-1 rounded-full">🚗 Parking</li>}
+                        {hotel.liftAvailable && <li className="text-sm bg-gray-100 px-3 py-1 rounded-full">🛗 Lift</li>}
+                        {hotel.powerBackup && <li className="text-sm bg-gray-100 px-3 py-1 rounded-full">⚡ Power Backup</li>}
+                        {hotel.wheelchairAccessible && <li className="text-sm bg-gray-100 px-3 py-1 rounded-full">♿ Wheelchair Accessible</li>}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Room Types */}
+                  {hotel.roomTypes?.length > 0 && (
+                    <div className={scss.facility_block}>
+                      <h3>Room Types & Pricing</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
+                        {hotel.roomTypes.map((room, i) => (
+                          <div key={i} className="border rounded-lg p-4 bg-white shadow-sm">
+                            <h4 className="font-semibold text-gray-800">{room.roomTypeName}</h4>
+                            {room.roomCount && (
+                              <p className="text-sm text-gray-500 mt-1">{room.roomCount} rooms available</p>
+                            )}
+                            {room.tariff && (
+                              <p className="text-lg font-bold text-green-700 mt-2">
+                                ₹{room.tariff.toLocaleString('en-IN')}
+                                <span className="text-sm font-normal text-gray-500"> / night</span>
+                              </p>
+                            )}
+                            <button className="mt-3 w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700">
+                              Book Now
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <button className={scss.book_btn}>Book Now</button>
-                  </div>
-                  <div className={scss.facilities}>
-                      <div className={scss.facility_block}>
-                          <h3>Overview</h3>
-                          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dignissim cras tincidunt lobortis feugiat vivamus at augue eget. Odio ut enim blandit volutpat. Ac ut consequat semper viverra nam libero. Fames ac turpis egestas integer eget aliquet nibh. Elementum pulvinar etiam non quam lacus. Risus pretium quam vulputate dignissim suspendisse in est.</p>
+                  )}
+
+                  {/* Location map */}
+                  <div className={scss.facility_block}>
+                    <h3>Location</h3>
+                    <p className="text-sm text-gray-600 mt-1 flex items-start gap-1">
+                      <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+                      {[hotel.addressLine1, hotel.city, hotel.district, hotel.state, hotel.pincode]
+                        .filter(Boolean).join(', ')}
+                    </p>
+                    {hotel.latitude && hotel.longitude ? (
+                      <div className="mt-3 rounded-lg overflow-hidden border">
+                        <iframe
+                          title="Hotel Location"
+                          width="100%"
+                          height="300"
+                          style={{ border: 0 }}
+                          loading="lazy"
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${hotel.longitude - 0.01},${hotel.latitude - 0.01},${hotel.longitude + 0.01},${hotel.latitude + 0.01}&layer=mapnik&marker=${hotel.latitude},${hotel.longitude}`}
+                        />
+                        <div className="p-2 bg-gray-50 text-center">
+                          <a
+                            href={hotel.googleMapsUrl || `https://www.google.com/maps?q=${hotel.latitude},${hotel.longitude}`}
+                            target="_blank" rel="noreferrer"
+                            className="text-sm text-blue-600 hover:underline"
+                          >
+                            Open in Google Maps →
+                          </a>
+                        </div>
                       </div>
-                      {/* <div className={scss.facility_block}>
-                          <h3>Amenities</h3> 
-                          <ul className='grid grid-cols-1 sm:grid-cols-4 gap-4'>
-                            <li><p>Air Conditioning</p></li>
-                          </ul>
-                      </div> */}
+                    ) : (
+                      <div className="mt-3 rounded-lg border p-4 bg-gray-50 text-center">
+                        <a
+                          href={`https://www.google.com/maps/search/${encodeURIComponent(
+                            [hotel.displayName, hotel.city, hotel.district, hotel.state].filter(Boolean).join(', ')
+                          )}`}
+                          target="_blank" rel="noreferrer"
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          Search on Google Maps →
+                        </a>
+                      </div>
+                    )}
                   </div>
+
                 </div>
               </div>
             </div>
-          </section>
-         
+          </div>
+        </section>
+
       </div>
     </>
-  )
+  );
 }
 
-export default Hoteldetail
+export default Hoteldetail;

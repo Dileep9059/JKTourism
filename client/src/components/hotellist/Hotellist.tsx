@@ -61,8 +61,8 @@ const DISTRICTS = ["Jammu", "Kashmir"];
 
 function Hotellist() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(2026, 2, 6),
-    to: new Date(2026, 4, 6),
+    from: new Date(2026, 2, 5),
+    to: new Date(2026, 4, 5),
   });
 
   const [childrenCount, setChildrenCount] = useState(0);
@@ -609,7 +609,12 @@ function Hotellist() {
                 {!loading && !error && hotelList.length > 0 && (
                   <div className={scss.hotel_card_wrapper}>
                     {getSortedHotels(hotelList).map(hotel => (
-                      <div key={hotel.id} className={scss.hotel_card}>
+                      <div
+                        key={hotel.id}
+                        className={scss.hotel_card}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => window.open(`/hotel-detail/${hotel.id}`, '_blank')}
+                      >
 
                         {/* Photo */}
                         <div className={scss.gallery} style={{ minWidth: '280px', maxWidth: '280px' }}>
