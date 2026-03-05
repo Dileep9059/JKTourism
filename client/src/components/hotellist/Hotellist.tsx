@@ -61,8 +61,8 @@ const DISTRICTS = ["Jammu", "Kashmir"];
 
 function Hotellist() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(2025, 5, 12),
-    to: new Date(2025, 6, 15),
+    from: new Date(2026, 2, 6),
+    to: new Date(2026, 4, 6),
   });
 
   const [childrenCount, setChildrenCount] = useState(0);
@@ -86,6 +86,7 @@ function Hotellist() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSort, setSelectedSort] = useState<string>('Popularity');
 
   // ── Sidebar filter state ──────────────────────────────────────────────────
   const [selectedFilters, setSelectedFilters] = useState<number[]>([]);
@@ -199,6 +200,25 @@ function Hotellist() {
     if (!url) return `${import.meta.env.VITE_BASE}assets/images/hotel-booking/gallery-1.jpeg`;
     if (url.startsWith('http')) return url;
     return `${import.meta.env.VITE_APP_API_BASE_URL}${url}`;
+  };
+
+  // ── Sort hotels based on selected sort option ─────────────────────────────
+  const getSortedHotels = (hotels: Hotel[]) => {
+    const sorted = [...hotels];
+    if (selectedSort === 'Price (Low to High)') {
+      sorted.sort((a, b) => (a.minTariff ?? 0) - (b.minTariff ?? 0));
+    } else if (selectedSort === 'Price (High to Low)') {
+      sorted.sort((a, b) => (b.minTariff ?? 0) - (a.minTariff ?? 0));
+    } else if (selectedSort === 'User Rating (Highest)') {
+      sorted.sort((a, b) => (b.starRating ?? 0) - (a.starRating ?? 0));
+    } else if (selectedSort === 'Lowest Price & Best Rated') {
+      sorted.sort((a, b) => {
+        const scoreA = (a.minTariff ?? 0) - (a.starRating ?? 0) * 1000;
+        const scoreB = (b.minTariff ?? 0) - (b.starRating ?? 0) * 1000;
+        return scoreA - scoreB;
+      });
+    }
+    return sorted;
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -529,11 +549,21 @@ function Hotellist() {
                       navigation={{ nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }}
                       className="mySwiper"
                     >
-                      {['Popularity', 'Price (Low to High)', 'User Rating (Highest)', 'Lowest Price & Best Rated', 'Nearest to -'].map(label => (
+                      {['Popularity', 'Price (Low to High)', 'User Rating (Highest)', 'Lowest Price & Best Rated', 'Price (High to Low)'].map(label => (
                         <SwiperSlide key={label}>
-                          <div className={scss.filter_btn}>
-                            <input type="radio" id={label} name="sort-filter" />
-                            <label htmlFor={label}>{label}</label>
+                          <div
+                            className={scss.filter_btn}
+                            onClick={() => setSelectedSort(label)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <input
+                              type="radio"
+                              id={label}
+                              name="sort-filter"
+                              checked={selectedSort === label}
+                              onChange={() => setSelectedSort(label)}
+                            />
+                            <label htmlFor={label} style={{ cursor: 'pointer' }}>{label}</label>
                           </div>
                         </SwiperSlide>
                       ))}
@@ -578,7 +608,7 @@ function Hotellist() {
                 {/* Hotel cards */}
                 {!loading && !error && hotelList.length > 0 && (
                   <div className={scss.hotel_card_wrapper}>
-                    {hotelList.map(hotel => (
+                    {getSortedHotels(hotelList).map(hotel => (
                       <div key={hotel.id} className={scss.hotel_card}>
 
                         {/* Photo */}
@@ -628,7 +658,11 @@ function Hotellist() {
 
                           <div className={scss.card_footer}>
                             <div className={scss.detail_block}>
-                              <p className="text-muted">Experience Unique Opportunity</p>
+                              <p className="text-muted">
+                                {hotel.hotelType
+                                  ? `${hotel.hotelType} · ${hotel.district}, ${hotel.state}`
+                                  : `${hotel.district}, ${hotel.state}`}
+                              </p>
                               <p>{hotel.roomTypeName || 'Standard rooms'}</p>
                               <div className={scss.review_detail}>
                                 <h5>Very Good ,</h5>
