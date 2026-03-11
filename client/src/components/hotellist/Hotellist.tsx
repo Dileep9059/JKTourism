@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom';
 import scss from './hotellist.module.scss';
 import {
   Select,
@@ -60,9 +61,10 @@ const DISTRICTS = ["Jammu", "Kashmir"];
 // ── Component ──────────────────────────────────────────────────────────────────
 
 function Hotellist() {
+  const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(2026, 2, 5),
-    to: new Date(2026, 4, 5),
+    from: new Date(),
+    to: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
   const [childrenCount, setChildrenCount] = useState(0);
@@ -181,6 +183,16 @@ function Hotellist() {
     setAppliedRoomType(selectedRoomType);
     setCurrentPage(0);
     fetchHotelListWithFilters(0, selectedDistrict, selectedStarRating, selectedRoomType);
+  };
+
+  // ── Auto-trigger search when star rating changes ────────────────────────────
+  const handleStarRatingChange = (value: string) => {
+    setSelectedStarRating(value);
+    setAppliedDistrict(selectedDistrict);
+    setAppliedStarRating(value);
+    setAppliedRoomType(selectedRoomType);
+    setCurrentPage(0);
+    fetchHotelListWithFilters(0, selectedDistrict, value, selectedRoomType);
   };
 
   // ── Star icons helper ─────────────────────────────────────────────────────
@@ -504,12 +516,12 @@ function Hotellist() {
                   </RadioGroup>
                 </div>
 
-                {/* Star rating — wired to API */}
+                {/* Star rating — wired to API with auto-search */}
                 <div className={scss.facility_list}>
                   <h3 className={scss.list_title}>Accommodation Classification</h3>
                   <RadioGroup
                     value={selectedStarRating}
-                    onValueChange={setSelectedStarRating}
+                    onValueChange={handleStarRatingChange}
                   >
                     <ul>
                       <li>
@@ -613,7 +625,16 @@ function Hotellist() {
                         key={hotel.id}
                         className={scss.hotel_card}
                         style={{ cursor: 'pointer' }}
-                        onClick={() => window.open(`/hotel-detail/${hotel.id}`, '_blank')}
+                        onClick={() => {
+                          const checkIn = dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : '';
+                          const checkOut = dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : '';
+                          const queryParams = new URLSearchParams({
+                            checkIn,
+                            checkOut,
+                            children: childrenCount.toString(),
+                          }).toString();
+                          navigate(`/hotel-detail/${hotel.id}?${queryParams}`);
+                        }}
                       >
 
                         {/* Photo */}

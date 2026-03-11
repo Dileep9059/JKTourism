@@ -4,8 +4,8 @@ import {
   Select, SelectContent, SelectGroup, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Link, useParams } from "react-router-dom";
-import { format } from "date-fns";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { format, parse } from "date-fns";
 import { ArrowDown, Calendar as CalendarIcon, Minus, Plus, MapPin, Phone, Mail, Globe, Star, Loader2, Building2 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -85,17 +85,40 @@ const renderStars = (count: number | null) => {
 // ── Component ──────────────────────────────────────────────────────────────────
 function Hoteldetail() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+
+  // Get all params from URL
+  const checkInParam = searchParams.get('checkIn');
+  const checkOutParam = searchParams.get('checkOut');
+  const childrenParam = searchParams.get('children');
+
+  // Parse dates from params or use defaults
+  const getInitialDates = () => {
+    try {
+      if (checkInParam && checkOutParam) {
+        return {
+          from: parse(checkInParam, 'yyyy-MM-dd', new Date()),
+          to: parse(checkOutParam, 'yyyy-MM-dd', new Date()),
+        };
+      }
+    } catch (e) {
+      console.error('Error parsing dates:', e);
+    }
+    return {
+      from: new Date(),
+      to: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    };
+  };
 
   const [hotel, setHotel] = useState<HotelDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-  });
-  const [childrenCount, setChildrenCount] = React.useState(0);
-  const [childrenAges, setChildrenAges] = React.useState<number[]>([]);
+  // Initialize with URL params
+  const initialChildrenCount = childrenParam ? parseInt(childrenParam) : 0;
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(getInitialDates());
+  const [childrenCount, setChildrenCount] = React.useState(initialChildrenCount);
+  const [childrenAges, setChildrenAges] = React.useState<number[]>(Array(initialChildrenCount).fill(0));
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleIncrement = () => {
@@ -459,7 +482,7 @@ function Hoteldetail() {
                           height="300"
                           style={{ border: 0 }}
                           loading="lazy"
-                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${hotel.longitude - 0.01},${hotel.latitude - 0.01},${hotel.longitude + 0.01},${hotel.latitude + 0.01}&layer=mapnik&marker=${hotel.latitude},${hotel.longitude}`}
+                          src={`https://www.google.com/maps?q=${hotel.latitude},${hotel.longitude}`}
                         />
                         <div className="p-2 bg-gray-50 text-center">
                           <a
