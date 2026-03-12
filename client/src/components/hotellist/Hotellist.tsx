@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import scss from './hotellist.module.scss';
 import {
   Select,
@@ -62,6 +62,7 @@ const DISTRICTS = ["Jammu", "Kashmir"];
 
 function Hotellist() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -70,6 +71,8 @@ function Hotellist() {
   const [childrenCount, setChildrenCount] = useState(0);
   const [childrenAges, setChildrenAges] = useState<number[]>([]);
   const [isChildOpen, setIsChildOpen] = useState(false);
+  const [roomsCount, setRoomsCount] = useState(1);
+  const [adultsCount, setAdultsCount] = useState(1);
 
   // ── Search filter state (what user selected in UI) ────────────────────────
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
@@ -145,6 +148,49 @@ function Hotellist() {
       setLoading(false);
     }
   }, [appliedDistrict, appliedStarRating]);
+
+  // Load filters from URL params when page loads
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    
+    const city = params.get('city') || 'all';
+    const roomType = params.get('roomType') || 'all';
+    const starRating = params.get('starRating') || 'all';
+    const rooms = parseInt(params.get('rooms') || '1');
+    const adults = parseInt(params.get('adults') || '1');
+    const children = parseInt(params.get('children') || '0');
+    
+    // Set selected filters
+    setSelectedDistrict(city);
+    setSelectedRoomType(roomType);
+    setSelectedStarRating(starRating);
+    setRoomsCount(rooms);
+    setAdultsCount(adults);
+    setChildrenCount(children);
+    
+    // Set applied filters (these trigger API call)
+    setAppliedDistrict(city);
+    setAppliedRoomType(roomType);
+    setAppliedStarRating(starRating);
+    
+    if (params.has('checkIn') && params.has('checkOut')) {
+      const checkIn = params.get('checkIn');
+      const checkOut = params.get('checkOut');
+      if (checkIn && checkOut) {
+        const from = new Date(checkIn);
+        const to = new Date(checkOut);
+        setDateRange({ from, to });
+      }
+    }
+    
+    if (params.has('childrenAges')) {
+      const ages = (params.get('childrenAges') || '')
+        .split(',')
+        .map(age => parseInt(age))
+        .filter(age => !isNaN(age));
+      setChildrenAges(ages);
+    }
+  }, [location.search]);
 
   // Direct fetch with explicit filters — avoids stale state timing issues
   const fetchHotelListWithFilters = async (page = 0, district: string, starRating: string, roomType: string) => {
@@ -315,12 +361,13 @@ function Hotellist() {
 
                     {/* Rooms (UI only) */}
                     <div className={scss.input_block}>
-                      <Select>
+                      <Select value={roomsCount.toString()} onValueChange={(val) => setRoomsCount(parseInt(val))}>
                         <SelectTrigger><SelectValue placeholder="Rooms" /></SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
+                            {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                              <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -328,12 +375,13 @@ function Hotellist() {
 
                     {/* Adults (UI only) */}
                     <div className={scss.input_block}>
-                      <Select>
+                      <Select value={adultsCount.toString()} onValueChange={(val) => setAdultsCount(parseInt(val))}>
                         <SelectTrigger><SelectValue placeholder="Adults" /></SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
+                            {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                              <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -595,6 +643,38 @@ function Hotellist() {
                   {totalElements} Result{totalElements !== 1 ? 's' : ''} found
                 </h4>
 
+                {/* Show Selected Filters as Chips */}
+                {(selectedDistrict !== 'all' || selectedRoomType !== 'all') && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded flex flex-wrap gap-2 items-center">
+                    <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+                    {selectedDistrict !== 'all' && (
+                      <span className="px-3 py-1 bg-blue-200 text-blue-800 rounded-full text-sm font-medium">
+                        📍 {selectedDistrict}
+                      </span>
+                    )}
+                    {selectedRoomType !== 'all' && (
+                      <span className="px-3 py-1 bg-blue-200 text-blue-800 rounded-full text-sm font-medium">
+                        🛏️ {selectedRoomType}
+                      </span>
+                    )}
+                    {selectedStarRating !== 'all' && (
+                      <span className="px-3 py-1 bg-blue-200 text-blue-800 rounded-full text-sm font-medium">
+                        ⭐ {selectedStarRating} Stars
+                      </span>
+                    )}
+                    <button
+                      onClick={() => {
+                        setSelectedDistrict('all');
+                        setSelectedRoomType('all');
+                        setSelectedStarRating('all');
+                      }}
+                      className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium hover:bg-red-200 cursor-pointer ml-auto"
+                    >
+                      ✕ Clear Filters
+                    </button>
+                  </div>
+                )}
+
                 {/* Loading */}
                 {loading && (
                   <div className="flex items-center justify-center py-16 gap-3 text-muted-foreground">
@@ -632,6 +712,11 @@ function Hotellist() {
                             checkIn,
                             checkOut,
                             children: childrenCount.toString(),
+                            rooms: roomsCount.toString(),
+                            adults: adultsCount.toString(),
+                            city: selectedDistrict,
+                            roomType: selectedRoomType,
+                            starRating: selectedStarRating,
                           }).toString();
                           navigate(`/hotel-detail/${hotel.id}?${queryParams}`);
                         }}

@@ -66,6 +66,8 @@ import AppliedHotels from "./components/hotel/AppliedHotels";
 import HotelUploadAssets from "./components/hotelregister/HotelUploadAssets";
 import Disclaimer from "./components/footer/Disclaimer";
 import TermsAndConditions from "./components/footer/TermsAndConditions";
+// ── NEW IMPORT ─────────────────────────────────────────────────────────────────
+import HotelBooking from "./components/hotelbooking/HotelBooking";
 
 const ROLES = {
   MASTER_ADMIN: "ROLE_MASTER_ADMIN",
@@ -115,7 +117,6 @@ const roleRoutes = [
       { path: "shopping-location", element: <ShoppingData /> },
       { path: "shopping-location/add", element: <AddShopping /> },
       { path: "feedback", element: <Feedbacks /> },
-
       { path: "dashboard/applied-hotels", element: <AppliedHotels /> }
     ],
   },
@@ -174,41 +175,26 @@ function App() {
               <Route path="/hotel-list" element={<Hotellist />} />
               <Route path="/hotel-detail/:id" element={<Hoteldetail />} />
 
+              {/* ── NEW BOOKING ROUTE ───────────────────────────────────────── */}
+              <Route path="/hotel-booking/:id" element={<HotelBooking />} />
+
               <Route path="/hotel-registration" element={<HotelRegistration />} />
             </Route>
 
             <Route element={<Sidebar />}>
-              {/* Role-based routes */}
               {roleRoutes.map(({ role, routes }) => (
-                <Route
-                  key={role}
-                  element={<RequireAuth allowedRoles={[role]} />}
-                >
+                <Route key={role} element={<RequireAuth allowedRoles={[role]} />}>
                   {routes.map(({ path, element }) => (
-                    <Route
-                      key={path}
-                      path={path}
-                      element={element}
-                    />
+                    <Route key={path} path={path} element={element} />
                   ))}
                 </Route>
               ))}
 
-              {/* Common authenticated settings routes */}
-              <Route
-                element={
-                  <RequireAuth
-                    allowedRoles={Object.values(ROLES)}
-                  />
-                }
-              >
+              <Route element={<RequireAuth allowedRoles={Object.values(ROLES)} />}>
                 <Route element={<Settings />}>
                   <Route path="profile" element={<SettingsProfile />} />
                   <Route path="profile/account" element={<SettingsAccount />} />
-                  <Route
-                    path="profile/notifications"
-                    element={<SettingsNotifications />}
-                  />
+                  <Route path="profile/notifications" element={<SettingsNotifications />} />
                 </Route>
               </Route>
             </Route>

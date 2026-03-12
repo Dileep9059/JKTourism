@@ -4,9 +4,9 @@ import {
   Select, SelectContent, SelectGroup, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
-import { ArrowDown, Calendar as CalendarIcon, Minus, Plus, MapPin, Phone, Mail, Globe, Star, Loader2, Building2 } from "lucide-react";
+import { ArrowDown, Calendar as CalendarIcon, Minus, Plus, MapPin, Phone, Mail, Globe, Loader2, Building2 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -86,11 +86,17 @@ const renderStars = (count: number | null) => {
 function Hoteldetail() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Get all params from URL
   const checkInParam = searchParams.get('checkIn');
   const checkOutParam = searchParams.get('checkOut');
   const childrenParam = searchParams.get('children');
+  const roomsParam = searchParams.get('rooms');
+  const adultsParam = searchParams.get('adults');
+  const city = searchParams.get('city') || '';
+  const roomType = searchParams.get('roomType') || '';
+  const starRating = searchParams.get('starRating') || '';
 
   // Parse dates from params or use defaults
   const getInitialDates = () => {
@@ -137,6 +143,18 @@ function Hoteldetail() {
     setChildrenAges(newAges);
   };
 
+  // ── Navigate to booking page ──────────────────────────────────────────────
+  const handleBookNow = (selectedRoomType?: string) => {
+    const params = new URLSearchParams();
+    if (dateRange?.from) params.append('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
+    if (dateRange?.to) params.append('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
+    if (roomsParam) params.append('rooms', roomsParam);
+    if (adultsParam) params.append('adults', adultsParam);
+    params.append('children', childrenCount.toString());
+    if (selectedRoomType) params.append('roomType', selectedRoomType);
+    navigate(`/hotel-booking/${id}?${params.toString()}`);
+  };
+
   // ── Fetch hotel detail ────────────────────────────────────────────────────
   useEffect(() => {
     if (!id) return;
@@ -174,6 +192,20 @@ function Hoteldetail() {
   return (
     <>
       <div className={scss.common_page}>
+
+        {/* ── Filter Summary Display ──────────────────────────────────────────*/}
+        {(city || roomType || starRating) && (
+          <div style={{ backgroundColor: '#f0f9ff', borderBottom: '1px solid #bfdbfe', padding: '12px 0' }}>
+            <div className="container mx-auto px-4">
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', fontWeight: '500', color: '#1f2937' }}>Active Filters:</span>
+                {city && <span style={{ padding: '4px 12px', backgroundColor: '#dbeafe', color: '#1e40af', borderRadius: '9999px', fontSize: '12px', fontWeight: '500' }}>📍 {city}</span>}
+                {roomType && <span style={{ padding: '4px 12px', backgroundColor: '#dbeafe', color: '#1e40af', borderRadius: '9999px', fontSize: '12px', fontWeight: '500' }}>🛏️ {roomType}</span>}
+                {starRating && <span style={{ padding: '4px 12px', backgroundColor: '#dbeafe', color: '#1e40af', borderRadius: '9999px', fontSize: '12px', fontWeight: '500' }}>⭐ {starRating} Stars</span>}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Top search bar ──────────────────────────────────────────────── */}
         <section className={scss.filter_top}>
@@ -287,6 +319,7 @@ function Hoteldetail() {
                         </PopoverContent>
                       </Popover>
                     </div>
+                    <div style={{ height: '20px' }}></div>
                     <div className={scss.input_block}>
                       <Link role="button" className={scss.search_btn} to="/hotel-list">
                         <span>Search</span>
@@ -304,7 +337,6 @@ function Hoteldetail() {
         <section className={scss.hotel_photos}>
           <div className="container mx-auto">
             <div className={scss.photo_wrapper}>
-              {/* Main large photo */}
               <div className={scss.w_50}>
                 <div className={scss.photo_block}>
                   <a data-fancybox="gallery" href={getPhotoUrl(photos[0])}>
@@ -314,7 +346,6 @@ function Hoteldetail() {
                   </a>
                 </div>
               </div>
-              {/* Side photos grid */}
               <div className={scss.w_50}>
                 <div className={scss.photo_block_wrapper}>
                   {[1, 2, 3, 4].map(i => (
@@ -337,7 +368,6 @@ function Hoteldetail() {
           <div className="container mx-auto">
             <div className={scss.hotel_container}>
 
-              {/* Nav tabs */}
               <ul className={scss.list_head}>
                 <li className={scss.active}><p>Overview</p></li>
                 <li><p>Facilities</p></li>
@@ -365,34 +395,31 @@ function Hoteldetail() {
                       )}
                     </div>
                   </div>
-                  <button className={scss.book_btn}>Book Now</button>
+                  {hotel?.roomTypes && hotel.roomTypes.length > 0 ? (
+                    <button className={scss.book_btn} onClick={() => handleBookNow()}>
+                      Book Now
+                    </button>
+                  ) : (
+                    <button className={clsx(scss.book_btn, 'opacity-50 cursor-not-allowed')} disabled>
+                      Sold Out
+                    </button>
+                  )}
                 </div>
 
-                {/* Overview */}
                 <div className={scss.facilities}>
                   <div className={scss.facility_block}>
                     <h3>Overview</h3>
                     <p>{hotel.description || 'No description available.'}</p>
-
-                    {/* Quick info */}
                     <div className="flex flex-wrap gap-6 mt-4 text-sm text-gray-600">
                       {hotel.hotelType && (
                         <span className="flex items-center gap-1">
                           <Building2 size={14} /> {hotel.hotelType}
                         </span>
                       )}
-                      {hotel.establishedYear && (
-                        <span>Est. {hotel.establishedYear}</span>
-                      )}
-                      {hotel.checkInTime && (
-                        <span>Check-in: {hotel.checkInTime}</span>
-                      )}
-                      {hotel.checkOutTime && (
-                        <span>Check-out: {hotel.checkOutTime}</span>
-                      )}
+                      {hotel.establishedYear && <span>Est. {hotel.establishedYear}</span>}
+                      {hotel.checkInTime && <span>Check-in: {hotel.checkInTime}</span>}
+                      {hotel.checkOutTime && <span>Check-out: {hotel.checkOutTime}</span>}
                     </div>
-
-                    {/* Contact info */}
                     <div className="flex flex-wrap gap-4 mt-3 text-sm">
                       {hotel.publicPhone && (
                         <a href={`tel:${hotel.publicPhone}`} className="flex items-center gap-1 text-blue-600">
@@ -412,7 +439,6 @@ function Hoteldetail() {
                     </div>
                   </div>
 
-                  {/* Amenities */}
                   {hotel.amenities?.length > 0 && (
                     <div className={scss.facility_block}>
                       <h3>Amenities</h3>
@@ -427,7 +453,6 @@ function Hoteldetail() {
                     </div>
                   )}
 
-                  {/* Property features */}
                   {(hotel.parkingAvailable || hotel.liftAvailable || hotel.powerBackup || hotel.wheelchairAccessible) && (
                     <div className={scss.facility_block}>
                       <h3>Property Features</h3>
@@ -440,7 +465,7 @@ function Hoteldetail() {
                     </div>
                   )}
 
-                  {/* Room Types */}
+                  {/* Room Types — each card has its own Book Now */}
                   {hotel.roomTypes?.length > 0 && (
                     <div className={scss.facility_block}>
                       <h3>Room Types & Pricing</h3>
@@ -457,7 +482,10 @@ function Hoteldetail() {
                                 <span className="text-sm font-normal text-gray-500"> / night</span>
                               </p>
                             )}
-                            <button className="mt-3 w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700">
+                            <button
+                              className="mt-3 w-full bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700"
+                              onClick={() => handleBookNow(room.roomTypeName)}
+                            >
                               Book Now
                             </button>
                           </div>
@@ -482,7 +510,7 @@ function Hoteldetail() {
                           height="300"
                           style={{ border: 0 }}
                           loading="lazy"
-                          src={`https://www.google.com/maps?q=${hotel.latitude},${hotel.longitude}`}
+                          src={`https://www.google.com/maps?q=${hotel.latitude},${hotel.longitude}&output=embed`}
                         />
                         <div className="p-2 bg-gray-50 text-center">
                           <a
@@ -508,13 +536,11 @@ function Hoteldetail() {
                       </div>
                     )}
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
         </section>
-
       </div>
     </>
   );

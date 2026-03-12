@@ -2,7 +2,7 @@ import React from 'react';
 import scss from './hotelsearch.module.scss';
 import clsx from 'clsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -24,10 +24,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover
 import DocumentTitle from '../DocumentTitle';
 
 function Hotelsearch() {
+  const navigate = useNavigate();
+
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: new Date(2025, 5, 12),
-    to: new Date(2025, 6, 15),
+    from: new Date(),
+    to: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   })
+
+  const [selectedCity, setSelectedCity] = React.useState('');
+  const [selectedRoomType, setSelectedRoomType] = React.useState('');
+  const [selectedRooms, setSelectedRooms] = React.useState(1);
+  const [selectedAdults, setSelectedAdults] = React.useState(1);
 
   const [childrenCount, setChildrenCount] = React.useState(0);
   const [childrenAges, setChildrenAges] = React.useState<number[]>([]);
@@ -35,7 +42,7 @@ function Hotelsearch() {
 
   const handleIncrement = () => {
     setChildrenCount((prev) => prev + 1);
-    setChildrenAges((prev) => [...prev, 0]); // Default age is 0
+    setChildrenAges((prev) => [...prev, 0]);
   };
 
   const handleDecrement = () => {
@@ -49,6 +56,20 @@ function Hotelsearch() {
     const newAges = [...childrenAges];
     newAges[index] = value;
     setChildrenAges(newAges);
+  };
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (selectedCity && selectedCity !== 'All') params.append('city', selectedCity);
+    if (selectedRoomType && selectedRoomType !== 'All') params.append('roomType', selectedRoomType);
+    if (dateRange?.from) params.append('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
+    if (dateRange?.to) params.append('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
+    params.append('rooms', selectedRooms.toString());
+    params.append('adults', selectedAdults.toString());
+    params.append('children', childrenCount.toString());
+    if (childrenAges.length > 0) params.append('childrenAges', childrenAges.join(','));
+
+    navigate(`/hotel-list?${params.toString()}`);
   };
 
   return (
@@ -77,21 +98,20 @@ function Hotelsearch() {
               <Tabs defaultValue="hotel" className={scss.custom_tab}>
                 <TabsList className={scss.tab_head}>
                   <TabsTrigger value="hotel"><RiHotelLine/> Hotel</TabsTrigger>
-                  {/* <TabsTrigger value="homestay"><AiOutlineHome /> Homestay</TabsTrigger> */}
                 </TabsList>
                 <TabsContent value="hotel">
                   <div className={scss.custom_form}>
                     <div className={scss.form_block}>
                       <div className={scss.input_block}>
-                        <Select>
+                        <Select value={selectedCity} onValueChange={setSelectedCity}>
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="City/Location" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              {/* <SelectLabel>City/Location</SelectLabel> */}
-                              <SelectItem value="jammu">Jammu</SelectItem>
-                              <SelectItem value="kashmir">Kashmir</SelectItem> 
+                              <SelectItem value="All">All</SelectItem>
+                              <SelectItem value="Jammu">Jammu</SelectItem>
+                              <SelectItem value="Kashmir">Kashmir</SelectItem> 
                             </SelectGroup>
                           </SelectContent>
                         </Select>
@@ -101,15 +121,16 @@ function Hotelsearch() {
                       <div className={scss.form_inner_block}>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                           <div className={scss.input_block}>
-                            <Select>
+                            <Select value={selectedRoomType} onValueChange={setSelectedRoomType}>
                               <SelectTrigger >
                                 <SelectValue placeholder="Room Type" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectGroup>
-                                  {/* <SelectLabel>City/Location</SelectLabel> */}
-                                  <SelectItem value="jammu">Deluxe Room</SelectItem>
-                                  <SelectItem value="kashmir">Super Deluxe Room</SelectItem> 
+                                  <SelectItem value="All">All</SelectItem>
+                                  <SelectItem value="Standard Room">Standard Room</SelectItem>
+                                  <SelectItem value="Deluxe Room">Deluxe Room</SelectItem>
+                                  <SelectItem value="Super Deluxe Room">Super Deluxe Room</SelectItem> 
                                 </SelectGroup>
                               </SelectContent>
                             </Select>
@@ -152,99 +173,150 @@ function Hotelsearch() {
                               </PopoverContent>
                             </Popover>
                           </div>
-                          <div className={scss.input_block}>
-                            <Select>
-                              <SelectTrigger >
-                                <SelectValue placeholder="Rooms/ Cottages" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {/* <SelectLabel>City/Location</SelectLabel> */}
-                                  <SelectItem value="jammu">1</SelectItem>
-                                  <SelectItem value="kashmir">2</SelectItem> 
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                          </div>
                         </div>
                       </div>
                       <div className={scss.form_inner_block}>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                           <div className={scss.input_block}>
-                            <Select>
-                              <SelectTrigger >
-                                <SelectValue placeholder="Adults" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectItem value="1">1</SelectItem>
-                                  <SelectItem value="2">2</SelectItem> 
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className={scss.input_block}>
-                            <div className="relative">
-                              <Popover open={isOpen} onOpenChange={setIsOpen}>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    className="w-full justify-between"
-                                    onClick={() => setIsOpen(!isOpen)}
-                                  >
-                                    Children (below 17): {childrenCount}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className={clsx(scss.age_body,"w-80 p-4")}>
-                                  <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                      <div>
-                                        <h4 className="font-medium">Children</h4>
-                                        <p className="text-sm text-muted-foreground">Ages 0-17</p>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Button
-                                          variant="outline"
-                                          size="icon"
-                                          onClick={handleDecrement}
-                                          disabled={childrenCount === 0}
-                                        >
-                                          <Minus className="h-4 w-4" />
-                                        </Button>
-                                        <span className="w-8 text-center">{childrenCount}</span>
-                                        <Button
-                                          variant="outline"
-                                          size="icon"
-                                          onClick={handleIncrement}
-                                        >
-                                          <Plus className="h-4 w-4" />
-                                        </Button>
-                                      </div>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-between"
+                                >
+                                  Rooms: {selectedRooms}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80 p-4">
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <h4 className="font-medium">Rooms</h4>
+                                      <p className="text-sm text-muted-foreground">Select rooms (1-10)</p>
                                     </div>
-                                    {childrenAges.map((age, index) => (
-                                      <div key={index} className="flex items-center justify-between">
-                                        <span>Child {index + 1}</span>
-                                        <Select
-                                          value={age.toString()}
-                                          onValueChange={(value) => handleAgeChange(index, parseInt(value))}
-                                        >
-                                          <SelectTrigger className="w-[100px]">
-                                            <SelectValue placeholder="Age" />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {Array.from({ length: 18 }, (_, i) => (
-                                              <SelectItem key={i} value={i.toString()}>
-                                                {i}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    ))}
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setSelectedRooms(Math.max(1, selectedRooms - 1))}
+                                      >
+                                        <Minus className="h-4 w-4" />
+                                      </Button>
+                                      <span className="w-8 text-center font-bold">{selectedRooms}</span>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setSelectedRooms(Math.min(10, selectedRooms + 1))}
+                                      >
+                                        <Plus className="h-4 w-4" />
+                                      </Button>
+                                    </div>
                                   </div>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+
+                          <div className={scss.input_block}>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-between"
+                                >
+                                  Adults: {selectedAdults}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80 p-4">
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <h4 className="font-medium">Adults</h4>
+                                      <p className="text-sm text-muted-foreground">Select adults (1-10)</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setSelectedAdults(Math.max(1, selectedAdults - 1))}
+                                      >
+                                        <Minus className="h-4 w-4" />
+                                      </Button>
+                                      <span className="w-8 text-center font-bold">{selectedAdults}</span>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setSelectedAdults(Math.min(10, selectedAdults + 1))}
+                                      >
+                                        <Plus className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+
+                          <div className={scss.input_block}>
+                            <Popover open={isOpen} onOpenChange={setIsOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-between"
+                                  onClick={() => setIsOpen(!isOpen)}
+                                >
+                                  Children (below 17): {childrenCount}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className={clsx(scss.age_body,"w-80 p-4")}>
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <h4 className="font-medium">Children</h4>
+                                      <p className="text-sm text-muted-foreground">Ages 0-17</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={handleDecrement}
+                                        disabled={childrenCount === 0}
+                                      >
+                                        <Minus className="h-4 w-4" />
+                                      </Button>
+                                      <span className="w-8 text-center">{childrenCount}</span>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={handleIncrement}
+                                      >
+                                        <Plus className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  {childrenAges.map((age, index) => (
+                                    <div key={index} className="flex items-center justify-between">
+                                      <span>Child {index + 1}</span>
+                                      <Select
+                                        value={age.toString()}
+                                        onValueChange={(value) => handleAgeChange(index, parseInt(value))}
+                                      >
+                                        <SelectTrigger className="w-[100px]">
+                                          <SelectValue placeholder="Age" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {Array.from({ length: 18 }, (_, i) => (
+                                            <SelectItem key={i} value={i.toString()}>
+                                              {i}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                         </div>
                       </div> 
@@ -252,7 +324,14 @@ function Hotelsearch() {
                   </div>
                 </TabsContent>
               </Tabs>
-              <Link role="button" className={scss.search_btn} to={"/hotel-list"}><span>Search</span> <div className={scss.search_icon}><ArrowDown /></div></Link>
+              <button 
+                role="button" 
+                className={scss.search_btn} 
+                onClick={handleSearch}
+              >
+                <span>Search</span> 
+                <div className={scss.search_icon}><ArrowDown /></div>
+              </button>
             </div>
           </div>
         </section>
