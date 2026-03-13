@@ -124,73 +124,76 @@ function Hotellist() {
     setExpandedLists(p => ({ ...p, [name]: !p[name] }));
 
   // ── API call ──────────────────────────────────────────────────────────────
-  const fetchHotelList = useCallback(async (page = 0) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const payload: Record<string, any> = { page, size: 10 };
-      if (appliedDistrict !== 'all')   payload.district   = appliedDistrict;
-      if (appliedStarRating !== 'all') payload.starRating = Number(appliedStarRating);
+ const fetchHotelList = useCallback(async (page = 0) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const payload: Record<string, any> = { page, size: 10 };
 
-      const response = await axiosInstance.post('/api/v1/hotels/hotellist', payload, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (appliedDistrict !== 'all') payload.district = appliedDistrict;
+    if (appliedStarRating !== 'all') payload.starRating = Number(appliedStarRating);
+    if (appliedRoomType !== 'all') payload.roomType = appliedRoomType;
 
-      const data: HotelPage = response.data;
-      setHotelList(data.content);
-      setTotalElements(data.totalElements);
-      setTotalPages(data.totalPages);
-      setCurrentPage(data.number);
-    } catch (err: any) {
-      setError('Failed to load hotels. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [appliedDistrict, appliedStarRating]);
+    const response = await axiosInstance.post('/api/v1/hotels/hotellist', payload, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const data: HotelPage = response.data;
+    setHotelList(data.content);
+    setTotalElements(data.totalElements);
+    setTotalPages(data.totalPages);
+    setCurrentPage(data.number);
+  } catch (err: any) {
+    setError('Failed to load hotels. Please try again.');
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+}, [appliedDistrict, appliedStarRating, appliedRoomType]);
 
   // Load filters from URL params when page loads
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    
-    const city = params.get('city') || 'all';
-    const roomType = params.get('roomType') || 'all';
-    const starRating = params.get('starRating') || 'all';
-    const rooms = parseInt(params.get('rooms') || '1');
-    const adults = parseInt(params.get('adults') || '1');
-    const children = parseInt(params.get('children') || '0');
-    
-    // Set selected filters
-    setSelectedDistrict(city);
-    setSelectedRoomType(roomType);
-    setSelectedStarRating(starRating);
-    setRoomsCount(rooms);
-    setAdultsCount(adults);
-    setChildrenCount(children);
-    
-    // Set applied filters (these trigger API call)
-    setAppliedDistrict(city);
-    setAppliedRoomType(roomType);
-    setAppliedStarRating(starRating);
-    
-    if (params.has('checkIn') && params.has('checkOut')) {
-      const checkIn = params.get('checkIn');
-      const checkOut = params.get('checkOut');
-      if (checkIn && checkOut) {
-        const from = new Date(checkIn);
-        const to = new Date(checkOut);
-        setDateRange({ from, to });
-      }
+  const params = new URLSearchParams(location.search);
+
+  const city = params.get('city') || 'all';
+  const roomType = params.get('roomType') || 'all';
+  const starRating = params.get('starRating') || 'all';
+  const rooms = parseInt(params.get('rooms') || '1');
+  const adults = parseInt(params.get('adults') || '1');
+  const children = parseInt(params.get('children') || '0');
+
+  setSelectedDistrict(city);
+  setSelectedRoomType(roomType);
+  setSelectedStarRating(starRating);
+  setRoomsCount(rooms);
+  setAdultsCount(adults);
+  setChildrenCount(children);
+
+  setAppliedDistrict(city);
+  setAppliedRoomType(roomType);
+  setAppliedStarRating(starRating);
+
+  if (params.has('checkIn') && params.has('checkOut')) {
+    const checkIn = params.get('checkIn');
+    const checkOut = params.get('checkOut');
+
+    if (checkIn && checkOut) {
+      const from = new Date(checkIn);
+      const to = new Date(checkOut);
+      setDateRange({ from, to });
     }
-    
-    if (params.has('childrenAges')) {
-      const ages = (params.get('childrenAges') || '')
-        .split(',')
-        .map(age => parseInt(age))
-        .filter(age => !isNaN(age));
-      setChildrenAges(ages);
-    }
-  }, [location.search]);
+  }
+
+  if (params.has('childrenAges')) {
+    const ages = (params.get('childrenAges') || '')
+      .split(',')
+      .map(age => parseInt(age))
+      .filter(age => !isNaN(age));
+    setChildrenAges(ages);
+  }
+
+  fetchHotelListWithFilters(0, city, starRating, roomType);
+}, [location.search]);
 
   // Direct fetch with explicit filters — avoids stale state timing issues
   const fetchHotelListWithFilters = async (page = 0, district: string, starRating: string, roomType: string) => {
@@ -219,9 +222,7 @@ function Hotellist() {
     }
   };
 
-  useEffect(() => {
-    fetchHotelList(0);
-  }, []);
+ 
 
   const handleSearch = () => {
     setAppliedDistrict(selectedDistrict);

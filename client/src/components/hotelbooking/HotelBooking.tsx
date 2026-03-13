@@ -121,7 +121,7 @@ function HotelBooking() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // ── Pricing calculations ──────────────────────────────────────────────────
+  // ── Pricing calculations ───────────────────────────────────────────────────
   const nights = dateRange?.from && dateRange?.to
     ? Math.max(1, differenceInDays(dateRange.to, dateRange.from))
     : 1;
@@ -133,7 +133,25 @@ function HotelBooking() {
   const taxAmount = Math.round(basePrice * TAX_RATE);
   const totalAmount = basePrice + taxAmount;
 
-  // ── Validation ────────────────────────────────────────────────────────────
+  // ── Back button handler ────────────────────────────────────────────────────
+  // FIX: navigate(-1) is unreliable — explicitly navigate back to hotel detail
+  const handleBack = () => {
+    if (step === 'payment') {
+      setStep('details');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Build params to restore state on hotel detail page
+      const params = new URLSearchParams();
+      if (checkInParam) params.append('checkIn', checkInParam);
+      if (checkOutParam) params.append('checkOut', checkOutParam);
+      params.append('rooms', rooms.toString());
+      params.append('adults', adults.toString());
+      params.append('children', children.toString());
+      navigate(`/hotel-detail/${id}?${params.toString()}`);
+    }
+  };
+
+  // ── Validation ─────────────────────────────────────────────────────────────
   const validate = (): boolean => {
     const newErrors: Partial<GuestInfo> = {};
     if (!guest.firstName.trim()) newErrors.firstName = 'First name is required';
@@ -146,10 +164,9 @@ function HotelBooking() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ── Razorpay dummy handler ────────────────────────────────────────────────
+  // ── Payment handlers ───────────────────────────────────────────────────────
   const handleRazorpayPayment = () => {
     setProcessingPayment(true);
-    // Simulate Razorpay popup & payment
     setTimeout(() => {
       setProcessingPayment(false);
       setStep('confirmation');
@@ -175,13 +192,14 @@ function HotelBooking() {
     else handlePayAtHotel();
   };
 
-  // ── Loading / Error ───────────────────────────────────────────────────────
+  // ── Loading / Error ────────────────────────────────────────────────────────
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen gap-3 text-gray-500">
       <Loader2 className="animate-spin" size={32} />
       <span>Loading booking details...</span>
     </div>
   );
+
   if (error || !hotel) return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-3 text-gray-500">
       <Hotel size={48} className="opacity-30" />
@@ -192,12 +210,11 @@ function HotelBooking() {
 
   const hotelPhoto = getPhotoUrl(hotel.photos?.[0]);
 
-  // ── Confirmation Page ─────────────────────────────────────────────────────
+  // ── Confirmation Page ──────────────────────────────────────────────────────
   if (step === 'confirmation') {
     return (
       <div style={styles.page}>
         <div style={styles.confirmWrapper}>
-          {/* Success Icon */}
           <div style={styles.successCircle}>
             <Check size={40} color="#fff" strokeWidth={3} />
           </div>
@@ -206,13 +223,11 @@ function HotelBooking() {
             Your booking has been successfully placed. A confirmation has been sent to <strong>{guest.email}</strong>
           </p>
 
-          {/* Booking ID */}
           <div style={styles.bookingIdBox}>
             <span style={styles.bookingIdLabel}>Booking ID</span>
             <span style={styles.bookingIdValue}>{bookingId}</span>
           </div>
 
-          {/* Summary Card */}
           <div style={styles.confirmCard}>
             <div style={styles.confirmHotelRow}>
               <img src={hotelPhoto} alt={hotel.displayName} style={styles.confirmHotelImg} onError={e => { (e.target as HTMLImageElement).src = FALLBACK; }} />
@@ -274,15 +289,15 @@ function HotelBooking() {
     );
   }
 
-  // ── Booking Form ──────────────────────────────────────────────────────────
+  // ── Booking Form ───────────────────────────────────────────────────────────
   return (
     <div style={styles.page}>
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerInner}>
-          <button style={styles.backBtn} onClick={() => step === 'payment' ? setStep('details') : navigate(-1)}>
+          <div style={styles.backBtn} onClick={handleBack} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && handleBack()}>
             <ArrowLeft size={18} /> Back
-          </button>
+          </div>
           <h1 style={styles.headerTitle}>Complete Your Booking</h1>
         </div>
       </div>
@@ -295,14 +310,16 @@ function HotelBooking() {
               <div style={styles.stepItem}>
                 <div style={{
                   ...styles.stepCircle,
-                  background: step === s ? '#1a1a2e' : step === 'confirmation' || (s === 'details' && step === 'payment') ? '#16a34a' : '#e5e7eb',
-                  color: step === s || step === 'confirmation' || (s === 'details' && step === 'payment') ? '#fff' : '#9ca3af',
+                  background: step === s ? '#1a1a2e' : (s === 'details' && step === 'payment') ? '#16a34a' : '#e5e7eb',
+                  color: step === s || (s === 'details' && step === 'payment') ? '#fff' : '#9ca3af',
                 }}>
-                  {(step === 'confirmation' || (s === 'details' && step === 'payment')) ? <Check size={14} /> : idx + 1}
+                  {(s === 'details' && step === 'payment') ? <Check size={14} /> : idx + 1}
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 500, color: step === s ? '#1a1a2e' : '#9ca3af', textTransform: 'capitalize' }}>{s}</span>
               </div>
-              {idx < 1 && <div style={{ flex: 1, height: 2, background: step === 'payment' || step === 'confirmation' ? '#16a34a' : '#e5e7eb', margin: '0 8px', marginBottom: 18 }} />}
+              {idx < 1 && (
+                <div style={{ flex: 1, height: 2, background: step === 'payment' ? '#16a34a' : '#e5e7eb', margin: '0 8px', marginBottom: 18 }} />
+              )}
             </React.Fragment>
           ))}
         </div>
@@ -343,7 +360,6 @@ function HotelBooking() {
               <div style={styles.card}>
                 <h2 style={styles.cardTitle}>🛏️ Room & Guests</h2>
                 <div style={styles.row}>
-                  {/* Room Type */}
                   <div style={styles.field}>
                     <label style={styles.label}>Room Type</label>
                     <Select value={selectedRoomType} onValueChange={setSelectedRoomType}>
@@ -362,7 +378,6 @@ function HotelBooking() {
                     </Select>
                   </div>
 
-                  {/* Rooms */}
                   <div style={styles.field}>
                     <label style={styles.label}>Rooms</label>
                     <div style={styles.counter}>
@@ -374,7 +389,6 @@ function HotelBooking() {
                 </div>
 
                 <div style={styles.row}>
-                  {/* Adults */}
                   <div style={styles.field}>
                     <label style={styles.label}>Adults</label>
                     <div style={styles.counter}>
@@ -384,7 +398,6 @@ function HotelBooking() {
                     </div>
                   </div>
 
-                  {/* Children */}
                   <div style={styles.field}>
                     <label style={styles.label}>Children (below 17)</label>
                     <div style={styles.counter}>
@@ -404,7 +417,8 @@ function HotelBooking() {
                     <label style={styles.label}>First Name *</label>
                     <div style={styles.inputWrap}>
                       <User size={16} style={styles.inputIcon} />
-                      <input style={{ ...styles.input, borderColor: errors.firstName ? '#ef4444' : '#e5e7eb' }}
+                      <input
+                        style={{ ...styles.input, borderColor: errors.firstName ? '#ef4444' : '#e5e7eb' }}
                         placeholder="First name"
                         value={guest.firstName}
                         onChange={e => { setGuest(g => ({ ...g, firstName: e.target.value })); setErrors(er => ({ ...er, firstName: undefined })); }}
@@ -416,7 +430,8 @@ function HotelBooking() {
                     <label style={styles.label}>Last Name *</label>
                     <div style={styles.inputWrap}>
                       <User size={16} style={styles.inputIcon} />
-                      <input style={{ ...styles.input, borderColor: errors.lastName ? '#ef4444' : '#e5e7eb' }}
+                      <input
+                        style={{ ...styles.input, borderColor: errors.lastName ? '#ef4444' : '#e5e7eb' }}
                         placeholder="Last name"
                         value={guest.lastName}
                         onChange={e => { setGuest(g => ({ ...g, lastName: e.target.value })); setErrors(er => ({ ...er, lastName: undefined })); }}
@@ -430,7 +445,8 @@ function HotelBooking() {
                     <label style={styles.label}>Email Address *</label>
                     <div style={styles.inputWrap}>
                       <Mail size={16} style={styles.inputIcon} />
-                      <input style={{ ...styles.input, borderColor: errors.email ? '#ef4444' : '#e5e7eb' }}
+                      <input
+                        style={{ ...styles.input, borderColor: errors.email ? '#ef4444' : '#e5e7eb' }}
                         placeholder="you@email.com" type="email"
                         value={guest.email}
                         onChange={e => { setGuest(g => ({ ...g, email: e.target.value })); setErrors(er => ({ ...er, email: undefined })); }}
@@ -442,7 +458,8 @@ function HotelBooking() {
                     <label style={styles.label}>Mobile Number *</label>
                     <div style={styles.inputWrap}>
                       <Phone size={16} style={styles.inputIcon} />
-                      <input style={{ ...styles.input, borderColor: errors.phone ? '#ef4444' : '#e5e7eb' }}
+                      <input
+                        style={{ ...styles.input, borderColor: errors.phone ? '#ef4444' : '#e5e7eb' }}
                         placeholder="10-digit mobile" type="tel" maxLength={10}
                         value={guest.phone}
                         onChange={e => { setGuest(g => ({ ...g, phone: e.target.value.replace(/\D/, '') })); setErrors(er => ({ ...er, phone: undefined })); }}
@@ -464,9 +481,10 @@ function HotelBooking() {
               <h2 style={styles.cardTitle}>💳 Payment Method</h2>
               <p style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>Choose how you'd like to pay</p>
 
-              {/* Razorpay Option */}
-              <div style={{ ...styles.payOption, borderColor: paymentMethod === 'razorpay' ? '#1a1a2e' : '#e5e7eb', background: paymentMethod === 'razorpay' ? '#f0f4ff' : '#fff' }}
-                onClick={() => setPaymentMethod('razorpay')}>
+              <div
+                style={{ ...styles.payOption, borderColor: paymentMethod === 'razorpay' ? '#1a1a2e' : '#e5e7eb', background: paymentMethod === 'razorpay' ? '#f0f4ff' : '#fff' }}
+                onClick={() => setPaymentMethod('razorpay')}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ ...styles.payRadio, borderColor: paymentMethod === 'razorpay' ? '#1a1a2e' : '#d1d5db' }}>
                     {paymentMethod === 'razorpay' && <div style={styles.payRadioDot} />}
@@ -482,9 +500,10 @@ function HotelBooking() {
                 <div style={styles.razorpayBadge}>Razorpay</div>
               </div>
 
-              {/* Pay at Hotel */}
-              <div style={{ ...styles.payOption, borderColor: paymentMethod === 'pay_at_hotel' ? '#1a1a2e' : '#e5e7eb', background: paymentMethod === 'pay_at_hotel' ? '#f0f4ff' : '#fff' }}
-                onClick={() => setPaymentMethod('pay_at_hotel')}>
+              <div
+                style={{ ...styles.payOption, borderColor: paymentMethod === 'pay_at_hotel' ? '#1a1a2e' : '#e5e7eb', background: paymentMethod === 'pay_at_hotel' ? '#f0f4ff' : '#fff' }}
+                onClick={() => setPaymentMethod('pay_at_hotel')}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ ...styles.payRadio, borderColor: paymentMethod === 'pay_at_hotel' ? '#1a1a2e' : '#d1d5db' }}>
                     {paymentMethod === 'pay_at_hotel' && <div style={styles.payRadioDot} />}
@@ -499,7 +518,6 @@ function HotelBooking() {
                 </div>
               </div>
 
-              {/* Note */}
               <div style={styles.noteBox}>
                 {paymentMethod === 'razorpay'
                   ? '🔒 Your payment is secured by Razorpay. 256-bit SSL encryption.'
@@ -520,7 +538,6 @@ function HotelBooking() {
         {/* RIGHT: Booking Summary */}
         <div style={styles.summaryCol}>
           <div style={styles.summaryCard}>
-            {/* Hotel info */}
             <img src={hotelPhoto} alt={hotel.displayName} style={styles.summaryImg} onError={e => { (e.target as HTMLImageElement).src = FALLBACK; }} />
             <div style={styles.summaryHotelInfo}>
               <h3 style={styles.summaryHotelName}>{hotel.displayName}</h3>
@@ -534,52 +551,23 @@ function HotelBooking() {
 
             <div style={styles.divider} />
 
-            {/* Dates */}
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Check-in</span>
-              <span style={styles.summaryValue}>{dateRange?.from ? format(dateRange.from, 'dd MMM yyyy') : '-'}</span>
-            </div>
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Check-out</span>
-              <span style={styles.summaryValue}>{dateRange?.to ? format(dateRange.to, 'dd MMM yyyy') : '-'}</span>
-            </div>
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Duration</span>
-              <span style={styles.summaryValue}>{nights} night{nights > 1 ? 's' : ''}</span>
-            </div>
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Room</span>
-              <span style={styles.summaryValue}>{selectedRoom?.roomTypeName || '-'}</span>
-            </div>
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Rooms × Nights</span>
-              <span style={styles.summaryValue}>{rooms} × {nights}</span>
-            </div>
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Guests</span>
-              <span style={styles.summaryValue}>{adults} Adult{adults > 1 ? 's' : ''}{children > 0 ? `, ${children} Child${children > 1 ? 'ren' : ''}` : ''}</span>
-            </div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Check-in</span><span style={styles.summaryValue}>{dateRange?.from ? format(dateRange.from, 'dd MMM yyyy') : '-'}</span></div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Check-out</span><span style={styles.summaryValue}>{dateRange?.to ? format(dateRange.to, 'dd MMM yyyy') : '-'}</span></div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Duration</span><span style={styles.summaryValue}>{nights} night{nights > 1 ? 's' : ''}</span></div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Room</span><span style={styles.summaryValue}>{selectedRoom?.roomTypeName || '-'}</span></div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Rooms × Nights</span><span style={styles.summaryValue}>{rooms} × {nights}</span></div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Guests</span><span style={styles.summaryValue}>{adults} Adult{adults > 1 ? 's' : ''}{children > 0 ? `, ${children} Child${children > 1 ? 'ren' : ''}` : ''}</span></div>
 
             <div style={styles.divider} />
 
-            {/* Pricing */}
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Base Price</span>
-              <span style={styles.summaryValue}>₹{basePrice.toLocaleString('en-IN')}</span>
-            </div>
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Tax (12% GST)</span>
-              <span style={styles.summaryValue}>₹{taxAmount.toLocaleString('en-IN')}</span>
-            </div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Base Price</span><span style={styles.summaryValue}>₹{basePrice.toLocaleString('en-IN')}</span></div>
+            <div style={styles.summaryRow}><span style={styles.summaryLabel}>Tax (12% GST)</span><span style={styles.summaryValue}>₹{taxAmount.toLocaleString('en-IN')}</span></div>
 
             <div style={styles.summaryTotal}>
               <span style={{ fontWeight: 700, fontSize: 15 }}>Total</span>
               <span style={{ fontWeight: 800, fontSize: 20, color: '#1a1a2e' }}>₹{totalAmount.toLocaleString('en-IN')}</span>
             </div>
-
-            <p style={{ fontSize: 11, color: '#aaa', marginTop: 8, textAlign: 'center' }}>
-              Includes all taxes & fees
-            </p>
+            <p style={{ fontSize: 11, color: '#aaa', marginTop: 8, textAlign: 'center', paddingBottom: 16 }}>Includes all taxes & fees</p>
           </div>
         </div>
       </div>
@@ -593,7 +581,7 @@ const styles: Record<string, React.CSSProperties> = {
   header: { background: '#1a1a2e', padding: '16px 0' },
   headerInner: { maxWidth: 1100, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 16 },
   headerTitle: { color: '#fff', fontSize: 20, fontWeight: 700, margin: 0 },
-  backBtn: { display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 14 },
+  backBtn: { display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 14, pointerEvents: 'auto', opacity: 1, userSelect: 'none' },
   stepperWrap: { background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '16px 0' },
   stepper: { maxWidth: 400, margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 24px' },
   stepItem: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 },
@@ -631,7 +619,6 @@ const styles: Record<string, React.CSSProperties> = {
   summaryLabel: { fontSize: 13, color: '#6b7280' },
   summaryValue: { fontSize: 13, fontWeight: 600, color: '#1a1a2e' },
   summaryTotal: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', background: '#f8f9fb', margin: '12px 0 0', borderTop: '2px solid #e5e7eb' },
-  // Confirmation
   confirmWrapper: { maxWidth: 640, margin: '60px auto', padding: '0 24px 60px', textAlign: 'center' },
   successCircle: { width: 80, height: 80, borderRadius: '50%', background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' },
   confirmTitle: { fontSize: 32, fontWeight: 800, color: '#1a1a2e', margin: '0 0 12px' },

@@ -66,7 +66,6 @@ import AppliedHotels from "./components/hotel/AppliedHotels";
 import HotelUploadAssets from "./components/hotelregister/HotelUploadAssets";
 import Disclaimer from "./components/footer/Disclaimer";
 import TermsAndConditions from "./components/footer/TermsAndConditions";
-// ── NEW IMPORT ─────────────────────────────────────────────────────────────────
 import HotelBooking from "./components/hotelbooking/HotelBooking";
 
 const ROLES = {
@@ -121,7 +120,8 @@ const roleRoutes = [
     ],
   },
   {
-    role: ROLES.HOTEL, routes: [
+    role: ROLES.HOTEL,
+    routes: [
       { path: "hotel/dashboard", element: <HotelDashboard /> },
       { path: "hotel/add", element: <Hotelregister /> },
       { path: "hotel/upload", element: <HotelUploadAssets /> },
@@ -135,7 +135,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route element={<PersistLogin />}>
-            {/* Public routes */}
+
+            {/* ── Public routes WITH navbar (OuterLayout) ── */}
             <Route element={<OuterLayout />}>
               <Route index element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -175,12 +176,14 @@ function App() {
               <Route path="/hotel-list" element={<Hotellist />} />
               <Route path="/hotel-detail/:id" element={<Hoteldetail />} />
 
-              {/* ── NEW BOOKING ROUTE ───────────────────────────────────────── */}
-              <Route path="/hotel-booking/:id" element={<HotelBooking />} />
-
               <Route path="/hotel-registration" element={<HotelRegistration />} />
             </Route>
 
+            {/* ── STANDALONE full-page route - NO OuterLayout navbar ── */}
+            {/* This fixes the Back button being blocked by the navbar overlay */}
+            <Route path="/hotel-booking/:id" element={<HotelBooking />} />
+
+            {/* ── Authenticated routes ── */}
             <Route element={<Sidebar />}>
               {roleRoutes.map(({ role, routes }) => (
                 <Route key={role} element={<RequireAuth allowedRoles={[role]} />}>
@@ -198,6 +201,7 @@ function App() {
                 </Route>
               </Route>
             </Route>
+
           </Route>
 
           {/* Catch-all */}
